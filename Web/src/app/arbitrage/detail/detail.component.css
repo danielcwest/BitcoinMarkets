@@ -1,0 +1,16 @@
+input {
+	width: 150px;
+	margin: 0 auto;
+}
+
+.arb-pair {
+	padding: 25px;
+}
+
+.success h1 {
+	font-size: 4.0rem;
+}
+
+.danger h1 {
+	font-size: 2.0rem;
+}

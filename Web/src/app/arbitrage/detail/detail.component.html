@@ -1,0 +1,124 @@
+<div class="row mt-4">
+	<div class="col">
+		<h1 class="display-2">{{symbol}}</h1>
+	</div>
+	<div class="col text-right">
+		<button class="btn" (click)="refreshMarkets()">Refresh</button>
+	</div>
+</div>
+<hr/>
+<div class="row mt-4">
+	<div class="col text-center">
+		<div class="form-group">
+			<select class="custom-select" id="baseExchangeSelect" (change)="onBaseExchangeChange($event.target.value)">
+                    <option *ngFor="let exchange of exchanges" [value]="exchange" [selected]="context.selectedBaseExchange == exchange">{{exchange}}</option>
+                  </select>
+		</div>
+	</div>
+	<div class="col text-center">
+		<div class="form-group">
+			<label for="thresholdInput">Buy/Sell Threshold</label>
+			<input type="number" class="form-control" id="thresholdInput" [(ngModel)]="threshold">
+		</div>
+	</div>
+	<div class="col text-center">
+		<div class="form-group">
+			<select class="custom-select" id="arbExchangeSelect" (change)="onArbExchangeChange($event.target.value)">
+                    <option *ngFor="let exchange of exchanges" [value]="exchange" [selected]="context.selectedArbExchange == exchange">{{exchange}}</option>
+                  </select>
+		</div>
+	</div>
+</div>
+<hr/>
+<div *ngIf="isLoading" class="load">
+	<div class="loader mx-auto"></div>
+</div>
+<div class="card">
+	<div class="car-body arb-pair">
+		<div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
+			<div class="col">
+				<h4 class="text-center"> {{baseExchangeMarket.exchange}} Last Price</h4>
+			</div>
+			<div class="col"></div>
+			<div class="col">
+				<h4 class="text-center">{{arbExchangeMarket.exchange}} Last Price</h4>
+			</div>
+		</div>
+		<div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
+			<div class="col">
+				<!-- <h1 class="text-center" [class.text-success]="baseExchangeMarket.last > arbExchangeMarket.last" [class.text-danger]="baseExchangeMarket.last < arbExchangeMarket.last">{{baseExchangeMarket.last | btcPrice}}</h1> -->
+				<h1 class="text-center">{{baseExchangeMarket.last | btcPrice}}</h1>
+			</div>
+			<div class="col">
+				<h1 class="text-center">{{spreadLast | numeral:'0.00%'}}</h1>
+			</div>
+			<div class="col">
+				<h1 class="text-center">{{arbExchangeMarket.last | btcPrice}}</h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<hr/>
+
+<!-- BUY at BASE *** SELL at ARB -->
+<div class="card">
+	<div class="buy-base card-body arb-pair" [class.success]="baseExactBuy < arbExactSell " [class.danger]="baseExactBuy > arbExactSell">
+		<div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
+			<div class="col">
+				<h4 class="text-center">Buy {{threshold}} {{baseCurrency}}</h4>
+			</div>
+			<div class="col"></div>
+			<div class="col">
+				<h4 class="text-center">Sell {{threshold}} {{baseCurrency}}</h4>
+			</div>
+		</div>
+		<div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
+			<div class="col">
+				<h1 *ngIf="baseExactBuy > arbExactSell " class="text-center">{{baseExactBuy | btcPrice}}</h1>
+				<h1 *ngIf="baseExactBuy < arbExactSell " class="text-center" [class.text-success]="baseExactBuy < arbExactSell" [class.text-danger]="baseExactBuy > arbExactSell">{{baseExactBuy | btcPrice}}</h1>
+
+			</div>
+			<div class="col">
+				<h1 class="text-center spread">{{baseBuySpread - (arbExchangeFee + baseExchangeFee) | numeral:'0.00%'}}</h1>
+				<h4 class="text-center spread">{{baseBuySpread | numeral:'0.00%'}}</h4>
+			</div>
+			<div class="col">
+				<h1 *ngIf="baseExactBuy > arbExactSell" class="text-center">{{arbExactSell | btcPrice}}</h1>
+				<h1 *ngIf="baseExactBuy < arbExactSell" class="text-center" [class.text-success]="baseExactBuy > arbExactSell" [class.text-danger]="baseExactBuy < arbExactSell">{{arbExactSell | btcPrice}}</h1>
+			</div>
+		</div>
+	</div>
+</div>
+<hr/>
+
+<!-- SELL at BASE *** BUY at ARB -->
+<div class="card">
+	<div class="sell-base card-body arb-pair" [class.success]="baseExactSell > arbExactBuy" [class.danger]="baseExactSell < arbExactBuy">
+		<div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
+			<div class="col">
+				<h4 class="text-center">Sell {{threshold}} {{baseCurrency}}</h4>
+			</div>
+			<div class="col"></div>
+			<div class="col">
+				<h4 class="text-center">Buy {{threshold}} {{baseCurrency}}</h4>
+			</div>
+		</div>
+
+		<div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket" [class.success]="baseSellSpread > 0">
+			<div class="col">
+				<h1 *ngIf="baseExactSell < arbExactBuy" class="text-center">{{baseExactSell | btcPrice}}</h1>
+				<h1 *ngIf="baseExactSell > arbExactBuy" class="text-center" [class.text-success]="baseExactSell > arbExactBuy" [class.text-danger]="baseExactSell < arbExactBuy">{{baseExactSell | btcPrice}}</h1>
+			</div>
+			<div class="col">
+				<h1 class="text-center spread">{{baseSellSpread - (arbExchangeFee + baseExchangeFee) | numeral:'0.00%'}}</h1>
+				<h4 class="text-center spread">{{baseSellSpread | numeral:'0.00%'}}</h4>
+			</div>
+			<div class="col">
+				<h1 *ngIf="baseExactSell < arbExactBuy" class="text-center">{{arbExactBuy | btcPrice}}</h1>
+				<h1 *ngIf="baseExactSell > arbExactBuy" class="text-center" [class.text-success]="baseExactSell > arbExactBuy" [class.text-danger]="baseExactSell < arbExactBuy">{{arbExactBuy | btcPrice}}</h1>
+			</div>
+		</div>
+	</div>
+</div>
+<hr/>

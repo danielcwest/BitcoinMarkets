@@ -1,0 +1,27 @@
+.currency-logo {
+	/* position: absolute;
+    left: 10px; */
+	float: left;
+	width: 16px;
+	height: 16px;
+}
+
+.price {
+	font-weight: bold;
+}
+
+.price-up {
+	color: green;
+}
+
+.price-down {
+	color: red;
+}
+
+.interval-buttons {
+	height: 100%;
+}
+
+.interval.active {
+	font-weight: bold;
+}

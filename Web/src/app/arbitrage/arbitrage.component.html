@@ -1,0 +1,65 @@
+<div class="row mt-4">
+	<div class="col">
+		<h1>Arbitrage</h1>
+	</div>
+	<div class="col text-right">
+		<button class="btn" (click)="refreshMarkets()">Refresh</button>
+	</div>
+</div>
+<hr/>
+<div class="row mt-4">
+	<div class="col">
+		<select class="custom-select" (change)="onBaseExchangeChange($event.target.value)">
+                    <option *ngFor="let exchange of exchanges" [value]="exchange" [selected]="context.selectedBaseExchange == exchange">{{exchange}}</option>
+                  </select>
+	</div>
+	<div class="col text-right">
+		<select class="custom-select" (change)="onArbExchangeChange($event.target.value)">
+                <option *ngFor="let exchange of exchanges" [value]="exchange" [selected]="context.selectedArbExchange == exchange">{{exchange}}</option>
+              </select>
+	</div>
+</div>
+<hr/>
+<div *ngIf="isLoading" class="load">
+	<div class="loader mx-auto"></div>
+</div>
+<table class="table" *ngIf="arbitrageMarkets.length > 0">
+	<thead>
+		<tr>
+			<th (click)="changeSort('symbol')">Market
+				<span *ngIf="sortProperty == 'symbol'" class="oi" [class.oi-caret-top]="sortAscending" [class.oi-caret-bottom]="!sortAscending"
+				    title="Sort" aria-hidden="true"></span>
+			</th>
+			<th (click)="changeSort('baseVolume')">{{context.selectedBaseExchange}} Volume
+				<span *ngIf="sortProperty == 'baseVolume'" class="oi" [class.oi-caret-top]="sortAscending" [class.oi-caret-bottom]="!sortAscending"
+				    title="Sort" aria-hidden="true"></span>
+			</th>
+			<th (click)="changeSort('arbVolume')">{{context.selectedArbExchange}} Volume
+				<span *ngIf="sortProperty == 'arbVolume'" class="oi" [class.oi-caret-top]="sortAscending" [class.oi-caret-bottom]="!sortAscending"
+				    title="Sort" aria-hidden="true"></span>
+			</th>
+			<th (click)="changeSort('baseLast')">{{context.selectedBaseExchange}} Price
+				<span *ngIf="sortProperty == 'baseLast'" class="oi" [class.oi-caret-top]="sortAscending" [class.oi-caret-bottom]="!sortAscending"
+				    title="Sort" aria-hidden="true"></span>
+			</th>
+			<th (click)="changeSort('arbLast')">{{context.selectedArbExchange}} Price
+				<span *ngIf="sortProperty == 'arbLast'" class="oi" [class.oi-caret-top]="sortAscending" [class.oi-caret-bottom]="!sortAscending"
+				    title="Sort" aria-hidden="true"></span>
+			</th>
+			<th (click)="changeSort('spreadAbs')">Spread
+				<span *ngIf="sortProperty == 'spreadAbs'" class="oi" [class.oi-caret-top]="sortAscending" [class.oi-caret-bottom]="!sortAscending"
+				    title="Sort" aria-hidden="true"></span>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr *ngFor="let mkt of arbitrageMarkets | orderBy:sortProperty:sortAscending" [class.table-success]="mkt.spreadExact >= .02 && mkt.arbVolume > 25 && mkt.baseVolume > 25">
+			<th scope="row"><a [routerLink]="[ './', mkt.symbol ]">{{mkt.symbol}}</a></th>
+			<td><a href="{{mkt.baseLink}}" target="_blank">{{mkt.baseVolume | numeral:'0,0.00'}}</a></td>
+			<td><a href="{{mkt.arbLink}}" target="_blank">{{mkt.arbVolume | numeral:'0,0.00'}}</a></td>
+			<td><a href="{{mkt.baseLink}}" target="_blank">{{mkt.baseLast | btcPrice}}</a></td>
+			<td><a href="{{mkt.arbLink}}" target="_blank">{{mkt.arbLast | btcPrice}}</a></td>
+			<td>{{mkt.spreadAbs | numeral:'0.00%'}}</td>
+		</tr>
+	</tbody>
+</table>

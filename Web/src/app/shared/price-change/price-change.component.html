@@ -1,0 +1,6 @@
+<span *ngIf="isPercent" class="price-change" [class.price-down]="!isPos" [class.price-up]="isPos" (click)="isPercent = false">
+    {{sign}}{{percentChange | commaSeparatedNumber}}%
+</span>
+<span *ngIf="!isPercent" class="price-change" [class.price-down]="!isPos" [class.price-up]="isPos" (click)="isPercent = true">
+        {{sign}}${{netChange}}
+    </span>

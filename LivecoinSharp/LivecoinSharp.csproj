@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="RestEase" Version="1.4.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BMCore\BMCore.csproj" />
+  </ItemGroup>
+</Project>
