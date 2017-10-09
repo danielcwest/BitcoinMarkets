@@ -318,3 +318,6 @@ Icon
 
 # Thumbnails
 ._*
+
+appsettings.Development.json
+appsettings.json
