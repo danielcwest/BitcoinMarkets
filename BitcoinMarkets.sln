@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinanceSharp", "BinanceShar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BMCore", "BMCore\BMCore.csproj", "{D31455D2-7D95-4972-A3AB-C7D9AB9E69A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csproj", "{E0037422-4873-473A-901B-A44EF50509C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -171,5 +173,17 @@ Global
 		{D31455D2-7D95-4972-A3AB-C7D9AB9E69A0}.Release|x64.Build.0 = Release|x64
 		{D31455D2-7D95-4972-A3AB-C7D9AB9E69A0}.Release|x86.ActiveCfg = Release|x86
 		{D31455D2-7D95-4972-A3AB-C7D9AB9E69A0}.Release|x86.Build.0 = Release|x86
+		{E0037422-4873-473A-901B-A44EF50509C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0037422-4873-473A-901B-A44EF50509C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0037422-4873-473A-901B-A44EF50509C2}.Debug|x64.ActiveCfg = Debug|x64
+		{E0037422-4873-473A-901B-A44EF50509C2}.Debug|x64.Build.0 = Debug|x64
+		{E0037422-4873-473A-901B-A44EF50509C2}.Debug|x86.ActiveCfg = Debug|x86
+		{E0037422-4873-473A-901B-A44EF50509C2}.Debug|x86.Build.0 = Debug|x86
+		{E0037422-4873-473A-901B-A44EF50509C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0037422-4873-473A-901B-A44EF50509C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0037422-4873-473A-901B-A44EF50509C2}.Release|x64.ActiveCfg = Release|x64
+		{E0037422-4873-473A-901B-A44EF50509C2}.Release|x64.Build.0 = Release|x64
+		{E0037422-4873-473A-901B-A44EF50509C2}.Release|x86.ActiveCfg = Release|x86
+		{E0037422-4873-473A-901B-A44EF50509C2}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 EndGlobal

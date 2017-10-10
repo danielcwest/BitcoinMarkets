@@ -6,10 +6,12 @@ using BMCore.Models;
 using System.Threading.Tasks;
 using System.Text;
 using LiquiSharp.Models;
+using BMCore.Contracts;
+using BMCore;
 
 namespace LiquiSharp
 {
-    public class Liqui
+    public class Liqui : IExchange
     {
         ILiquiApi _liqui;
 
@@ -53,6 +55,55 @@ namespace LiquiSharp
             var summaries = await _liqui.GetTickers(sb.ToString());
 
             return summaries.Select(s => new Market(s.Key, s.Value));
+        }
+
+        public async Task<OrderBook> OrderBook(string symbol)
+        {
+            var book = new OrderBook(symbol);
+            string liquiSymbol = GetLiquiSymbolFromBMSymbol(symbol);
+            var dic = await _liqui.GetOrderBook(liquiSymbol);
+            var depth = dic[liquiSymbol];
+
+            book.asks = depth.asks.Select(e => new OrderBookEntry() { price = e[0], quantity = e[1] }).ToList();
+            book.bids = depth.bids.Select(e => new OrderBookEntry() { price = e[0], quantity = e[1] }).ToList();
+
+            book.asks = Helper.SumOrderEntries(book.asks);
+            book.bids = Helper.SumOrderEntries(book.bids);
+
+            return book;
+        }
+
+        public async Task<IMarket> MarketSummary(string symbol)
+        {
+            string liquiSymbol = GetLiquiSymbolFromBMSymbol(symbol);
+            var dic = await _liqui.GetTickers(liquiSymbol);
+            return new Market(liquiSymbol, dic[liquiSymbol]);
+        }
+
+        public decimal GetFee()
+        {
+            return 0.0025M;
+        }
+
+        public string GetExchangeName()
+        {
+            return "Liqui";
+        }
+
+        private string GetLiquiSymbolFromBMSymbol(string bmSymbol)
+        {
+            string symbol = "";
+            if (bmSymbol.EndsWith("BTC"))
+            {
+                var c = bmSymbol.Replace("BTC", "");
+                symbol = string.Format("{0}_btc", c.ToLowerInvariant());
+            }
+            else if (bmSymbol.EndsWith("ETH"))
+            {
+                var c = bmSymbol.Replace("ETH", "");
+                symbol = string.Format("{0}_eth", c.ToLowerInvariant());
+            }
+            return symbol;
         }
     }
 }

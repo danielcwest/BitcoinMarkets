@@ -18,6 +18,16 @@ namespace BittrexSharp
             _bittrex = new BittrexApi(apiKey, apiSecret);
         }
 
+        public decimal GetFee()
+        {
+            return 0.0025M;
+        }
+
+        public string GetExchangeName()
+        {
+            return "Bittrex";
+        }
+
         public async Task<IEnumerable<IMarket>> MarketSummaries()
         {
             var summaries = await _bittrex.GetMarketSummaries();

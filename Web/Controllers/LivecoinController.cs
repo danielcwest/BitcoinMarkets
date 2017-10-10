@@ -37,5 +37,16 @@ namespace Web.Controllers
             return summaries.Select(s => s.MarketName);
         }
 
+        [HttpGet]
+        public async Task<IMarket> MarketSummary(string symbol)
+        {
+            return await _livecoin.MarketSummary(symbol);
+        }
+
+        [HttpGet]
+        public async Task<BMCore.Models.OrderBook> OrderBook(string symbol)
+        {
+            return await _livecoin.OrderBook(symbol);
+        }
     }
 }

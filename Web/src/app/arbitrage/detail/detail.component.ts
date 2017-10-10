@@ -29,15 +29,15 @@ export class DetailComponent implements OnInit {
 
     exchanges: string[] = ['Bittrex', 'Hitbtc', 'Poloniex', 'Liqui', 'Livecoin', 'Tidex', 'Etherdelta', 'Bitz', 'Nova', 'Binance'];
 
-    //Amount in base currency to measure accurate buy/sell price 
-    threshold: number = .25;
+    // Amount in base currency to measure accurate buy/sell price
+    threshold = .25;
 
     baseCurrency: string;
     quoteCurrency: string;
     spreadLast: number;
 
 
-    //Price at which I can Buy or Sell given the market depth
+    // Price at which I can Buy or Sell given the market depth
     baseExactBuy: number;
     arbExactSell: number;
     baseBuySpread: number;
@@ -72,7 +72,7 @@ export class DetailComponent implements OnInit {
     refreshMarkets(): Promise<boolean> {
         this.isLoading = true;
         return new Promise((resolve, reject) => {
-            let promises = [];
+            const promises = [];
 
             promises.push(this.exchangeService.getMarketSummary(this.context.selectedBaseExchange, this.symbol));
             promises.push(this.exchangeService.getMarketSummary(this.context.selectedArbExchange, this.symbol));
@@ -89,15 +89,15 @@ export class DetailComponent implements OnInit {
                 this.processMarkets();
                 this.isLoading = false;
                 resolve(true);
-            })
+            });
         });
     }
 
     processMarkets(): void {
-        console.log(this.baseExchangeMarket);
-        console.log(this.arbExchangeMarket);
-        console.log(this.baseOrderBook);
-        console.log(this.arbOrderBook);
+        // console.log(this.baseExchangeMarket);
+        // console.log(this.arbExchangeMarket);
+        // console.log(this.baseOrderBook);
+        // console.log(this.arbOrderBook);
 
         this.spreadLast = Math.abs((this.baseExchangeMarket.last - this.arbExchangeMarket.last) / this.baseExchangeMarket.last);
 
@@ -109,38 +109,40 @@ export class DetailComponent implements OnInit {
 
     setThresholdPrices(): void {
 
-        //TODO: Optimize below
-        //Base Exchange
+        // TODO: Optimize below
+        // Base Exchange
         this.baseOrderBook.asks.some(e => {
             if (e.sumBase >= this.threshold) {
-                console.log(e);
+                // console.log(e);
                 this.baseExactBuy = e.price;
                 return true;
             }
-        })
+        });
+
         this.baseOrderBook.bids.some(e => {
             if (e.sumBase >= this.threshold) {
-                console.log(e);
+                // console.log(e);
                 this.baseExactSell = e.price;
                 return true;
             }
-        })
+        });
 
-        //Arb Exchange
+        // Arb Exchange
         this.arbOrderBook.asks.some(e => {
             if (e.sumBase >= this.threshold) {
-                console.log(e);
+                // console.log(e);
                 this.arbExactBuy = e.price;
                 return true;
             }
-        })
+        });
+
         this.arbOrderBook.bids.some(e => {
             if (e.sumBase >= this.threshold) {
-                console.log(e);
+                // console.log(e);
                 this.arbExactSell = e.price;
                 return true;
             }
-        })
+        });
 
         this.baseBuySpread = Math.abs((this.baseExactBuy - this.arbExactSell) / this.baseExactBuy);
         this.baseSellSpread = Math.abs((this.baseExactSell - this.arbExactBuy) / this.baseExactSell);
@@ -149,7 +151,7 @@ export class DetailComponent implements OnInit {
     }
 
     onArbExchangeChange(exchange: string): void {
-        if (exchange != this.context.selectedBaseExchange) {
+        if (exchange !== this.context.selectedBaseExchange) {
             this.contextService.setArbExchange(exchange);
         } else {
             console.log('ERROR');
@@ -157,7 +159,7 @@ export class DetailComponent implements OnInit {
     }
 
     onBaseExchangeChange(exchange: string): void {
-        if (exchange != this.context.selectedArbExchange) {
+        if (exchange !== this.context.selectedArbExchange) {
             this.contextService.setBaseExchange(exchange);
         } else {
             console.log('ERROR');

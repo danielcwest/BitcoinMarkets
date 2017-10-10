@@ -18,6 +18,16 @@ namespace HitbtcSharp
             _hitbtc = RestClient.For<IHitbtcApi>("http://api.hitbtc.com");
         }
 
+        public decimal GetFee()
+        {
+            return 0.0010M;
+        }
+
+        public string GetExchangeName()
+        {
+            return "Hitbtc";
+        }
+
         public async Task<IEnumerable<IMarket>> MarketSummaries()
         {
             var summaries = await _hitbtc.GetTickers();

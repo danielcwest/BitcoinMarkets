@@ -1,0 +1,9 @@
+Bittrex-Hitbtc NXTBTC: Bittrex Buy @0.00001415, Hitbtc Sell @0.00001420, Spread: 0.00%, Tuesday, October 10, 2017 7:36:03 AM
+Bittrex-Hitbtc ADXETH: Bittrex Sell @0.00299808, Hitbtc Buy @0.00298000, Spread: 0.25%, Tuesday, October 10, 2017 7:43:13 AM
+Bittrex-Binance MTLBTC: Bittrex Sell @0.00146000, Binance Buy @0.00145000, Spread: 0.18%, Tuesday, October 10, 2017 7:43:20 AM
+Bittrex-Hitbtc ADXETH: Bittrex Sell @0.00299808, Hitbtc Buy @0.00298000, Spread: 0.25%, Tuesday, October 10, 2017 7:44:13 AM
+Bittrex-Binance MTLBTC: Bittrex Sell @0.00146000, Binance Buy @0.00145000, Spread: 0.18%, Tuesday, October 10, 2017 7:44:19 AM
+Bittrex-Binance MTLBTC: Bittrex Sell @0.00146000, Binance Buy @0.00145000, Spread: 0.18%, Tuesday, October 10, 2017 7:45:15 AM
+Bittrex-Hitbtc OMGETH: Bittrex Buy @0.02572893, Hitbtc Sell @0.02583100, Spread: 0.05%, Tuesday, October 10, 2017 7:51:31 AM
+Bittrex-Binance OMGETH: Bittrex Buy @0.02552052, Binance Sell @0.02565000, Spread: 0.01%, Tuesday, October 10, 2017 7:52:40 AM
+Bittrex-Binance MTLETH: Bittrex Buy @0.02269681, Binance Sell @0.02300000, Spread: 0.84%, Tuesday, October 10, 2017 7:57:20 AM

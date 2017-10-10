@@ -43,10 +43,6 @@ namespace Web
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
-
-
-
-
         }
     }
 }

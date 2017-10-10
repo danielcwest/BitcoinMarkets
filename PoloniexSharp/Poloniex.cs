@@ -64,5 +64,15 @@ namespace PoloniexSharp
 
             return new Market(poloSymbol, ticker);
         }
+
+        public decimal GetFee()
+        {
+            return 0.0025M;
+        }
+
+        public string GetExchangeName()
+        {
+            return "Poloniex";
+        }
     }
 }

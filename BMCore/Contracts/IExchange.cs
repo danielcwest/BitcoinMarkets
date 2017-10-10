@@ -8,12 +8,15 @@ namespace BMCore.Contracts
 {
     public interface IExchange
     {
-
         Task<IEnumerable<IMarket>> MarketSummaries();
 
         Task<OrderBook> OrderBook(string symbol);
 
         Task<IMarket> MarketSummary(string symbol);
+
+        decimal GetFee();
+
+        string GetExchangeName();
     }
 
 }

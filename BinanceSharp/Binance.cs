@@ -51,6 +51,16 @@ namespace BinanceSharp
             var ticker = await _binance.GetTicker(symbol);
             return new Market(symbol, ticker);
         }
+
+        public decimal GetFee()
+        {
+            return 0.0025M;
+        }
+
+        public string GetExchangeName()
+        {
+            return "Binance";
+        }
     }
 
 }

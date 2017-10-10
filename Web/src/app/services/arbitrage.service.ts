@@ -19,7 +19,7 @@ export class ArbitrageService {
 
     exchanges: string[] = ['Bittrex', 'Hitbtc', 'Poloniex', 'Liqui', 'Livecoin', 'Tidex', 'Etherdelta', 'Bitz', 'Nova', 'Binance'];
 
-    //TODO: make dynamic
+    // TODO: make dynamic
     exchangeFees: { [exchange: string]: number } = { 'Bittrex': .0025, 'Hitbtc': .0010, 'Poloniex': .0025, 'Binance': .0010 };
 
     arbitrageMarkets: Collections.Dictionary<string, ArbitrageMarket>;
@@ -47,17 +47,17 @@ export class ArbitrageService {
 
     refreshMarkets(): Promise<ArbitrageMarket[]> {
         return new Promise((resolve, reject) => {
-            let promises = [];
+            const promises = [];
 
             promises.push(this.exchangeService.getMarketSummaries(this.context.selectedBaseExchange));
             promises.push(this.exchangeService.getMarketSummaries(this.context.selectedArbExchange));
             Promise.all(promises).then(response => {
-                let baseExchangeMarkets = response[0];
-                let arbExchangeMarkets = response[1];
+                const baseExchangeMarkets = response[0];
+                const arbExchangeMarkets = response[1];
 
-                let dic = new Collections.Dictionary<string, ArbitrageMarket>();
+                const dic = new Collections.Dictionary<string, ArbitrageMarket>();
                 baseExchangeMarkets.forEach(market => {
-                    if (arbExchangeMarkets.containsKey(market) && arbExchangeMarkets.getValue(market).volume > 10) {
+                    if (arbExchangeMarkets.containsKey(market)) {
                         dic.setValue(market, new ArbitrageMarket(baseExchangeMarkets.getValue(market), arbExchangeMarkets.getValue(market)));
                     }
                 });
@@ -74,7 +74,7 @@ export class ArbitrageService {
             this.exchanges.forEach(exchange => promises.push(this.exchangeService.getSymbols(exchange)))
 
             Promise.all(promises).then(response => {
-                var i = 0;
+                let i = 0;
                 this.exchanges.forEach(exchange => {
                     this.exchangeMarketSymbols.setValue(exchange, response[i++]);
                 });

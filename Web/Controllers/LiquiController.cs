@@ -37,5 +37,17 @@ namespace Web.Controllers
             var summaries = await _liqui.MarketSummaries();
             return summaries.Select(s => s.MarketName);
         }
+
+        [HttpGet]
+        public async Task<IMarket> MarketSummary(string symbol)
+        {
+            return await _liqui.MarketSummary(symbol);
+        }
+
+        [HttpGet]
+        public async Task<BMCore.Models.OrderBook> OrderBook(string symbol)
+        {
+            return await _liqui.OrderBook(symbol);
+        }
     }
 }
