@@ -39,6 +39,20 @@ namespace BMCore.DbService
                 return reader.ToList<DbTradeLog>();
             }
         }
+
+        public void LogError(string baseX, string arbX, string symbol, string method, string message, string stackTrace)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertError", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@baseExchange", Value = baseX },
+                    new SqlParameter { ParameterName = "@arbExchange", Value = arbX },
+                    new SqlParameter { ParameterName = "@symbol", Value = symbol },
+                    new SqlParameter { ParameterName = "@method", Value = method },
+                    new SqlParameter { ParameterName = "@message", Value = message},
+                    new SqlParameter { ParameterName = "@exception", Value = stackTrace}
+                });
+        }
     }
 
 }

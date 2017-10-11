@@ -64,7 +64,7 @@ namespace Engine
 
                         if (bMarket == null || bBook == null || rMarket == null || rBook == null)
                         {
-                            Console.WriteLine("Error: {0} {1} - {2} failed", this.baseExchange.GetExchangeName(), this.arbExchange.GetExchangeName(), kvp.Key);
+                            dbService.LogError(this.baseExchange.GetExchangeName(), this.arbExchange.GetExchangeName(), kvp.Key, "AnalyzeMarkets", "Market Data Null", "");
                         }
                         else
                         {
@@ -73,8 +73,7 @@ namespace Engine
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("Error: {0} {1} - {2} failed with Exception", this.baseExchange.GetExchangeName(), this.arbExchange.GetExchangeName(), kvp.Key);
-                        //Console.WriteLine(e);
+                        dbService.LogError(this.baseExchange.GetExchangeName(), this.arbExchange.GetExchangeName(), kvp.Key, "AnalyzeMarkets", e.Message, e.StackTrace);
                     }
                 }
             }

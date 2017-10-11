@@ -67,6 +67,8 @@ namespace Engine
                             {
                                 //Console.WriteLine(e);
                                 Console.WriteLine("Error: {0} {1}", baseExchange.GetExchangeName(), arbExchange.GetExchangeName());
+                                dbService.LogError(baseExchange.GetExchangeName(), arbExchange.GetExchangeName(), "", "Main", e.Message, e.StackTrace);
+
                             }
                             finally
                             {
