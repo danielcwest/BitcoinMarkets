@@ -13,7 +13,7 @@ namespace HitbtcSharp
     public class Hitbtc : IExchange
     {
         IHitbtcApi _hitbtc;
-        public Hitbtc()
+        public Hitbtc(string apiKey, string apiSecret)
         {
             _hitbtc = RestClient.For<IHitbtcApi>("http://api.hitbtc.com");
         }

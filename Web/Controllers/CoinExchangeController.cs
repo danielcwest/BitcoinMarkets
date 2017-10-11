@@ -21,7 +21,7 @@ namespace Web.Controllers
         public CoinExchangeController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _coin = new CoinExchange();
+            _coin = new CoinExchange("", "");
         }
 
         [HttpGet]

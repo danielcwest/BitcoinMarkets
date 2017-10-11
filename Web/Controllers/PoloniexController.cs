@@ -21,7 +21,7 @@ namespace Web.Controllers
         public PoloniexController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _poloniex = new Poloniex();
+            _poloniex = new Poloniex("", "");
         }
 
         [HttpGet]

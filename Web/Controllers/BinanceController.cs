@@ -22,7 +22,7 @@ namespace Web.Controllers
         public BinanceController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _binance = new Binance();
+            _binance = new Binance("", "");
         }
 
         [HttpGet]

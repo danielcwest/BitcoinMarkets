@@ -21,7 +21,7 @@ namespace Web.Controllers
         public LivecoinController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _livecoin = new Livecoin();
+            _livecoin = new Livecoin("", "");
         }
 
         [HttpGet]

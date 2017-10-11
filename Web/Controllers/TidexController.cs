@@ -22,7 +22,7 @@ namespace Web.Controllers
         public TidexController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _tidex = new Tidex();
+            _tidex = new Tidex("", "");
         }
 
         [HttpGet]
@@ -36,6 +36,18 @@ namespace Web.Controllers
         {
             var summaries = await _tidex.MarketSummaries();
             return summaries.Select(s => s.MarketName);
+        }
+
+        [HttpGet]
+        public async Task<IMarket> MarketSummary(string symbol)
+        {
+            return await _tidex.MarketSummary(symbol);
+        }
+
+        [HttpGet]
+        public async Task<BMCore.Models.OrderBook> OrderBook(string symbol)
+        {
+            return await _tidex.OrderBook(symbol);
         }
 
     }

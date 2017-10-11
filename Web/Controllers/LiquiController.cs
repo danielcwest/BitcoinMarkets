@@ -22,7 +22,7 @@ namespace Web.Controllers
         public LiquiController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _liqui = new Liqui();
+            _liqui = new Liqui("", "");
         }
 
         [HttpGet]

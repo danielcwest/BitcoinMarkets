@@ -21,7 +21,7 @@ namespace Web.Controllers
         public BitzController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _bitz = new Bitz();
+            _bitz = new Bitz("", "");
         }
 
         [HttpGet]
@@ -41,6 +41,18 @@ namespace Web.Controllers
         {
             var summaries = await _bitz.MarketSummaries();
             return summaries.Select(s => s.MarketName);
+        }
+
+        [HttpGet]
+        public async Task<IMarket> MarketSummary(string symbol)
+        {
+            return await _bitz.MarketSummary(symbol);
+        }
+
+        [HttpGet]
+        public async Task<BMCore.Models.OrderBook> OrderBook(string symbol)
+        {
+            return await _bitz.OrderBook(symbol);
         }
 
     }

@@ -15,7 +15,7 @@ namespace LivecoinSharp
 
         ILivecoinApi _livecoin;
 
-        public Livecoin()
+        public Livecoin(string apiKey, string apiSecret)
         {
             _livecoin = RestClient.For<ILivecoinApi>("https://api.livecoin.net/");
         }
@@ -48,6 +48,7 @@ namespace LivecoinSharp
         public async Task<IMarket> MarketSummary(string symbol)
         {
             var sum = await _livecoin.GetTicker(GetLivecoinSymbolFromBMSymbol(symbol));
+            sum.symbol = GetLivecoinSymbolFromBMSymbol(symbol);
             return new Market(sum);
         }
 

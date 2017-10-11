@@ -21,7 +21,7 @@ namespace Web.Controllers
         public NovaController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _nova = new Nova();
+            _nova = new Nova("", "");
         }
 
         [HttpGet]
@@ -35,6 +35,18 @@ namespace Web.Controllers
         {
             var summaries = await _nova.MarketSummaries();
             return summaries.Select(s => s.MarketName);
+        }
+
+        [HttpGet]
+        public async Task<IMarket> MarketSummary(string symbol)
+        {
+            return await _nova.MarketSummary(symbol);
+        }
+
+        [HttpGet]
+        public async Task<BMCore.Models.OrderBook> OrderBook(string symbol)
+        {
+            return await _nova.OrderBook(symbol);
         }
 
     }

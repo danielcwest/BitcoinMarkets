@@ -13,7 +13,7 @@ namespace CoinExchangeSharp
     {
         ICoinExchangeApi _coin;
 
-        public CoinExchange()
+        public CoinExchange(string apiKey, string apiSecret)
         {
             _coin = RestClient.For<ICoinExchangeApi>("https://www.coinexchange.io");
 

@@ -14,7 +14,7 @@ namespace BinanceSharp
     public class Binance : IExchange
     {
         IBinanceApi _binance;
-        public Binance()
+        public Binance(string apiKey, string apiSecret)
         {
             _binance = RestClient.For<IBinanceApi>("https://www.binance.com");
         }

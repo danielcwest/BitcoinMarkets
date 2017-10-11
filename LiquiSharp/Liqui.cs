@@ -15,7 +15,7 @@ namespace LiquiSharp
     {
         ILiquiApi _liqui;
 
-        public Liqui()
+        public Liqui(string apiKey, string apiSecret)
         {
             _liqui = RestClient.For<ILiquiApi>("https://api.liqui.io");
         }

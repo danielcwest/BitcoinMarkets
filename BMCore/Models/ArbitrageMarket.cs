@@ -16,6 +16,9 @@ namespace BMCore.Models
 
         public ArbitrageMarket(IMarket baseM, OrderBook baseBook, IMarket arbM, OrderBook arbBook)
         {
+            if (baseM == null || baseBook == null || arbM == null || arbBook == null)
+                throw new Exception("Market data was null");
+
             this.Symbol = baseM.MarketName;
             this.baseMarket = baseM;
             this.baseBook = baseBook;

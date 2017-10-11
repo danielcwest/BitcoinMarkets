@@ -21,7 +21,7 @@ namespace Web.Controllers
         public EtherdeltaController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _etherdelta = new Etherdelta();
+            _etherdelta = new Etherdelta("", "");
         }
 
         [HttpGet]

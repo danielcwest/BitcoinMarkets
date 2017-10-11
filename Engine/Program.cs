@@ -1,12 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using Microsoft.Extensions.Configuration;
+using BMCore.Contracts;
+
 using BinanceSharp;
 using BittrexSharp;
+using BitzSharp;
 using HitbtcSharp;
-using Microsoft.Extensions.Configuration;
+using LiquiSharp;
+using LivecoinSharp;
+using NovaExchangeSharp;
 using PoloniexSharp;
+using TidexSharp;
+using System.Linq;
+using BMCore.Models;
+using BMCore.DbService;
 
 namespace Engine
 {
@@ -14,57 +25,59 @@ namespace Engine
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Loading Config ...");
+
             var builder = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddEnvironmentVariables();
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables();
 
             IConfigurationRoot configuration = builder.Build();
+
+            var config = new List<ConfigExchange>();
+            configuration.GetSection("Exchanges").Bind(config);
+
+            var sqlConnectionString = configuration.GetValue<string>("SqlConnectionString");
+            var dbService = new DbService(sqlConnectionString);
+
+            var exchanges = config.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToArray();
 
             Console.WriteLine("Starting Engine ...");
 
             while (true)
             {
-                try
+                for (var i = 0; i < exchanges.Length; i++)
                 {
-                    var bittrex = new Bittrex(configuration.GetValue<string>("Exchanges:Bittrex:ApiKey"), configuration.GetValue<string>("Exchanges:Bittrex:Secret"));
-                    var hitbtc = new Hitbtc();
-                    var binance = new Binance();
+                    var baseExchange = exchanges[i];
+                    for (var j = 0; j < exchanges.Length; j++)
+                    {
+                        var arbExchange = exchanges[j];
 
-                    Console.WriteLine("Bittrex Hitbtc");
+                        if (baseExchange != arbExchange)
+                        {
+                            try
+                            {
+                                Console.WriteLine("Starting: {0} {1}", baseExchange.GetExchangeName(), arbExchange.GetExchangeName());
+                                var engine = new TradingEngine(baseExchange, arbExchange, dbService);
+                                engine.AnalyzeMarkets().Wait();
+                                Console.WriteLine("Completed: {0} {1}", baseExchange.GetExchangeName(), arbExchange.GetExchangeName());
 
-                    var engine = new TradingEngine(bittrex, hitbtc);
-                    engine.LoadMarketData().Wait();
-                    engine.FindOpportunities();
-                    engine.PrintResults();
+                            }
+                            catch (Exception e)
+                            {
+                                //Console.WriteLine(e);
+                                Console.WriteLine("Error: {0} {1}", baseExchange.GetExchangeName(), arbExchange.GetExchangeName());
+                            }
+                            finally
+                            {
+                                //Thread.Sleep(1000 * 60);
+                                Thread.Sleep(100);
+                            }
+                        }
 
-                    Console.WriteLine("Bittrex Binance");
-
-                    engine = new TradingEngine(bittrex, binance);
-                    engine.LoadMarketData().Wait();
-                    engine.FindOpportunities();
-                    engine.PrintResults();
-
-                    Console.WriteLine("Hitbtc Binance");
-
-                    engine = new TradingEngine(hitbtc, binance);
-                    engine.LoadMarketData().Wait();
-                    engine.FindOpportunities();
-                    engine.PrintResults();
-
-                    Console.WriteLine("Complete");
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-                finally
-                {
-                    Console.WriteLine("Sleeping ...");
-                    Thread.Sleep(1000);
+                    }
                 }
             }
-
         }
     }
 }

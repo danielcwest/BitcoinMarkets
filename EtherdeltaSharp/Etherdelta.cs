@@ -13,7 +13,7 @@ namespace EtherdeltaSharp
     {
         IEtherdeltaApi _etherdelta;
 
-        public Etherdelta()
+        public Etherdelta(string apiKey, string apiSecret)
         {
             _etherdelta = RestClient.For<IEtherdeltaApi>("https://api.etherdelta.com");
 

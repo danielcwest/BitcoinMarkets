@@ -14,7 +14,7 @@ namespace PoloniexSharp
     {
         IPoloniexApi _poloniex;
 
-        public Poloniex()
+        public Poloniex(string apiKey, string apiSecret)
         {
             _poloniex = RestClient.For<IPoloniexApi>("https://poloniex.com");
         }

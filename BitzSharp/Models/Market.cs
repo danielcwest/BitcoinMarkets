@@ -38,8 +38,8 @@ namespace BitzSharp.Models
             }
 
             this.Link = string.Format("https://www.bit-z.com/trade/{0}", name);
-            this.Volume = ticker.vol * ticker.last;
-            this.Last = ticker.last;
+            this.Volume = (ticker.vol.HasValue && ticker.last.HasValue) ? ticker.vol.Value * ticker.last.Value : 0M;
+            this.Last = ticker.last.HasValue ? ticker.last.Value : 0M;
             this.Timestamp = Utils.UnixTimeStampToDateTimeUtc(ticker.date);
             this.Bid = ticker.buy;
             this.Ask = ticker.sell;

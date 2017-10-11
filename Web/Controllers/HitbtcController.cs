@@ -21,7 +21,7 @@ namespace Web.Controllers
         public HitbtcController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _hitbtc = new Hitbtc();
+            _hitbtc = new Hitbtc("", "");
         }
 
         [HttpGet]

@@ -5,11 +5,11 @@ using System.Text;
 
 namespace BitzSharp.Models
 {
-    public class BitzResponse
+    public class BitzResponse<T>
     {
         public int code { get; set; }
         public string msg { get; set; }
-        public Dictionary<string, Ticker> data { get; set; }
+        public T data { get; set; }
 
     }
 }
