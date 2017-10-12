@@ -21,7 +21,10 @@ namespace Web.Controllers
         public LivecoinController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _livecoin = new Livecoin("", "");
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "Livecoin");
+            _livecoin = new Livecoin(config);
         }
 
         [HttpGet]

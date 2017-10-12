@@ -14,10 +14,28 @@ namespace BitzSharp
     public class Bitz : IExchange
     {
         IBitzApi _bitz;
+        private string name;
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+        }
+        private decimal fee;
+        public decimal Fee
+        {
+            get
+            {
+                return fee;
+            }
+        }
 
-        public Bitz(string apiKey, string apiSecret)
+        public Bitz(ConfigExchange config)
         {
             _bitz = RestClient.For<IBitzApi>("https://www.bit-z.com");
+            name = config.Name;
+            fee = config.Fee;
         }
 
         public async Task<Dictionary<string, Ticker>> Tickers()
@@ -64,16 +82,6 @@ namespace BitzSharp
             return market;
         }
 
-        public decimal GetFee()
-        {
-            return 0.008M;
-        }
-
-        public string GetExchangeName()
-        {
-            return "Bitz";
-        }
-
         private string GetBitzSymbolFromBMSymbol(string bmSymbol)
         {
             string symbol = "";
@@ -88,6 +96,41 @@ namespace BitzSharp
                 symbol = string.Format("{0}_eth", c.ToLowerInvariant());
             }
             return symbol;
+        }
+
+        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CancelOrder(string orderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IOrder> CheckOrder(string uuid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IDepositAddress> GetDepositAddress(string currency)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ICurrencyBalance> GetBalance(string currency)
+        {
+            throw new NotImplementedException();
         }
     }
 }

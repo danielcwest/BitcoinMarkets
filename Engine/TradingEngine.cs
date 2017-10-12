@@ -64,7 +64,7 @@ namespace Engine
 
                         if (bMarket == null || bBook == null || rMarket == null || rBook == null)
                         {
-                            dbService.LogError(this.baseExchange.GetExchangeName(), this.arbExchange.GetExchangeName(), kvp.Key, "AnalyzeMarkets", "Market Data Null", "");
+                            dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, kvp.Key, "AnalyzeMarkets", "Market Data Null", "");
                         }
                         else
                         {
@@ -73,7 +73,7 @@ namespace Engine
                     }
                     catch (Exception e)
                     {
-                        dbService.LogError(this.baseExchange.GetExchangeName(), this.arbExchange.GetExchangeName(), kvp.Key, "AnalyzeMarkets", e.Message, e.StackTrace);
+                        dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, kvp.Key, "AnalyzeMarkets", e.Message, e.StackTrace);
                     }
                 }
             }
@@ -97,16 +97,16 @@ namespace Engine
 
             if (baseBuy > 0 && baseSell > 0 && arbBuy > 0 && arbSell > 0)
             {
-                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (this.baseExchange.GetFee() + this.arbExchange.GetFee());
-                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (this.baseExchange.GetFee() + this.arbExchange.GetFee());
+                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (this.baseExchange.Fee + this.arbExchange.Fee);
+                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (this.baseExchange.Fee + this.arbExchange.Fee);
 
                 if (baseBuy < arbSell && baseBuySpread > 0)
                 {
-                    dbService.LogTrade(this.baseExchange.GetExchangeName(), this.arbExchange.GetExchangeName(), am.Symbol, baseBuy, arbSell, baseBuySpread);
+                    dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseBuy, arbSell, baseBuySpread);
                 }
                 if (baseSell > arbBuy && baseSellSpread > 0)
                 {
-                    dbService.LogTrade(this.baseExchange.GetExchangeName(), this.arbExchange.GetExchangeName(), am.Symbol, baseSell, arbBuy, baseSellSpread);
+                    dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseSell, arbBuy, baseSellSpread);
                 }
             }
         }

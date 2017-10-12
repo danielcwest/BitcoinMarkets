@@ -63,7 +63,7 @@
 
 <!-- BUY at BASE *** SELL at ARB -->
 <div class="card">
-    <div class="buy-base card-body arb-pair" [class.success]="baseExactBuy < arbExactSell " [class.danger]="baseExactBuy > arbExactSell">
+    <div class="buy-base card-body arb-pair" [class.success]="baseExactBuy < arbExactSell" [class.danger]="baseExactBuy > arbExactSell">
         <div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
             <div class="col">
                 <h4 class="text-center">Buy {{threshold}} {{baseCurrency}}</h4>
@@ -80,8 +80,8 @@
 
             </div>
             <div class="col">
-                <h1 class="text-center spread">{{baseBuySpread - (arbExchangeFee + baseExchangeFee) | numeral:'0.00%'}}</h1>
-                <h4 class="text-center spread">{{baseBuySpread | numeral:'0.00%'}}</h4>
+                <h1 *ngIf="baseExactBuy < arbExactSell" class="text-center spread">{{baseBuySpread - (arbExchangeFee + baseExchangeFee) | numeral:'0.00%'}}</h1>
+                <h4 *ngIf="baseExactBuy < arbExactSell" class="text-center spread">{{baseBuySpread | numeral:'0.00%'}}</h4>
             </div>
             <div class="col">
                 <h1 *ngIf="baseExactBuy > arbExactSell" class="text-center">{{arbExactSell | btcPrice}}</h1>
@@ -111,8 +111,8 @@
                 <h1 *ngIf="baseExactSell > arbExactBuy" class="text-center" [class.text-danger]="baseExactSell > arbExactBuy">{{baseExactSell | btcPrice}}</h1>
             </div>
             <div class="col">
-                <h1 class="text-center spread">{{baseSellSpread - (arbExchangeFee + baseExchangeFee) | numeral:'0.00%'}}</h1>
-                <h4 class="text-center spread">{{baseSellSpread | numeral:'0.00%'}}</h4>
+                <h1 *ngIf="baseExactSell > arbExactBuy" class="text-center spread">{{baseSellSpread - (arbExchangeFee + baseExchangeFee) | numeral:'0.00%'}}</h1>
+                <h4 *ngIf="baseExactSell > arbExactBuy" class="text-center spread">{{baseSellSpread | numeral:'0.00%'}}</h4>
             </div>
             <div class="col">
                 <h1 *ngIf="baseExactSell < arbExactBuy" class="text-center">{{arbExactBuy | btcPrice}}</h1>

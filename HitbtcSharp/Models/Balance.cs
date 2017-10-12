@@ -3,24 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BMCore.Models;
+using Newtonsoft.Json;
 
 namespace HitbtcSharp.Models
 {
-    public class Balance
+    public class HitBalance : ICurrencyBalance
     {
         /// <summary>
         /// Currency symbol, e.g. BTC
         /// </summary>
-        public string currency_code { get; set; }
+        [JsonProperty("currency_code")]
+        public string Currency { get; set; }
 
         /// <summary>
         /// Funds amount
         /// </summary>
-        public double balance { get; set; }
+        [JsonProperty("cash")]
+        public decimal Balance { get; set; }
+        [JsonProperty("reserved")]
+        public decimal Reserved { get; set; }
     }
 
     public class MultiCurrencyBalance
     {
-        public List<Balance> balance { get; set; }
+        public List<HitBalance> balance { get; set; }
     }
 }

@@ -13,10 +13,27 @@ namespace PoloniexSharp
     public class Poloniex : IExchange
     {
         IPoloniexApi _poloniex;
-
-        public Poloniex(string apiKey, string apiSecret)
+        private string name;
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+        }
+        private decimal fee;
+        public decimal Fee
+        {
+            get
+            {
+                return fee;
+            }
+        }
+        public Poloniex(ConfigExchange config)
         {
             _poloniex = RestClient.For<IPoloniexApi>("https://poloniex.com");
+            name = config.Name;
+            fee = config.Fee;
         }
 
         public async Task<IEnumerable<IMarket>> MarketSummaries()
@@ -65,14 +82,39 @@ namespace PoloniexSharp
             return new Market(poloSymbol, ticker);
         }
 
-        public decimal GetFee()
+        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate)
         {
-            return 0.0025M;
+            throw new NotImplementedException();
         }
 
-        public string GetExchangeName()
+        public Task CancelOrder(string orderId)
         {
-            return "Poloniex";
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IOrder> CheckOrder(string uuid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IDepositAddress> GetDepositAddress(string currency)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ICurrencyBalance> GetBalance(string currency)
+        {
+            throw new NotImplementedException();
         }
     }
 }

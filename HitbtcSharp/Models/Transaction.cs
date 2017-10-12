@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BMCore.Models;
+using Newtonsoft.Json;
 
 namespace HitbtcSharp.Models
 {
@@ -34,8 +36,9 @@ namespace HitbtcSharp.Models
         public List<Transaction> transactions { get; set; }
     }
 
-    public class PayoutTransaction
+    public class PayoutTransaction : IAcceptedAction
     {
-        public string transaction { get; set; }
+        [JsonProperty("transaction")]
+        public string Uuid { get; set; }
     }
 }

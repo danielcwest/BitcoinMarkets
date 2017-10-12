@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace HitbtcSharp.Models
 {
-    public class Order
+    public class HitbtcOrder
     {
         /// <summary>
         /// Order ID on the exchange
         /// </summary>
-        public int orderId { get; set; }
+        public string orderId { get; set; }
 
         /// <summary>
         /// Order status
@@ -68,7 +68,7 @@ namespace HitbtcSharp.Models
         /// <summary>
         /// Currency symbol
         /// </summary>
-        public string symbo { get; set; }
+        public string symbol { get; set; }
 
         /// <summary>
         /// Side of a trade
@@ -82,8 +82,27 @@ namespace HitbtcSharp.Models
 
     }
 
-    public class Orders
+    public class OrderRequest
     {
-        public List<Order> orders { get; set; }
+        public string clientOrderId { get; set; }
+        public string symbol { get; set; }
+        public string side { get; set; } //buy or sell
+        public decimal price { get; set; }
+        public int quantity { get; set; }
+        public string type { get; set; } //limit, stopLimit, stopMarket, market
+        public string stopPrice { get; set; }
+    }
+
+    public class CancelOrderRequest
+    {
+        public string clientOrderId { get; set; }
+        public string cancelRequestClientOrderId { get; set; }
+        public string symbol { get; set; } //buy or sell
+        public string side { get; set; }
+    }
+
+    public class OrderResponse
+    {
+        public List<HitbtcOrder> orders { get; set; }
     }
 }

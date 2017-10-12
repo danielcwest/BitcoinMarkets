@@ -135,26 +135,28 @@ namespace BittrexSharp.BittrexOrderSimulation
         {
             var order = simulatedOpenOrders.Single(o => o.OrderUuid == orderId);
             simulatedOpenOrders.Remove(order);
+            await Task.FromResult(0);
         }
 
         public override async Task<IEnumerable<OpenOrder>> GetOpenOrders(string marketName = null)
         {
             if (marketName == null) return simulatedOpenOrders;
-            else return simulatedOpenOrders.Where(o => o.Exchange == marketName).ToList();
+            else return await Task.FromResult(simulatedOpenOrders.Where(o => o.Exchange == marketName).ToList());
+
         }
 
         public override async Task<IEnumerable<CurrencyBalance>> GetBalances()
         {
-            return simulatedBalances;
+            return await Task.FromResult(simulatedBalances);
         }
 
         public override async Task<CurrencyBalance> GetBalance(string currency)
         {
-            return simulatedBalances.SingleOrDefault(b => b.Currency == currency) ?? new CurrencyBalance
+            return await Task.FromResult(simulatedBalances.SingleOrDefault(b => b.Currency == currency) ?? new CurrencyBalance
             {
                 Balance = 0,
                 Currency = currency
-            };
+            });
         }
 
         public override async Task<Order> GetOrder(string orderId)
@@ -162,7 +164,7 @@ namespace BittrexSharp.BittrexOrderSimulation
             var openOrder = simulatedOpenOrders.SingleOrDefault(o => o.OrderUuid == orderId);
             if (openOrder == null) return simulatedFinishedOrders.SingleOrDefault(o => o.OrderUuid == orderId);
 
-            return new Order
+            return await Task.FromResult(new Order
             {
                 Closed = openOrder.Closed,
                 Exchange = openOrder.Exchange,
@@ -172,12 +174,12 @@ namespace BittrexSharp.BittrexOrderSimulation
                 Price = openOrder.Price,
                 PricePerUnit = openOrder.PricePerUnit,
                 Quantity = openOrder.Quantity
-            };
+            });
         }
 
         public override async Task<IEnumerable<HistoricOrder>> GetOrderHistory(string marketName = null)
         {
-            return simulatedFinishedOrders.Where(o => o.Exchange == marketName).Select(o => new HistoricOrder
+            return await Task.FromResult(simulatedFinishedOrders.Where(o => o.Exchange == marketName).Select(o => new HistoricOrder
             {
                 Exchange = o.Exchange,
                 Limit = o.Limit,
@@ -186,7 +188,7 @@ namespace BittrexSharp.BittrexOrderSimulation
                 PricePerUnit = o.PricePerUnit,
                 Quantity = o.Quantity,
                 Timestamp = o.Closed.Value
-            }).ToList();
+            }).ToList());
         }
     }
 }

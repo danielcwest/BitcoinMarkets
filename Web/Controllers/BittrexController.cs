@@ -20,7 +20,11 @@ namespace Web.Controllers
         public BittrexController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _bittrex = new Bittrex(_iconfiguration.GetValue<string>("Bittrex:ApiKey"), _iconfiguration.GetValue<string>("Bittrex:Secret"));
+
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "Bittrex");
+            _bittrex = new Bittrex(config);
         }
 
         [HttpGet]

@@ -12,10 +12,14 @@ namespace EtherdeltaSharp
     public class Etherdelta
     {
         IEtherdeltaApi _etherdelta;
+        string Name;
+        decimal Fee;
 
-        public Etherdelta(string apiKey, string apiSecret)
+        public Etherdelta(ConfigExchange config)
         {
             _etherdelta = RestClient.For<IEtherdeltaApi>("https://api.etherdelta.com");
+            Name = config.Name;
+            Fee = config.Fee;
 
         }
 
@@ -29,6 +33,16 @@ namespace EtherdeltaSharp
         {
             var summaries = await _etherdelta.GetTickers();
             return summaries.Where(s => s.Key.StartsWith("ETH_")).Select(s => new Market(s.Key, s.Value));
+        }
+
+        public decimal GetFee()
+        {
+            return Fee;
+        }
+
+        public string GetExchangeName()
+        {
+            return Name;
         }
     }
 }

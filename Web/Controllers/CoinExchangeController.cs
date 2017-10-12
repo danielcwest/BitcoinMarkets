@@ -21,7 +21,10 @@ namespace Web.Controllers
         public CoinExchangeController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _coin = new CoinExchange("", "");
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "CoinExchange");
+            _coin = new CoinExchange(config);
         }
 
         [HttpGet]

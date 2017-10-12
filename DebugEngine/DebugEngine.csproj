@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="RestEase" Version="1.4.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BittrexSharp\BittrexSharp.csproj" />
+    <ProjectReference Include="..\HitbtcSharp\HitbtcSharp.csproj" />
+    <ProjectReference Include="..\PoloniexSharp\PoloniexSharp.csproj" />
+    <ProjectReference Include="..\LiquiSharp\LiquiSharp.csproj" />
+    <ProjectReference Include="..\LivecoinSharp\LivecoinSharp.csproj" />
+    <ProjectReference Include="..\CoinExchangeSharp\CoinExchangeSharp.csproj" />
+    <ProjectReference Include="..\NovaExchangeSharp\NovaExchangeSharp.csproj" />
+    <ProjectReference Include="..\TidexSharp\TidexSharp.csproj" />
+    <ProjectReference Include="..\BitzSharp\BitzSharp.csproj" />
+    <ProjectReference Include="..\EtherdeltaSharp\EtherdeltaSharp.csproj" />
+    <ProjectReference Include="..\BinanceSharp\BinanceSharp.csproj" />
+    <ProjectReference Include="..\BMCore\BMCore.csproj" />
+    <ProjectReference Include="..\Engine\Engine.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="2.0.0" />
+  </ItemGroup>
+</Project>

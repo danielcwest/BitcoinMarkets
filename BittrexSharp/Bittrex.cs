@@ -13,19 +13,29 @@ namespace BittrexSharp
     public class Bittrex : IExchange
     {
         BittrexApi _bittrex;
-        public Bittrex(string apiKey, string apiSecret)
+
+        private string name;
+        public string Name
         {
-            _bittrex = new BittrexApi(apiKey, apiSecret);
+            get
+            {
+                return name;
+            }
+        }
+        private decimal fee;
+        public decimal Fee
+        {
+            get
+            {
+                return fee;
+            }
         }
 
-        public decimal GetFee()
+        public Bittrex(ConfigExchange config)
         {
-            return 0.0025M;
-        }
-
-        public string GetExchangeName()
-        {
-            return "Bittrex";
+            _bittrex = new BittrexApi(config.ApiKey, config.Secret);
+            name = config.Name;
+            fee = config.Fee;
         }
 
         public async Task<IEnumerable<IMarket>> MarketSummaries()
@@ -36,14 +46,14 @@ namespace BittrexSharp
 
         public async Task<IMarket> MarketSummary(string symbol)
         {
-            var sum = await _bittrex.GetMarketSummary(Helper.GetMarketNameFromSymbol(symbol));
+            var sum = await _bittrex.GetMarketSummary(GetMarketNameFromSymbol(symbol));
             return new BMMarket(sum.FirstOrDefault());
         }
 
         public async Task<BMCore.Models.OrderBook> OrderBook(string symbol)
         {
             var ob = new BMCore.Models.OrderBook(symbol);
-            var books = await _bittrex.GetOrderBook(Helper.GetMarketNameFromSymbol(symbol), "both", 1);
+            var books = await _bittrex.GetOrderBook(GetMarketNameFromSymbol(symbol), "both", 1);
 
             if (ob.symbol != Helper.GetSymbolFromMarketName(books.MarketName))
             {
@@ -57,6 +67,58 @@ namespace BittrexSharp
             ob.bids = BMCore.Helper.SumOrderEntries(ob.bids);
 
             return ob;
+        }
+
+        public async Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate)
+        {
+            return await _bittrex.BuyLimit(GetMarketNameFromSymbol(symbol), quantity, rate);
+        }
+
+        public async Task CancelOrder(string orderId)
+        {
+            await _bittrex.CancelOrder(orderId);
+        }
+
+        public async Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate)
+        {
+            return await _bittrex.SellLimit(GetMarketNameFromSymbol(symbol), quantity, rate);
+        }
+
+        public async Task<IOrder> CheckOrder(string uuid)
+        {
+            return await _bittrex.GetOrder(uuid);
+        }
+
+        public async Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
+        {
+            return await _bittrex.Withdraw(currency, quantity, address, paymentId);
+        }
+
+        public async Task<IDepositAddress> GetDepositAddress(string currency)
+        {
+            return await _bittrex.GetDepositAddress(currency);
+        }
+
+        public async Task<ICurrencyBalance> GetBalance(string currency)
+        {
+            return await _bittrex.GetBalance(currency);
+        }
+
+        //return Bittrex market name in the form of BTC-XMR or ETH-XRP
+        private static string GetMarketNameFromSymbol(string symbol)
+        {
+            if (symbol.EndsWith("BTC"))
+            {
+                return string.Format("BTC-{0}", symbol.Replace("BTC", ""));
+            }
+            else if (symbol.EndsWith("ETH"))
+            {
+                return string.Format("ETH-{0}", symbol.Replace("ETH", ""));
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

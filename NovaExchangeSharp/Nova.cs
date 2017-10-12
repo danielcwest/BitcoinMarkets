@@ -13,20 +13,27 @@ namespace NovaExchangeSharp
     public class Nova : IExchange
     {
         INovaExchangeApi _nova;
-
-        public Nova(string apiKey, string apiSecret)
+        private string name;
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+        }
+        private decimal fee;
+        public decimal Fee
+        {
+            get
+            {
+                return fee;
+            }
+        }
+        public Nova(ConfigExchange config)
         {
             _nova = RestClient.For<INovaExchangeApi>("https://novaexchange.com");
-        }
-
-        public string GetExchangeName()
-        {
-            return "NovaExchange";
-        }
-
-        public decimal GetFee()
-        {
-            return 0.0020M;
+            name = config.Name;
+            fee = config.Fee;
         }
 
         public async Task<IEnumerable<IMarket>> MarketSummaries()
@@ -73,6 +80,41 @@ namespace NovaExchangeSharp
                 symbol = string.Format("ETH_{0}", c);
             }
             return symbol;
+        }
+
+        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CancelOrder(string orderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IOrder> CheckOrder(string uuid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IDepositAddress> GetDepositAddress(string currency)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ICurrencyBalance> GetBalance(string currency)
+        {
+            throw new NotImplementedException();
         }
     }
 }

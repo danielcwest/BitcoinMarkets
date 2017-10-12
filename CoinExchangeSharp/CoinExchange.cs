@@ -12,11 +12,14 @@ namespace CoinExchangeSharp
     public class CoinExchange
     {
         ICoinExchangeApi _coin;
+        string Name;
+        decimal Fee;
 
-        public CoinExchange(string apiKey, string apiSecret)
+        public CoinExchange(ConfigExchange config)
         {
             _coin = RestClient.For<ICoinExchangeApi>("https://www.coinexchange.io");
-
+            Name = config.Name;
+            Fee = config.Fee;
         }
 
         public async Task<CoinResponse<CoinExchangeSharp.Models.CoinXMarket>> Markets()
@@ -35,6 +38,16 @@ namespace CoinExchangeSharp
             var tickersDic = tickers.result.ToDictionary(t => t.MarketID);
 
             return marketDic.Select(m => new Market(m.Value, tickersDic[m.Key]));
+        }
+
+        public decimal GetFee()
+        {
+            return Fee;
+        }
+
+        public string GetExchangeName()
+        {
+            return Name;
         }
 
     }

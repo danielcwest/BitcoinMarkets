@@ -21,7 +21,10 @@ namespace Web.Controllers
         public EtherdeltaController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _etherdelta = new Etherdelta("", "");
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "Etherdelta");
+            _etherdelta = new Etherdelta(config);
         }
 
         [HttpGet]

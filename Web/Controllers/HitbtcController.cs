@@ -21,7 +21,10 @@ namespace Web.Controllers
         public HitbtcController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _hitbtc = new Hitbtc("", "");
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "Hitbtc");
+            _hitbtc = new Hitbtc(config);
         }
 
         [HttpGet]

@@ -200,7 +200,7 @@ namespace BittrexSharp
         /// <param name="orderType">The types of orders you want to get, use the static properties of OrderType.</param>
         /// <param name="depth"></param>
         /// <returns></returns>
-        public virtual async Task<OrderBook> GetOrderBook(string marketName, string orderType, int depth)
+        public virtual async Task<Domain.OrderBook> GetOrderBook(string marketName, string orderType, int depth)
         {
             var uri = BaseUrl + "public/getorderbook";
             var parameters = new Dictionary<string, string>
@@ -210,14 +210,14 @@ namespace BittrexSharp
                 { "depth", depth.ToString() }
             };
             var jsonResponse = await request(HttpMethod.Get, uri, parameters, false);
-            var orderBook = new OrderBook();
+            var orderBook = new Domain.OrderBook();
 
             if (orderType == OrderType.Both)
-                orderBook = jsonResponse.ToObject<OrderBook>();
+                orderBook = jsonResponse.ToObject<Domain.OrderBook>();
             else if (orderType == OrderType.Buy)
-                orderBook.Buy = jsonResponse.ToObject<IEnumerable<OrderBookEntry>>();
+                orderBook.Buy = jsonResponse.ToObject<IEnumerable<Domain.OrderBookEntry>>();
             else if (orderType == OrderType.Sell)
-                orderBook.Sell = jsonResponse.ToObject<IEnumerable<OrderBookEntry>>();
+                orderBook.Sell = jsonResponse.ToObject<IEnumerable<Domain.OrderBookEntry>>();
 
             orderBook.MarketName = marketName;
             return orderBook;
@@ -351,7 +351,7 @@ namespace BittrexSharp
         /// </summary>
         /// <param name="currency">Currency symbol, e.g. BTC</param>
         /// <returns></returns>
-        public virtual async Task<DepositAddress> GetDepositAddress(string currency)
+        public virtual async Task<BMCore.Models.IDepositAddress> GetDepositAddress(string currency)
         {
             var uri = BaseUrl + "account/getdepositaddress";
             var parameters = new Dictionary<string, string>
@@ -359,7 +359,7 @@ namespace BittrexSharp
                 { "currency", currency }
             };
             var jsonResponse = await request(HttpMethod.Get, uri, parameters);
-            var depositAddress = jsonResponse.ToObject<DepositAddress>();
+            var depositAddress = jsonResponse.ToObject<BMCore.Models.IDepositAddress>();
             return depositAddress;
         }
 

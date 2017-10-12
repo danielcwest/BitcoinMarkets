@@ -22,7 +22,10 @@ namespace Web.Controllers
         public LiquiController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _liqui = new Liqui("", "");
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "Liqui");
+            _liqui = new Liqui(config);
         }
 
         [HttpGet]

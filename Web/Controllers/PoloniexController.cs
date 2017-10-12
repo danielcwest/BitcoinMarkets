@@ -21,7 +21,10 @@ namespace Web.Controllers
         public PoloniexController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _poloniex = new Poloniex("", "");
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "Poloniex");
+            _poloniex = new Poloniex(config);
         }
 
         [HttpGet]

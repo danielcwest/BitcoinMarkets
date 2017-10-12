@@ -14,10 +14,28 @@ namespace LivecoinSharp
     {
 
         ILivecoinApi _livecoin;
+        private string name;
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+        }
+        private decimal fee;
+        public decimal Fee
+        {
+            get
+            {
+                return fee;
+            }
+        }
 
-        public Livecoin(string apiKey, string apiSecret)
+        public Livecoin(ConfigExchange config)
         {
             _livecoin = RestClient.For<ILivecoinApi>("https://api.livecoin.net/");
+            name = config.Name;
+            fee = config.Fee;
         }
 
         public async Task<IEnumerable<Ticker>> Tickers()
@@ -52,16 +70,6 @@ namespace LivecoinSharp
             return new Market(sum);
         }
 
-        public decimal GetFee()
-        {
-            return 0.0018M;
-        }
-
-        public string GetExchangeName()
-        {
-            return "Livecoin";
-        }
-
         private string GetLivecoinSymbolFromBMSymbol(string bmSymbol)
         {
             string symbol = "";
@@ -76,6 +84,41 @@ namespace LivecoinSharp
                 symbol = string.Format("{0}/ETH", c);
             }
             return symbol;
+        }
+
+        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CancelOrder(string orderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IOrder> CheckOrder(string uuid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IDepositAddress> GetDepositAddress(string currency)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ICurrencyBalance> GetBalance(string currency)
+        {
+            throw new NotImplementedException();
         }
     }
 }

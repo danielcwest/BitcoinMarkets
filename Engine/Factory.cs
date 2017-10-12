@@ -20,17 +20,17 @@ namespace Engine
         {
             switch (configExchange.Name)
             {
-                case "Bittrex": return new Bittrex(configExchange.ApiKey, configExchange.Secret);
-                case "Binance": return new Binance(configExchange.ApiKey, configExchange.Secret);
-                case "Bitz": return new Bitz(configExchange.ApiKey, configExchange.Secret);
+                case "Bittrex": return new Bittrex(configExchange);
+                case "Binance": return new Binance(configExchange);
+                case "Bitz": return new Bitz(configExchange);
                 case "CoinExchange": return null;
                 case "EtherDelta": return null;
-                case "Hitbtc": return new Hitbtc(configExchange.ApiKey, configExchange.Secret);
-                case "Liqui": return new Liqui(configExchange.ApiKey, configExchange.Secret);
-                case "Livecoin": return new Livecoin(configExchange.ApiKey, configExchange.Secret);
-                case "Nova": return new Nova(configExchange.ApiKey, configExchange.Secret);
-                case "Poloniex": return new Poloniex(configExchange.ApiKey, configExchange.Secret);
-                case "Tidex": return new Tidex(configExchange.ApiKey, configExchange.Secret);
+                case "Hitbtc": return new Hitbtc(configExchange);
+                case "Liqui": return new Liqui(configExchange);
+                case "Livecoin": return new Livecoin(configExchange);
+                case "Nova": return new Nova(configExchange);
+                case "Poloniex": return new Poloniex(configExchange);
+                case "Tidex": return new Tidex(configExchange);
                 default: return null;
             }
         }

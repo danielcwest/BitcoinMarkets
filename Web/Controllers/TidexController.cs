@@ -22,7 +22,10 @@ namespace Web.Controllers
         public TidexController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _tidex = new Tidex("", "");
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "Tidex");
+            _tidex = new Tidex(config);
         }
 
         [HttpGet]

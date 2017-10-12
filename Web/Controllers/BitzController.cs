@@ -21,7 +21,10 @@ namespace Web.Controllers
         public BitzController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _bitz = new Bitz("", "");
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "Bitz");
+            _bitz = new Bitz(config);
         }
 
         [HttpGet]

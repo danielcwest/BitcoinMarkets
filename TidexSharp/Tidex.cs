@@ -14,9 +14,28 @@ namespace TidexSharp
     public class Tidex : IExchange
     {
         ITidexApi _tidex;
-        public Tidex(string apiKey, string apiSecret)
+        private string name;
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+        }
+        private decimal fee;
+        public decimal Fee
+        {
+            get
+            {
+                return fee;
+            }
+        }
+
+        public Tidex(ConfigExchange config)
         {
             _tidex = RestClient.For<ITidexApi>("https://api.tidex.com");
+            name = config.Name;
+            fee = config.Fee;
         }
 
         public async Task<IEnumerable<object>> Info()
@@ -82,16 +101,6 @@ namespace TidexSharp
             return new Market(tidexSymbol, dic[tidexSymbol]);
         }
 
-        public decimal GetFee()
-        {
-            return 0.0010M;
-        }
-
-        public string GetExchangeName()
-        {
-            return "Tidex";
-        }
-
         private string GetTidexSymbolFromBMSymbol(string bmSymbol)
         {
             string symbol = "";
@@ -106,6 +115,41 @@ namespace TidexSharp
                 symbol = string.Format("{0}_eth", c.ToLowerInvariant());
             }
             return symbol;
+        }
+
+        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CancelOrder(string orderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IOrder> CheckOrder(string uuid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IDepositAddress> GetDepositAddress(string currency)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ICurrencyBalance> GetBalance(string currency)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -21,7 +21,10 @@ namespace Web.Controllers
         public NovaController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _nova = new Nova("", "");
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "Nova");
+            _nova = new Nova(config);
         }
 
         [HttpGet]

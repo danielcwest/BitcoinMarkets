@@ -9,7 +9,7 @@ namespace BMCore.Models
         public string Name { get; set; }
         public string ApiKey { get; set; }
         public string Secret { get; set; }
-        public double Fee { get; set; }
+        public decimal Fee { get; set; }
         public bool Enabled { get; set; }
     }
 }

@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using BMCore.Models;
 
 namespace BittrexSharp.Domain
 {
-    public class Order
+    public class Order : IOrder
     {
         public string AccountId { get; set; }
         public string OrderUuid { get; set; }
         public string Exchange { get; set; }
+        public string Symbol { get; set; }
         public string Type { get; set; }
         public decimal Quantity { get; set; }
         public decimal QuantityRemaining { get; set; }

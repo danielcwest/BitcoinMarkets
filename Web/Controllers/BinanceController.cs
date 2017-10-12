@@ -22,7 +22,10 @@ namespace Web.Controllers
         public BinanceController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            _binance = new Binance("", "");
+            var exchanges = new List<ConfigExchange>();
+            _iconfiguration.GetSection("Exchanges").Bind(exchanges);
+            var config = exchanges.Find(e => e.Name == "Binance");
+            _binance = new Binance(config);
         }
 
         [HttpGet]

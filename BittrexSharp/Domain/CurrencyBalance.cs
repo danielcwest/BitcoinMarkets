@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using BMCore.Models;
 
-namespace BittrexSharp.Domain
+namespace BittrexSharp
 {
-    public class CurrencyBalance
+    public class CurrencyBalance : ICurrencyBalance
     {
         public string Currency { get; set; }
         public decimal Balance { get; set; }
