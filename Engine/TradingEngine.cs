@@ -21,11 +21,11 @@ namespace Engine
 
         // BASE EXCHANGE
         IExchange baseExchange;
-        Dictionary<string, IMarket> baseExchangeMarkets;
+        Dictionary<string, ISymbol> baseExchangeMarkets;
 
         //ARBITRAGE EXCHANGE
         IExchange arbExchange;
-        Dictionary<string, IMarket> arbitrageExchangeMarkets;
+        Dictionary<string, ISymbol> arbitrageExchangeMarkets;
 
         ConcurrentDictionary<string, ArbitrageMarket> arbitrageMarkets;
 
@@ -44,11 +44,11 @@ namespace Engine
 
         public async Task AnalyzeMarkets()
         {
-            var baseMarkets = await this.baseExchange.MarketSummaries();
-            this.baseExchangeMarkets = baseMarkets.ToDictionary(m => m.MarketName);
+            var baseMarkets = await this.baseExchange.Symbols();
+            this.baseExchangeMarkets = baseMarkets.ToDictionary(m => m.LocalSymbol);
 
-            var arbExchange = await this.arbExchange.MarketSummaries();
-            this.arbitrageExchangeMarkets = arbExchange.Where(m => !string.IsNullOrWhiteSpace(m.MarketName)).ToDictionary(m => m.MarketName);
+            var arbExchange = await this.arbExchange.Symbols();
+            this.arbitrageExchangeMarkets = arbExchange.ToDictionary(m => m.LocalSymbol);
 
             foreach (var kvp in this.baseExchangeMarkets)
             {
@@ -65,10 +65,12 @@ namespace Engine
                         if (bMarket == null || bBook == null || rMarket == null || rBook == null)
                         {
                             dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, kvp.Key, "AnalyzeMarkets", "Market Data Null", "");
+                            Console.WriteLine("{0}: Null Market Data", kvp.Key);
                         }
                         else
                         {
-                            FindOpportunity(new ArbitrageMarket(kvp.Value, bBook, this.arbitrageExchangeMarkets[kvp.Key], rBook));
+                            FindOpportunity(new ArbitrageMarket(bMarket, bBook, rMarket, rBook));
+                            Console.WriteLine("Analyzing {0}", kvp.Key);
                         }
                     }
                     catch (Exception e)

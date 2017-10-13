@@ -117,17 +117,7 @@ namespace TidexSharp
             return symbol;
         }
 
-        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task CancelOrder(string orderId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate)
         {
             throw new NotImplementedException();
         }
@@ -148,6 +138,21 @@ namespace TidexSharp
         }
 
         public Task<ICurrencyBalance> GetBalance(string currency)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<ISymbol>> Symbols()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
         {
             throw new NotImplementedException();
         }

@@ -38,6 +38,12 @@ namespace BittrexSharp
             fee = config.Fee;
         }
 
+        public async Task<IEnumerable<ISymbol>> Symbols()
+        {
+            var markets = await _bittrex.GetMarkets();
+            return markets.Where(m => m.BaseCurrency == "BTC" || m.BaseCurrency == "ETH").Select(m => new Symbol(m));
+        }
+
         public async Task<IEnumerable<IMarket>> MarketSummaries()
         {
             var summaries = await _bittrex.GetMarketSummaries();
@@ -69,19 +75,9 @@ namespace BittrexSharp
             return ob;
         }
 
-        public async Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate)
-        {
-            return await _bittrex.BuyLimit(GetMarketNameFromSymbol(symbol), quantity, rate);
-        }
-
         public async Task CancelOrder(string orderId)
         {
             await _bittrex.CancelOrder(orderId);
-        }
-
-        public async Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate)
-        {
-            return await _bittrex.SellLimit(GetMarketNameFromSymbol(symbol), quantity, rate);
         }
 
         public async Task<IOrder> CheckOrder(string uuid)
@@ -119,6 +115,16 @@ namespace BittrexSharp
             {
                 return null;
             }
+        }
+
+        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        {
+            throw new NotImplementedException();
         }
     }
 }

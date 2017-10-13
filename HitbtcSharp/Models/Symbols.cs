@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BMCore.Models;
 
 namespace HitbtcSharp.Models
 {
-    public class Symbol
+    public class HitSymbol
     {
         /// <summary>
         /// Symbol name
@@ -44,8 +45,26 @@ namespace HitbtcSharp.Models
         public string provideLiquidityRate { get; set; }
     }
 
+    public class Symbol : ISymbol
+    {
+        public string LocalSymbol { get; set; }
+        public string ExchangeSymbol { get; set; }
+        public string BaseCurrency { get; set; }
+        public string MarketCurrency { get; set; }
+        public decimal LotSize { get; set; }
+
+        public Symbol(HitSymbol symbol)
+        {
+            ExchangeSymbol = symbol.symbol;
+            MarketCurrency = symbol.commodity;
+            BaseCurrency = symbol.currency;
+            LotSize = decimal.Parse(symbol.lot);
+            LocalSymbol = symbol.symbol;
+        }
+    }
+
     public class Symbols
     {
-        public List<Symbol> symbols { get; set; }
+        public List<HitSymbol> symbols { get; set; }
     }
 }

@@ -9,6 +9,11 @@ using HitbtcSharp;
 using Microsoft.Extensions.Configuration;
 using Engine;
 using BMCore.DbService;
+using HitbtcSharp.Models;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using BittrexSharp;
 
 namespace DebugEngine
 {
@@ -29,14 +34,12 @@ namespace DebugEngine
 
             try
             {
-
+                var bittrex = (Bittrex)exchanges["Bittrex"];
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
 
-                var tbalances = hitbtc.GetBalances("trading").Result;
-                var pbalances = hitbtc.GetBalances("payment").Result;
+                var engine = new TradingEngine(bittrex, hitbtc, dbService);
+                engine.AnalyzeMarkets().Wait();
 
-                var ethB = hitbtc.GetBalance("ETH").Result;
-                var orders = hitbtc.GetOrders().Result;
 
                 Console.WriteLine("Complete");
             }

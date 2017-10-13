@@ -31,6 +31,11 @@ namespace BitzSharp
             }
         }
 
+        public Task<IEnumerable<ISymbol>> Symbols()
+        {
+            throw new NotImplementedException();
+        }
+
         public Bitz(ConfigExchange config)
         {
             _bitz = RestClient.For<IBitzApi>("https://www.bit-z.com");
@@ -98,17 +103,7 @@ namespace BitzSharp
             return symbol;
         }
 
-        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task CancelOrder(string orderId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate)
         {
             throw new NotImplementedException();
         }
@@ -129,6 +124,16 @@ namespace BitzSharp
         }
 
         public Task<ICurrencyBalance> GetBalance(string currency)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
         {
             throw new NotImplementedException();
         }

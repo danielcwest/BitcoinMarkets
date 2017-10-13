@@ -31,6 +31,7 @@ namespace HitbtcSharp.Models
             this.Price = Convert.ToDecimal(order.orderPrice);
             this.Side = order.side;
             this.ClientOrderId = order.clientOrderId;
+            this.IsOpen = order.orderStatus == "new" || order.orderStatus == "partiallyFilled";
         }
     }
 }

@@ -39,6 +39,13 @@ namespace BinanceSharp
             fee = config.Fee;
         }
 
+        public async Task<IEnumerable<ISymbol>> Symbols()
+        {
+            var prices = await _binance.GetPrices();
+
+            throw new NotImplementedException();
+        }
+
         public async Task<IEnumerable<IMarket>> MarketSummaries()
         {
             var prices = await _binance.GetPrices();
@@ -72,17 +79,7 @@ namespace BinanceSharp
             return new Market(symbol, ticker);
         }
 
-        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task CancelOrder(string orderId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate)
         {
             throw new NotImplementedException();
         }
@@ -103,6 +100,16 @@ namespace BinanceSharp
         }
 
         public Task<ICurrencyBalance> GetBalance(string currency)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
         {
             throw new NotImplementedException();
         }

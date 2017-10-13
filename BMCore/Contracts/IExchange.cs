@@ -19,6 +19,8 @@ namespace BMCore.Contracts
         }
 
         //Public Market API Endpoints 
+        Task<IEnumerable<ISymbol>> Symbols();
+
         Task<IEnumerable<IMarket>> MarketSummaries();
 
         Task<OrderBook> OrderBook(string symbol);
@@ -28,11 +30,11 @@ namespace BMCore.Contracts
 
 
         //Authenticated API Endpoints
-        Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate);
+        Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate, decimal lot = 1.0m);
 
         Task CancelOrder(string orderId);
 
-        Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate);
+        Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate, decimal lot = 1.0m);
 
         Task<IOrder> CheckOrder(string uuid);
 
