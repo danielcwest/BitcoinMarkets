@@ -166,4 +166,20 @@ export class DetailComponent implements OnInit {
         }
     }
 
+    BuyBase(): void {
+
+    }
+
+    SellBase(): void {
+
+    }
+
+    BuyArb(): void {
+
+    }
+
+    SellArb(): void {
+
+    }
+
 }

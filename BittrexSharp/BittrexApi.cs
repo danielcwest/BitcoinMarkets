@@ -374,13 +374,20 @@ namespace BittrexSharp
         public virtual async Task<AcceptedWithdrawal> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
         {
             var uri = BaseUrl + "account/withdraw";
-            var parameters = new Dictionary<string, string>
+
+            var parameters = string.IsNullOrWhiteSpace(paymentId) ? new Dictionary<string, string>
+            {
+                { "currency", currency },
+                { "quantity", quantity.ToString() },
+                { "address", address }
+            } : new Dictionary<string, string>
             {
                 { "currency", currency },
                 { "quantity", quantity.ToString() },
                 { "address", address },
                 { "paymentid", paymentId }
             };
+
             var jsonResponse = await request(HttpMethod.Get, uri, parameters);
             var acceptedWithdrawal = jsonResponse.ToObject<AcceptedWithdrawal>();
             return acceptedWithdrawal;
@@ -391,7 +398,7 @@ namespace BittrexSharp
         /// </summary>
         /// <param name="orderId">The uuid of the order</param>
         /// <returns></returns>
-        public virtual async Task<Order> GetOrder(string orderId)
+        public virtual async Task<BittrexOrder> GetOrder(string orderId)
         {
             var uri = BaseUrl + "account/getorder";
             var parameters = new Dictionary<string, string>
@@ -399,7 +406,7 @@ namespace BittrexSharp
                 { "uuid", orderId }
             };
             var jsonResponse = await request(HttpMethod.Get, uri, parameters);
-            var order = jsonResponse.ToObject<Order>();
+            var order = jsonResponse.ToObject<BittrexOrder>();
             return order;
         }
 

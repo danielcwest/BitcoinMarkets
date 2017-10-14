@@ -9,10 +9,10 @@
 <hr/>
 <div class="row mt-4">
     <div class="col text-center">
+        <h4>{{baseExchangeMarket.exchange}}</h4>
         <div class="form-group">
-            <select class="custom-select" id="baseExchangeSelect" (change)="onBaseExchangeChange($event.target.value)">
-                <option *ngFor="let exchange of exchanges" [value]="exchange" [selected]="context.selectedBaseExchange == exchange">{{exchange}}</option>
-            </select>
+            <button class="btn" (click)="BuyBase()">Buy</button>
+            <button class="btn" (click)="SellBase()">Sell</button>
         </div>
     </div>
     <div class="col text-center">
@@ -22,10 +22,11 @@
         </div>
     </div>
     <div class="col text-center">
+        <h4>{{arbExchangeMarket.exchange}}</h4>
+
         <div class="form-group">
-            <select class="custom-select" id="arbExchangeSelect" (change)="onArbExchangeChange($event.target.value)">
-                <option *ngFor="let exchange of exchanges" [value]="exchange" [selected]="context.selectedArbExchange == exchange">{{exchange}}</option>
-            </select>
+            <button class="btn" (click)="BuyArb()">Buy</button>
+            <button class="btn" (click)="SellArb()">Sell</button>
         </div>
     </div>
 </div>

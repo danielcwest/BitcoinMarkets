@@ -73,16 +73,16 @@ namespace HitbtcSharp
             return book;
         }
 
-        public async Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate, decimal lot = 1.0m)
+        public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0m)
         {
             long nonce = GetNonce();
 
-            string pathAndQuery = string.Format("/api/1/trading/new_order?nonce={0}&apikey={1}clientOrderId={2}&symbol={3}&side=buy&price={4}&quantity={5}&type=limit", nonce, _config.ApiKey, nonce, symbol, rate, quantity);
+            string pathAndQuery = string.Format("/api/1/trading/new_order?nonce={0}&apikey={1}clientOrderId={2}&symbol={3}&side=buy&price={4}&quantity={5}&type=limit", nonce, _config.ApiKey, nonce, symbol, rate, quantity / lot);
 
             string sign = CalculateSignature(pathAndQuery, _config.Secret);
 
             var data = new Dictionary<string, object> {
-                {"clientOrderId", nonce},
+                {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "buy"},
                 {"price", rate},
@@ -95,7 +95,7 @@ namespace HitbtcSharp
             return execution.ExecutionReport;
         }
 
-        public async Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate, decimal lot = 1.0m)
+        public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0m)
         {
             long nonce = GetNonce();
 
@@ -104,7 +104,7 @@ namespace HitbtcSharp
             string sign = CalculateSignature(pathAndQuery, _config.Secret);
 
             var data = new Dictionary<string, object> {
-                {"clientOrderId", nonce},
+                {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "sell"},
                 {"price", rate},
@@ -126,7 +126,7 @@ namespace HitbtcSharp
 
             await _hitbtc.CancelOrder(sign, nonce, _config.ApiKey, orderId);
         }
-        public async Task<IOrder> CheckOrder(string orderId)
+        public async Task<IOrder> CheckOrder(string orderId, decimal lot = 1.0m)
         {
             int limit = 25;
             long nonce = GetNonce();
@@ -136,18 +136,7 @@ namespace HitbtcSharp
             var orders = await _hitbtc.GetOrders(sign, nonce, _config.ApiKey, limit);
             var order = orders.orders.Find(o => o.orderId == orderId);
 
-            return new Order(order);
-        }
-
-        public async Task<IEnumerable<IOrder>> GetOrders()
-        {
-            int limit = 25;
-            long nonce = GetNonce();
-            string pathAndQuery = string.Format("/api/1/trading/orders/recent?nonce={0}&apikey={1}&max_results={2}", nonce, _config.ApiKey, limit);
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
-
-            var orders = await _hitbtc.GetOrders(sign, nonce, _config.ApiKey, limit);
-            return orders.orders.Select(o => new Order(o));
+            return new Order(order, lot);
         }
 
         public async Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
@@ -163,6 +152,15 @@ namespace HitbtcSharp
             };
 
             return await _hitbtc.Withdraw(sign, nonce, _config.ApiKey, data);
+        }
+
+        public async Task<IWithdrawal> GetWithdrawal(string uuid)
+        {
+            long nonce = GetNonce();
+            string pathAndQuery = string.Format("/api/1/payment/transactions/{0}?nonce={1}&apikey={2}", uuid, nonce, _config.ApiKey);
+            string sign = CalculateSignature(pathAndQuery, _config.Secret);
+            var tx = await _hitbtc.GetWithdrawal(sign, nonce, _config.ApiKey, uuid);
+            return new Withdrawal(tx.transaction);
         }
 
         public async Task<IDepositAddress> GetDepositAddress(string currency)

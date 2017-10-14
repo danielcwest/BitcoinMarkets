@@ -75,14 +75,25 @@ namespace BittrexSharp
             return ob;
         }
 
+        public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        {
+            return await _bittrex.BuyLimit(GetMarketNameFromSymbol(symbol), quantity, rate);
+        }
+
+        public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        {
+            return await _bittrex.SellLimit(GetMarketNameFromSymbol(symbol), quantity, rate);
+        }
+
         public async Task CancelOrder(string orderId)
         {
             await _bittrex.CancelOrder(orderId);
         }
 
-        public async Task<IOrder> CheckOrder(string uuid)
+        public async Task<IOrder> CheckOrder(string uuid, decimal lot = 1.0m)
         {
-            return await _bittrex.GetOrder(uuid);
+            var bOrder = await _bittrex.GetOrder(uuid);
+            return new Order(bOrder);
         }
 
         public async Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
@@ -100,6 +111,12 @@ namespace BittrexSharp
             return await _bittrex.GetBalance(currency);
         }
 
+        public async Task<IWithdrawal> GetWithdrawal(string uuid)
+        {
+            var history = await _bittrex.GetWithdrawalHistory();
+            return history.Where(h => h.Uuid == uuid).FirstOrDefault();
+        }
+
         //return Bittrex market name in the form of BTC-XMR or ETH-XRP
         private static string GetMarketNameFromSymbol(string symbol)
         {
@@ -115,16 +132,6 @@ namespace BittrexSharp
             {
                 return null;
             }
-        }
-
-        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
-        {
-            throw new NotImplementedException();
         }
     }
 }

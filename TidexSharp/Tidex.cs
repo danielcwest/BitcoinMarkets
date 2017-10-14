@@ -122,7 +122,7 @@ namespace TidexSharp
             throw new NotImplementedException();
         }
 
-        public Task<IOrder> CheckOrder(string uuid)
+        public Task<IOrder> CheckOrder(string uuid, decimal lot = 1.0m)
         {
             throw new NotImplementedException();
         }
@@ -147,12 +147,17 @@ namespace TidexSharp
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        public Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        public Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IWithdrawal> GetWithdrawal(string uuid)
         {
             throw new NotImplementedException();
         }

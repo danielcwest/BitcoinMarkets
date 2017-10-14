@@ -3,12 +3,11 @@ using System.Threading;
 using BMCore.Contracts;
 using BMCore.DbService;
 
-namespace Engine
+namespace BMCore.Engine
 {
-
     public class EngineHelper
     {
-        public static void ExecuteAllExchanges(IExchange[] exchanges, DbService dbService)
+        public static void ExecuteAllExchanges(IExchange[] exchanges, BMDbService dbService, decimal threshold)
         {
             for (var i = 0; i < exchanges.Length; i++)
             {
@@ -22,7 +21,7 @@ namespace Engine
                         try
                         {
                             Console.WriteLine("Starting: {0} {1}", baseExchange.Name, arbExchange.Name);
-                            var engine = new TradingEngine(baseExchange, arbExchange, dbService);
+                            var engine = new TradingEngine(baseExchange, arbExchange, dbService, threshold);
                             engine.AnalyzeMarkets().Wait();
                             Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);
 
@@ -45,12 +44,12 @@ namespace Engine
             }
         }
 
-        public static void ExecuteExchangePair(IExchange baseExchange, IExchange arbExchange, DbService dbService)
+        public static void ExecuteExchangePair(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, decimal threshold)
         {
             try
             {
                 Console.WriteLine("Starting: {0} {1}", baseExchange.Name, arbExchange.Name);
-                var engine = new TradingEngine(baseExchange, arbExchange, dbService);
+                var engine = new TradingEngine(baseExchange, arbExchange, dbService, threshold);
                 engine.AnalyzeMarkets().Wait();
                 Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);
             }

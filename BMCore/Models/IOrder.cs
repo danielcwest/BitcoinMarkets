@@ -12,5 +12,6 @@ namespace BMCore.Models
         decimal QuantityRemaining { get; set; }
         decimal Price { get; set; }
         bool IsOpen { get; set; }
+        bool IsFilled { get; set; }
     }
 }

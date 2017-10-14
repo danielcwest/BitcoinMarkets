@@ -7,7 +7,6 @@ namespace BMCore
 {
     public class Helper
     {
-
         public static List<OrderBookEntry> SumOrderEntries(List<OrderBookEntry> entries)
         {
             for (var i = 0; i < entries.Count; i++)

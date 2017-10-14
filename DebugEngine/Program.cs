@@ -28,18 +28,15 @@ namespace DebugEngine
             IConfigurationRoot configuration = builder.Build();
             var configs = new List<ConfigExchange>();
             configuration.GetSection("Exchanges").Bind(configs);
-
-            var dbService = new DbService(configuration.GetValue<string>("SqlConnectionString"));
+            var threshold = configuration.GetValue<decimal>("TradeThreshold");
+            var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"));
             var exchanges = configs.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
 
             try
             {
-                var bittrex = (Bittrex)exchanges["Bittrex"];
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
 
-                var engine = new TradingEngine(bittrex, hitbtc, dbService);
-                engine.AnalyzeMarkets().Wait();
-
+                var tx = hitbtc.GetWithdrawal("7bbe8c69-82eb-469f-a5f0-21e95f043bdb").Result;
 
                 Console.WriteLine("Complete");
             }

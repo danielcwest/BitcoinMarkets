@@ -30,16 +30,14 @@ namespace BMCore.Contracts
 
 
         //Authenticated API Endpoints
-        Task<IAcceptedAction> Buy(string symbol, decimal quantity, decimal rate, decimal lot = 1.0m);
+        Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0m);
+        Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0m);
 
         Task CancelOrder(string orderId);
-
-        Task<IAcceptedAction> Sell(string symbol, decimal quantity, decimal rate, decimal lot = 1.0m);
-
-        Task<IOrder> CheckOrder(string uuid);
+        Task<IOrder> CheckOrder(string uuid, decimal lot = 1.0m);
 
         Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null);
-
+        Task<IWithdrawal> GetWithdrawal(string uuid);
         Task<IDepositAddress> GetDepositAddress(string currency);
 
         Task<ICurrencyBalance> GetBalance(string currency);

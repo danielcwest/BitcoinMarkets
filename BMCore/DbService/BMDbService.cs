@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace BMCore.DbService
 {
-    public class DbService
+    public class BMDbService
     {
         private string sqlConnectionString = string.Empty;
 
         // constructor
-        public DbService(string sqlConnectionString)
+        public BMDbService(string sqlConnectionString)
         {
             this.sqlConnectionString = sqlConnectionString;
         }
@@ -51,6 +51,47 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@method", Value = method },
                     new SqlParameter { ParameterName = "@message", Value = message},
                     new SqlParameter { ParameterName = "@exception", Value = stackTrace}
+                });
+        }
+
+        public long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side)
+        {
+            return (long)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertOrder", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@exchange", Value = exchange },
+                    new SqlParameter { ParameterName = "@symbol", Value = symbol },
+                    new SqlParameter { ParameterName = "@side", Value = side },
+                    new SqlParameter { ParameterName = "@baseCurrency", Value = baseCurrency },
+                    new SqlParameter { ParameterName = "@marketCurrency", Value = marketCurrency }
+                });
+        }
+
+        public IEnumerable<DbOrder> GetOrders(long id = -1, string uuid = null)
+        {
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetOrders", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@id", Value = id },
+                        new SqlParameter { ParameterName = "@uuid", Value = uuid }
+                }))
+            {
+                return reader.ToList<DbOrder>();
+            }
+        }
+
+        public void UpdateOrderUuid(long id, string uuid, string status, long counterId = 0, decimal quantity = 0m, decimal price = 0m, decimal commission = 0m)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateOrderUuid", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@counterId", Value = counterId },
+                    new SqlParameter { ParameterName = "@uuid", Value = uuid },
+                    new SqlParameter { ParameterName = "@status", Value = status },
+                    new SqlParameter { ParameterName = "@quantity", Value = quantity},
+                    new SqlParameter { ParameterName = "@price", Value = price},
+                    new SqlParameter { ParameterName = "@commission", Value = commission}
                 });
         }
     }

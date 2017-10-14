@@ -7,6 +7,30 @@ namespace BittrexSharp.Domain
 {
     public class Order : IOrder
     {
+        public string OrderUuid { get; set; }
+        public string Exchange { get; set; }
+        public string Symbol { get; set; }
+        public string Type { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal QuantityRemaining { get; set; }
+        public decimal Price { get; set; }
+        public bool IsOpen { get; set; }
+        public bool IsFilled { get; set; }
+        public Order(BittrexOrder order)
+        {
+            this.OrderUuid = order.OrderUuid;
+            this.Exchange = order.Exchange;
+            this.Symbol = order.Symbol;
+            this.Type = order.Type;
+            this.Quantity = order.Quantity;
+            this.QuantityRemaining = order.QuantityRemaining;
+            this.Price = order.Price;
+            this.IsOpen = order.IsOpen;
+            this.IsFilled = !order.IsOpen && order.QuantityRemaining == 0m;
+        }
+    }
+    public class BittrexOrder
+    {
         public string AccountId { get; set; }
         public string OrderUuid { get; set; }
         public string Exchange { get; set; }

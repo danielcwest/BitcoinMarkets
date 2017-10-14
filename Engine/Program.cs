@@ -18,6 +18,7 @@ using TidexSharp;
 using System.Linq;
 using BMCore.Models;
 using BMCore.DbService;
+using BMCore.Engine;
 
 namespace Engine
 {
@@ -36,17 +37,17 @@ namespace Engine
                 IConfigurationRoot configuration = builder.Build();
                 var configs = new List<ConfigExchange>();
                 configuration.GetSection("Exchanges").Bind(configs);
-
-                var dbService = new DbService(configuration.GetValue<string>("SqlConnectionString"));
+                var threshold = configuration.GetValue<decimal>("TradeThreshold");
+                var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"));
                 var exchanges = configs.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
 
                 if (args.Length == 0)
                 {
-                    EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService);
+                    EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService, threshold);
                 }
                 else if (args.Length == 2)
                 {
-                    EngineHelper.ExecuteExchangePair(exchanges[args[0]], exchanges[args[1]], dbService);
+                    EngineHelper.ExecuteExchangePair(exchanges[args[0]], exchanges[args[1]], dbService, threshold);
                 }
 
                 Console.WriteLine("Engine Complete...");

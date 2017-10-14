@@ -13,7 +13,7 @@ namespace BittrexSharp.BittrexOrderSimulation
     public class BittrexOrderSimulation : BittrexApi
     {
         private List<OpenOrder> simulatedOpenOrders = new List<OpenOrder>();
-        private List<Order> simulatedFinishedOrders = new List<Order>();
+        private List<BittrexOrder> simulatedFinishedOrders = new List<BittrexOrder>();
         private List<CurrencyBalance> simulatedBalances = new List<CurrencyBalance>();
 
         public BittrexOrderSimulation(string apiKey, string apiSecret) : base(apiKey, apiSecret)
@@ -46,7 +46,7 @@ namespace BittrexSharp.BittrexOrderSimulation
             var acceptedOrderId = Guid.NewGuid().ToString();
             if (currentRate <= rate)
             {
-                var order = new Order
+                var order = new BittrexOrder
                 {
                     Closed = DateTime.Now,
                     Exchange = marketName,
@@ -92,7 +92,7 @@ namespace BittrexSharp.BittrexOrderSimulation
             var acceptedOrderId = Guid.NewGuid().ToString();
             if (currentRate >= rate)
             {
-                var order = new Order
+                var order = new BittrexOrder
                 {
                     Closed = DateTime.Now,
                     Exchange = marketName,
@@ -159,12 +159,12 @@ namespace BittrexSharp.BittrexOrderSimulation
             });
         }
 
-        public override async Task<Order> GetOrder(string orderId)
+        public override async Task<BittrexOrder> GetOrder(string orderId)
         {
             var openOrder = simulatedOpenOrders.SingleOrDefault(o => o.OrderUuid == orderId);
             if (openOrder == null) return simulatedFinishedOrders.SingleOrDefault(o => o.OrderUuid == orderId);
 
-            return await Task.FromResult(new Order
+            return await Task.FromResult(new BittrexOrder
             {
                 Closed = openOrder.Closed,
                 Exchange = openOrder.Exchange,
