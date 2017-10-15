@@ -1,6 +1,6 @@
 using System;
 
-namespace BMCore.Models
+namespace BMCore.Contracts
 {
     public interface ISymbol
     {
@@ -8,6 +8,6 @@ namespace BMCore.Models
         string ExchangeSymbol { get; set; }
         string BaseCurrency { get; set; }
         string MarketCurrency { get; set; }
-        decimal LotSize { get; set; }
+        //decimal Fee { get; set; }
     }
 }

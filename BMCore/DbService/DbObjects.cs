@@ -10,7 +10,7 @@ namespace BMCore.DbService
         public decimal BasePrice;
         public decimal ArbPrice;
         public decimal Spread;
-        public DateTime CreatedAtUtc;
+        public DateTime CreatedUtc;
     }
 
     public class DbOrder
@@ -27,6 +27,21 @@ namespace BMCore.DbService
         public decimal Price;
         public decimal Commission; //Fee paid
         public string Side; //Buy or Sell
+        public DateTime CreatedUtc;
+    }
+
+    public class DbWithdrawal
+    {
+        public long Id; //Client ID (Our ID)
+        public long CounterId;
+        public long OrderId;
+        public string FromExchange;
+        public string Currency;
+        public string Status;
+        public string Uuid; //Exchange ID
+        public decimal AmountRequested;
+        public decimal AmountActual;
+        public string TxId;
         public DateTime CreatedUtc;
     }
 }

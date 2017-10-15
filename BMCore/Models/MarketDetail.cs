@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BMCore.Contracts;
 using BMCore.Util;
 using Newtonsoft.Json;
 

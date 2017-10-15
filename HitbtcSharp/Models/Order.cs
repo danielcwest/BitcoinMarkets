@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BMCore.Util;
-using BMCore.Models;
+using BMCore.Contracts;
 using Newtonsoft.Json;
 
 namespace HitbtcSharp.Models
@@ -21,14 +21,14 @@ namespace HitbtcSharp.Models
         public string Side { get; set; }
         public string ClientOrderId { get; set; }
 
-        public Order(HitbtcSharp.Models.HitbtcOrder order, decimal lotSize)
+        public Order(HitbtcSharp.Models.HitbtcOrder order)
         {
-            this.OrderUuid = order.orderId.ToString();
+            this.OrderUuid = order.Uuid.ToString();
             this.Exchange = "Hitbtc";
             this.Symbol = order.symbol;
             this.Type = order.type;
-            this.Quantity = Convert.ToDecimal(order.orderQuantity) * lotSize;
-            this.QuantityRemaining = Convert.ToDecimal(order.quantityLeaves) * lotSize;
+            this.Quantity = Convert.ToDecimal(order.quantity);
+            this.QuantityRemaining = Convert.ToDecimal(order.quantity) - Convert.ToDecimal(order.cumQuantity);
             this.Price = Convert.ToDecimal(order.orderPrice);
             this.Side = order.side;
             this.ClientOrderId = order.clientOrderId;

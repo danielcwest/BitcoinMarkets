@@ -18,12 +18,12 @@ namespace HitbtcSharp.Models
         public Withdrawal(Transaction tx)
         {
             this.Uuid = tx.id;
-            this.Currency = string.IsNullOrWhiteSpace(tx.bitcoin_address) ? tx.currency_code_from : "BTC";
-            this.Address = tx.destination_data.ToString();
-            this.Amount = Convert.ToDecimal(tx.amount_from);
-            this.TxId = tx.external_data;
+            this.Currency = tx.currency;
+            this.Address = tx.address;
+            this.Amount = tx.amount;
+            this.TxId = tx.hash;
             this.Pending = tx.status == "pending";
-
+            this.TxCost = tx.networkFee + tx.fee;
         }
     }
 }

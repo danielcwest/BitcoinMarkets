@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BMCore.Contracts;
+using Newtonsoft.Json;
 
 namespace HitbtcSharp.Models
 {
-    public class HitbtcOrder
+    public class HitbtcOrder : IAcceptedAction
     {
         /// <summary>
         /// Order ID on the exchange
         /// </summary>
-        public string orderId { get; set; }
+        [JsonProperty("id")]
+        public string Uuid { get; set; }
 
         /// <summary>
         /// Order status
@@ -32,17 +35,7 @@ namespace HitbtcSharp.Models
         /// <summary>
         /// Order quantity, in lots
         /// </summary>
-        public int orderQuantity { get; set; }
-
-        /// <summary>
-        /// Average price	
-        /// </summary>
-        public string avgPrice { get; set; }
-
-        /// <summary>
-        /// Remaining quantity, in lots
-        /// </summary>
-        public int quantityLeaves { get; set; }
+        public int quantity { get; set; }
 
         /// <summary>
         /// Type of an order
@@ -58,7 +51,7 @@ namespace HitbtcSharp.Models
         /// <summary>
         /// Cumulative quantity
         /// </summary>
-        public int cumQuantity { get; set; }
+        public int? cumQuantity { get; set; }
 
         /// <summary>
         /// Unique client-generated ID
@@ -75,22 +68,6 @@ namespace HitbtcSharp.Models
         /// </summary>
         public string side { get; set; }
 
-        /// <summary>
-        /// Last executed quantity, in lots
-        /// </summary>
-        public int execQuantity { get; set; }
-
-    }
-
-    public class OrderRequest
-    {
-        public string clientOrderId { get; set; }
-        public string symbol { get; set; }
-        public string side { get; set; } //buy or sell
-        public decimal price { get; set; }
-        public int quantity { get; set; }
-        public string type { get; set; } //limit, stopLimit, stopMarket, market
-        public string stopPrice { get; set; }
     }
 
     public class CancelOrderRequest

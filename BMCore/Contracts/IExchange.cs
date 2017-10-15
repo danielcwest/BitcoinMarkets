@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BMCore.Models;
 
 namespace BMCore.Contracts
 {
@@ -23,18 +22,18 @@ namespace BMCore.Contracts
 
         Task<IEnumerable<IMarket>> MarketSummaries();
 
-        Task<OrderBook> OrderBook(string symbol);
+        Task<Models.OrderBook> OrderBook(string symbol);
 
         Task<IMarket> MarketSummary(string symbol);
 
 
 
         //Authenticated API Endpoints
-        Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0m);
-        Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0m);
+        Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate);
+        Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate);
 
         Task CancelOrder(string orderId);
-        Task<IOrder> CheckOrder(string uuid, decimal lot = 1.0m);
+        Task<IOrder> CheckOrder(string uuid);
 
         Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null);
         Task<IWithdrawal> GetWithdrawal(string uuid);

@@ -6,9 +6,14 @@ using System.Threading.Tasks;
 
 namespace HitbtcSharp.Models
 {
+    public class BookEntry
+    {
+        public decimal price { get; set; }
+        public decimal size { get; set; }
+    }
     public class OrderbookResponse
     {
-        public List<List<decimal>> asks { get; set; }
-        public List<List<decimal>> bids { get; set; }
+        public List<BookEntry> ask { get; set; }
+        public List<BookEntry> bid { get; set; }
     }
 }

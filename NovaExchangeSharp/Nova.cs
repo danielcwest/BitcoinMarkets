@@ -87,7 +87,7 @@ namespace NovaExchangeSharp
             throw new NotImplementedException();
         }
 
-        public Task<IOrder> CheckOrder(string uuid, decimal lot = 1.0m)
+        public Task<IOrder> CheckOrder(string uuid)
         {
             throw new NotImplementedException();
         }
@@ -112,12 +112,12 @@ namespace NovaExchangeSharp
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        public Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        public Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate)
         {
             throw new NotImplementedException();
         }

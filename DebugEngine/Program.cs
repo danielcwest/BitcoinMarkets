@@ -14,6 +14,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using BittrexSharp;
+using BMCore.Engine;
 
 namespace DebugEngine
 {
@@ -34,9 +35,10 @@ namespace DebugEngine
 
             try
             {
+                var bittrex = (Bittrex)exchanges["Bittrex"];
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
 
-                var tx = hitbtc.GetWithdrawal("7bbe8c69-82eb-469f-a5f0-21e95f043bdb").Result;
+                EngineHelper.UpdateWithdrawals(dbService, exchanges).Wait();
 
                 Console.WriteLine("Complete");
             }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BMCore.Models;
+using BMCore.Contracts;
 using Newtonsoft.Json;
 
 namespace HitbtcSharp.Models
@@ -11,19 +11,15 @@ namespace HitbtcSharp.Models
     public class Transaction
     {
         public string id { get; set; }
+        public string currency { get; set; }
         public string type { get; set; }
         public string status { get; set; }
-        public int created { get; set; }
-        public int finished { get; set; }
-        public double amount_from { get; set; }
-        public string currency_code_from { get; set; }
-        public double amount_to { get; set; }
-        public string currency_code_to { get; set; }
-        public object destination_data { get; set; }
-        public int commission_percent { get; set; }
-        public string bitcoin_address { get; set; }
-        public string bitcoin_return_address { get; set; }
-        public string external_data { get; set; }
+        public decimal amount { get; set; }
+        public decimal fee { get; set; }
+        public decimal networkFee { get; set; }
+        public string hash { get; set; }
+        public string paymentId { get; set; }
+        public string address { get; set; }
     }
 
     public class TransactionObject
@@ -39,6 +35,12 @@ namespace HitbtcSharp.Models
     public class PayoutTransaction : IAcceptedAction
     {
         [JsonProperty("transaction")]
+        public string Uuid { get; set; }
+    }
+
+    public class CryptoTransaction : IAcceptedAction
+    {
+        [JsonProperty("id")]
         public string Uuid { get; set; }
     }
 }

@@ -7,8 +7,9 @@ using BitzSharp;
 using BitzSharp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using BMCore.Models;
+using BMCore.Contracts;
 using RestEase;
+using BMCore.Models;
 
 namespace Web.Controllers
 {

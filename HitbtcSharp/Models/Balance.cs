@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BMCore.Models;
+using BMCore.Contracts;
 using Newtonsoft.Json;
 
 namespace HitbtcSharp.Models
@@ -13,13 +13,13 @@ namespace HitbtcSharp.Models
         /// <summary>
         /// Currency symbol, e.g. BTC
         /// </summary>
-        [JsonProperty("currency_code")]
+        [JsonProperty("currency")]
         public string Currency { get; set; }
 
         /// <summary>
         /// Funds amount
         /// </summary>
-        [JsonProperty("cash")]
+        [JsonProperty("amount")]
         public decimal Balance { get; set; }
         [JsonProperty("reserved")]
         public decimal Reserved { get; set; }

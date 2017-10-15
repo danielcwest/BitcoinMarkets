@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using BMCore.Models;
+using BMCore.Contracts;
 
 namespace BinanceSharp.Models
 {
@@ -12,13 +12,13 @@ namespace BinanceSharp.Models
         public string ExchangeSymbol { get; set; }
         public string BaseCurrency { get; set; }
         public string MarketCurrency { get; set; }
-        public decimal LotSize { get; set; }
+        public decimal Fee { get; set; }
 
         public Symbol(PriceTicker ticker)
         {
             LocalSymbol = ticker.symbol;
             ExchangeSymbol = ticker.symbol;
-            LotSize = 1.0m;
+            Fee = 1.0m;
 
             if (ticker.symbol.EndsWith("BTC"))
             {

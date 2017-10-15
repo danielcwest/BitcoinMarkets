@@ -4,7 +4,7 @@ using System.Linq;
 using BMCore.Util;
 using Newtonsoft.Json;
 
-namespace BMCore.Models
+namespace BMCore.Contracts
 {
     public interface IMarket
     {

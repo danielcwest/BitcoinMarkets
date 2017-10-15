@@ -351,7 +351,7 @@ namespace BittrexSharp
         /// </summary>
         /// <param name="currency">Currency symbol, e.g. BTC</param>
         /// <returns></returns>
-        public virtual async Task<BMCore.Models.IDepositAddress> GetDepositAddress(string currency)
+        public virtual async Task<BMCore.Contracts.IDepositAddress> GetDepositAddress(string currency)
         {
             var uri = BaseUrl + "account/getdepositaddress";
             var parameters = new Dictionary<string, string>
@@ -359,7 +359,7 @@ namespace BittrexSharp
                 { "currency", currency }
             };
             var jsonResponse = await request(HttpMethod.Get, uri, parameters);
-            var depositAddress = jsonResponse.ToObject<BMCore.Models.IDepositAddress>();
+            var depositAddress = jsonResponse.ToObject<DepositAddress>();
             return depositAddress;
         }
 

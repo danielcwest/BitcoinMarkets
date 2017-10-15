@@ -7,9 +7,10 @@ using TidexSharp;
 using TidexSharp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using BMCore.Models;
+using BMCore.Contracts;
 using RestEase;
 using System.Text;
+using BMCore.Models;
 
 namespace Web.Controllers
 {

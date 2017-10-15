@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BMCore.Util;
-using BMCore.Models;
+using BMCore.Contracts;
 using Newtonsoft.Json;
 
 namespace HitbtcSharp.Models
@@ -24,7 +24,7 @@ namespace HitbtcSharp.Models
         {
             this.Exchange = "Hitbtc";
             this.MarketName = name;
-            this.Volume = ticker.volume_quote.HasValue ? ticker.volume_quote.Value : 0;
+            this.Volume = ticker.volumeQuote.HasValue ? ticker.volumeQuote.Value : 0;
             this.Last = ticker.last.HasValue ? ticker.last.Value : 0;
             this.Timestamp = Utils.UnixMilliTimeStampToDateTimeUtc(ticker.timestamp);
             this.Bid = ticker.bid.HasValue ? ticker.bid.Value : 0;

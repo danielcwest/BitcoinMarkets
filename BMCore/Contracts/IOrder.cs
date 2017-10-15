@@ -1,6 +1,6 @@
 using System;
 
-namespace BMCore.Models
+namespace BMCore.Contracts
 {
     public interface IOrder
     {

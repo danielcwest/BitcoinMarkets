@@ -75,12 +75,12 @@ namespace BittrexSharp
             return ob;
         }
 
-        public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate)
         {
             return await _bittrex.BuyLimit(GetMarketNameFromSymbol(symbol), quantity, rate);
         }
 
-        public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate, decimal lot = 1.0M)
+        public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate)
         {
             return await _bittrex.SellLimit(GetMarketNameFromSymbol(symbol), quantity, rate);
         }
@@ -90,7 +90,7 @@ namespace BittrexSharp
             await _bittrex.CancelOrder(orderId);
         }
 
-        public async Task<IOrder> CheckOrder(string uuid, decimal lot = 1.0m)
+        public async Task<IOrder> CheckOrder(string uuid)
         {
             var bOrder = await _bittrex.GetOrder(uuid);
             return new Order(bOrder);

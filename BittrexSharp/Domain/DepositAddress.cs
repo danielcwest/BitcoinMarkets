@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using BMCore.Contracts;
 
-namespace BMCore.Models
+namespace BittrexSharp.Domain
 {
     public class DepositAddress : IDepositAddress
     {

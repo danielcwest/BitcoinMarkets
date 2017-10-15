@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 using CoinExchangeSharp.Models;
 using RestEase;
 using System.Collections.Generic;
-using BMCore.Models;
+using BMCore.Contracts;
 using System.Linq;
+using BMCore.Models;
 
 namespace CoinExchangeSharp
 {

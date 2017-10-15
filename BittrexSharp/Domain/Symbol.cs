@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using BMCore.Models;
+using BMCore.Contracts;
 
 namespace BittrexSharp.Domain
 {
@@ -10,7 +10,7 @@ namespace BittrexSharp.Domain
         public string ExchangeSymbol { get; set; }
         public string BaseCurrency { get; set; }
         public string MarketCurrency { get; set; }
-        public decimal LotSize { get; set; }
+        public decimal Fee { get; set; }
         public string LocalSymbol { get; set; }
 
         public Symbol(Market market)
@@ -18,7 +18,7 @@ namespace BittrexSharp.Domain
             ExchangeSymbol = market.MarketName;
             MarketCurrency = market.MarketCurrency;
             BaseCurrency = market.BaseCurrency;
-            LotSize = 1.0m;
+            Fee = 1.0m;
             LocalSymbol = string.Format("{0}{1}", MarketCurrency, BaseCurrency);
         }
     }

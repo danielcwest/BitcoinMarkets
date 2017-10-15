@@ -12,5 +12,6 @@ namespace HitbtcSharp.Models
         /// BTC/LTC address to withdraw to
         /// </summary>
         public string address { get; set; }
+        public string paymentId { get; set; }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace BMCore.DbService
 {
-    public class BMDbService
+    public class BMDbService : IDbService
     {
         private string sqlConnectionString = string.Empty;
 
@@ -93,6 +93,44 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@price", Value = price},
                     new SqlParameter { ParameterName = "@commission", Value = commission}
                 });
+        }
+
+        public long InsertWithdrawal(string uuid, long orderId, string currency, string fromExchange, decimal amount)
+        {
+            return (long)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertWithdrawal", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@uuid", Value = uuid },
+                    new SqlParameter { ParameterName = "@orderId", Value = orderId },
+                    new SqlParameter { ParameterName = "@currency", Value = currency },
+                    new SqlParameter { ParameterName = "@fromExchange", Value = fromExchange },
+                    new SqlParameter { ParameterName = "@amount", Value = amount },
+                });
+        }
+
+        public void UpdateWithdrawal(long id, long counterId, decimal actualAmount, string txId)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateWithdrawal", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@counterId", Value = counterId },
+                    new SqlParameter { ParameterName = "@amount", Value = actualAmount },
+                    new SqlParameter { ParameterName = "@txId", Value = txId }
+                });
+        }
+
+        public IEnumerable<DbWithdrawal> GetWithdrawals(long id = -1, string uuid = null)
+        {
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetWithdrawals", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@id", Value = id },
+                        new SqlParameter { ParameterName = "@uuid", Value = uuid }
+                }))
+            {
+                return reader.ToList<DbWithdrawal>();
+            }
         }
     }
 

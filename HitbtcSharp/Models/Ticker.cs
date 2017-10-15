@@ -8,6 +8,7 @@ namespace HitbtcSharp.Models
 {
     public class Ticker
     {
+        public string symbol { get; set; }
         /// <summary>
         /// Last price
         /// </summary>
@@ -46,7 +47,7 @@ namespace HitbtcSharp.Models
         /// <summary>
         /// Volume in second currency per last 24h + last incomplete minute
         /// </summary>
-        public decimal? volume_quote { get; set; }
+        public decimal? volumeQuote { get; set; }
 
         /// <summary>
         /// Server time in UNIX timestamp format
@@ -64,7 +65,7 @@ namespace HitbtcSharp.Models
             sb.AppendLine($"low:{low}");
             sb.AppendLine($"volume:{volume}");
             sb.AppendLine($"open:{open}");
-            sb.AppendLine($"volume_quote:{volume_quote}");
+            sb.AppendLine($"volume_quote:{volumeQuote}");
             sb.AppendLine($"timestamp:{timestamp}");
 
             return sb.ToString();

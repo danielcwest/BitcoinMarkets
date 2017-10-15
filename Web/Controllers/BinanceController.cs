@@ -7,7 +7,7 @@ using BinanceSharp;
 using BinanceSharp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using BMCore.Models;
+using BMCore.Contracts;
 using RestEase;
 
 namespace Web.Controllers
@@ -22,7 +22,7 @@ namespace Web.Controllers
         public BinanceController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            var exchanges = new List<ConfigExchange>();
+            var exchanges = new List<BMCore.Models.ConfigExchange>();
             _iconfiguration.GetSection("Exchanges").Bind(exchanges);
             var config = exchanges.Find(e => e.Name == "Binance");
             _binance = new Binance(config);
