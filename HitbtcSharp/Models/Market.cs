@@ -26,7 +26,7 @@ namespace HitbtcSharp.Models
             this.MarketName = name;
             this.Volume = ticker.volumeQuote.HasValue ? ticker.volumeQuote.Value : 0;
             this.Last = ticker.last.HasValue ? ticker.last.Value : 0;
-            this.Timestamp = Utils.UnixMilliTimeStampToDateTimeUtc(ticker.timestamp);
+            this.Timestamp = ticker.timestamp;
             this.Bid = ticker.bid.HasValue ? ticker.bid.Value : 0;
             this.Ask = ticker.ask.HasValue ? ticker.ask.Value : 0;
 

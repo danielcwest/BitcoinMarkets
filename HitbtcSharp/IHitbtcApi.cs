@@ -16,7 +16,7 @@ namespace HitbtcSharp
         Task<IEnumerable<Ticker>> GetTickers();
 
         [Get("/api/2/public/ticker/{symbol}")]
-        Task<IEnumerable<Ticker>> GetTicker([Path] string symbol);
+        Task<Ticker> GetTicker([Path] string symbol);
 
         [Get("/api/2/public/orderbook/{symbol}?limit=25")]
         Task<OrderbookResponse> GetOrderBook([Path] string symbol);

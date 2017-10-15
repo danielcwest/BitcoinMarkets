@@ -52,7 +52,7 @@ namespace HitbtcSharp.Models
         /// <summary>
         /// Server time in UNIX timestamp format
         /// </summary>
-        public long timestamp { get; set; }
+        public DateTime timestamp { get; set; }
 
 
         public override string ToString()

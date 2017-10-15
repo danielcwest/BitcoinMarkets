@@ -13,6 +13,7 @@ namespace BinanceSharp.Models
         public string BaseCurrency { get; set; }
         public string MarketCurrency { get; set; }
         public decimal Fee { get; set; }
+        public string FeeCurrency { get; set; }
 
         public Symbol(PriceTicker ticker)
         {

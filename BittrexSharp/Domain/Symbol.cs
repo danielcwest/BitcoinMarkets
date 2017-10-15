@@ -12,7 +12,7 @@ namespace BittrexSharp.Domain
         public string MarketCurrency { get; set; }
         public decimal Fee { get; set; }
         public string LocalSymbol { get; set; }
-
+        public string FeeCurrency { get; set; }
         public Symbol(Market market)
         {
             ExchangeSymbol = market.MarketName;

@@ -56,8 +56,7 @@ namespace HitbtcSharp
         public async Task<IMarket> MarketSummary(string symbol)
         {
             var summary = await _hitbtc.GetTicker(symbol);
-            var ticker = summary.Single();
-            return new Market(symbol, ticker);
+            return new Market(symbol, summary);
         }
 
         public async Task<OrderBook> OrderBook(string symbol)
