@@ -42,8 +42,7 @@ namespace BinanceSharp
         public async Task<IEnumerable<ISymbol>> Symbols()
         {
             var prices = await _binance.GetPrices();
-
-            throw new NotImplementedException();
+            return prices.Select(p => new Symbol(p));
         }
 
         public async Task<IEnumerable<IMarket>> MarketSummaries()
