@@ -47,17 +47,36 @@ namespace Engine
                 }
                 else if (args.Length == 2)
                 {
-                    Console.WriteLine("Finding Opportunities...");
-                    EngineHelper.ExecuteExchangePair(exchanges[args[0]], exchanges[args[1]], dbService, threshold);
+                    while (true)
+                    {
+                        try
+                        {
+                            Console.WriteLine("Finding Opportunities...");
+                            EngineHelper.ExecuteExchangePair(exchanges[args[0]], exchanges[args[1]], dbService, threshold);
 
-                    Console.WriteLine("Updating Order Statuses...");
-                    EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
+                            Console.WriteLine("Updating Order Statuses...");
+                            EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
 
-                    Console.WriteLine("Processing Withdrawals");
-                    EngineHelper.ProcessWithdrawals(dbService, exchanges).Wait();
+                            Console.WriteLine("Processing Withdrawals");
+                            EngineHelper.ProcessWithdrawals(dbService, exchanges).Wait();
 
-                    Console.WriteLine("Updating Withdrawal Statuses...");
-                    EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
+                            Console.WriteLine("Updating Withdrawal Statuses...");
+                            EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
+
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex);
+                        }
+                        finally
+                        {
+                            Console.WriteLine("Sleeping ...");
+                            Thread.Sleep(1000 * 60);
+                        }
+
+                    }
+
                 }
 
                 Console.WriteLine("Engine Complete...");

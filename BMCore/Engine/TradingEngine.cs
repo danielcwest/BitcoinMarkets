@@ -113,12 +113,12 @@ namespace BMCore.Engine
 
                 if (baseBuy < arbSell && baseBuySpread > 0)
                 {
-                    dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseBuy, arbSell, baseBuySpread);
+                    dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseBuy, arbSell, baseBuySpread, txThreshold);
                 }
 
                 if (baseSell > arbBuy && baseSellSpread >= 0)
                 {
-                    dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseSell, arbBuy, baseSellSpread);
+                    dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseSell, arbBuy, baseSellSpread, txThreshold);
                 }
             }
             await Task.FromResult(0);
