@@ -27,5 +27,8 @@ namespace BMCore.DbService
 
         void UpdateOrderStatus(long id, string status, Exception e = null);
         void UpdateWithdrawalStatus(long id, string status, Exception e = null);
+
+        int StartEngineProcess(string baseExchange, string arbExchange, string runType);
+        void EndEngineProcess(int id, string resultStatus, object payload = null);
     }
 }

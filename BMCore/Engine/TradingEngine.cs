@@ -51,8 +51,6 @@ namespace BMCore.Engine
 
         public async Task AnalyzeMarkets()
         {
-            await RefreshBalances();
-
             var baseMarkets = await this.baseExchange.Symbols();
             this.baseExchangeMarkets = baseMarkets.ToDictionary(m => m.LocalSymbol);
 
@@ -101,10 +99,10 @@ namespace BMCore.Engine
             decimal baseBuySpread = 0M;
             decimal baseSellSpread = 0M;
 
-            baseBuy = GetPriceAtVolumeThreshold(txThreshold, am.baseBook.asks);
-            baseSell = GetPriceAtVolumeThreshold(txThreshold, am.baseBook.bids);
-            arbBuy = GetPriceAtVolumeThreshold(txThreshold, am.arbitrageBook.asks);
-            arbSell = GetPriceAtVolumeThreshold(txThreshold, am.arbitrageBook.bids);
+            baseBuy = EngineHelper.GetPriceAtVolumeThreshold(txThreshold, am.baseBook.asks);
+            baseSell = EngineHelper.GetPriceAtVolumeThreshold(txThreshold, am.baseBook.bids);
+            arbBuy = EngineHelper.GetPriceAtVolumeThreshold(txThreshold, am.arbitrageBook.asks);
+            arbSell = EngineHelper.GetPriceAtVolumeThreshold(txThreshold, am.arbitrageBook.bids);
 
             if (baseBuy > 0 && baseSell > 0 && arbBuy > 0 && arbSell > 0)
             {
@@ -122,20 +120,6 @@ namespace BMCore.Engine
                 }
             }
             await Task.FromResult(0);
-        }
-
-        private decimal GetPriceAtVolumeThreshold(decimal threshold, List<OrderBookEntry> entries)
-        {
-            decimal result = -1M;
-            foreach (var entry in entries)
-            {
-                if (entry.sumBase >= threshold)
-                {
-                    result = entry.price;
-                    break;
-                }
-            }
-            return result;
         }
     }
 }

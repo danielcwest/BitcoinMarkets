@@ -22,26 +22,7 @@ namespace BMCore.Engine
 
                     if (baseExchange != arbExchange)
                     {
-                        try
-                        {
-                            Console.WriteLine("Starting: {0} {1}", baseExchange.Name, arbExchange.Name);
-                            var engine = new TradingEngine(baseExchange, arbExchange, dbService, threshold);
-                            engine.AnalyzeMarkets().Wait();
-                            Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);
-
-                        }
-                        catch (Exception e)
-                        {
-                            //Console.WriteLine(e);
-                            Console.WriteLine("Error: {0} {1}", baseExchange.Name, arbExchange.Name);
-                            dbService.LogError(baseExchange.Name, arbExchange.Name, "", "Main", e.Message, e.StackTrace);
-
-                        }
-                        finally
-                        {
-                            //Thread.Sleep(1000 * 60);
-                            Thread.Sleep(100);
-                        }
+                        ExecuteExchangePair(baseExchange, arbExchange, dbService, threshold);
                     }
 
                 }
@@ -50,12 +31,14 @@ namespace BMCore.Engine
 
         public static void ExecuteExchangePair(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, decimal threshold)
         {
+            int pId = -1;
             try
             {
                 Console.WriteLine("Starting: {0} {1}", baseExchange.Name, arbExchange.Name);
+                pId = dbService.StartEngineProcess(baseExchange.Name, arbExchange.Name, "log");
                 var engine = new TradingEngine(baseExchange, arbExchange, dbService, threshold);
-                engine.RefreshBalances().Wait();
                 engine.AnalyzeMarkets().Wait();
+                dbService.EndEngineProcess(pId, "success");
                 Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);
             }
             catch (Exception e)
@@ -63,7 +46,7 @@ namespace BMCore.Engine
                 //Console.WriteLine(e);
                 Console.WriteLine("Error: {0} {1}", baseExchange.Name, arbExchange.Name);
                 dbService.LogError(baseExchange.Name, arbExchange.Name, "", "Main", e.Message, e.StackTrace);
-
+                if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
             }
         }
 
@@ -167,5 +150,18 @@ namespace BMCore.Engine
             await Task.FromResult(0);
         }
 
+        public static decimal GetPriceAtVolumeThreshold(decimal threshold, List<OrderBookEntry> entries)
+        {
+            decimal result = -1M;
+            foreach (var entry in entries)
+            {
+                if (entry.sumBase >= threshold)
+                {
+                    result = entry.price;
+                    break;
+                }
+            }
+            return result;
+        }
     }
 }

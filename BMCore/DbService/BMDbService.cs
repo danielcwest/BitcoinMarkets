@@ -1,6 +1,7 @@
 using System;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace BMCore.DbService
 {
@@ -43,16 +44,24 @@ namespace BMCore.DbService
 
         public void LogError(string baseX, string arbX, string symbol, string method, string message, string stackTrace)
         {
-            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertError", 15,
-                new SqlParameter[]
-                {
+            try
+            {
+                DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertError", 15,
+                                new SqlParameter[]
+                                {
                     new SqlParameter { ParameterName = "@baseExchange", Value = baseX },
                     new SqlParameter { ParameterName = "@arbExchange", Value = arbX },
                     new SqlParameter { ParameterName = "@symbol", Value = symbol },
                     new SqlParameter { ParameterName = "@method", Value = method },
                     new SqlParameter { ParameterName = "@message", Value = message},
                     new SqlParameter { ParameterName = "@exception", Value = stackTrace}
-                });
+                                });
+            }
+            catch (Exception)
+            {
+                //fail silently
+            }
+
         }
 
         public long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side)
@@ -186,6 +195,28 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@id", Value = id },
                     new SqlParameter { ParameterName = "@status", Value = status },
                     new SqlParameter { ParameterName = "@meta", Value = (e == null) ? "" : e.ToString()}
+                });
+        }
+
+        public int StartEngineProcess(string baseExchange, string arbExchange, string runType)
+        {
+            return (int)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.StartEngineProcess", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@baseExchange", Value = baseExchange },
+                    new SqlParameter { ParameterName = "@arbExchange", Value = arbExchange },
+                    new SqlParameter { ParameterName = "@runType", Value = runType }
+                });
+        }
+
+        public void EndEngineProcess(int id, string resultStatus, object payload = null)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.EndEngineProcess", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@result", Value = resultStatus },
+                    new SqlParameter { ParameterName = "@meta", Value = (payload == null) ? "" : JsonConvert.SerializeObject(payload)}
                 });
         }
     }

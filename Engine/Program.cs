@@ -41,42 +41,28 @@ namespace Engine
                 var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"));
                 var exchanges = configs.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
 
-                if (args.Length == 0)
+                if (args.Length < 1)
                 {
-                    EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService, threshold);
+                    PrintUsage();
+                    return;
                 }
-                else if (args.Length == 2)
+
+                switch (args[0])
                 {
-                    while (true)
-                    {
-                        try
+                    case "log":
+                        if (args.Length == 1)
                         {
-                            Console.WriteLine("Finding Opportunities...");
-                            EngineHelper.ExecuteExchangePair(exchanges[args[0]], exchanges[args[1]], dbService, threshold);
-
-                            Console.WriteLine("Updating Order Statuses...");
-                            EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
-
-                            Console.WriteLine("Processing Withdrawals");
-                            EngineHelper.ProcessWithdrawals(dbService, exchanges).Wait();
-
-                            Console.WriteLine("Updating Withdrawal Statuses...");
-                            EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
-
-
+                            EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService, threshold);
                         }
-                        catch (Exception ex)
+                        else if (args.Length == 3)
                         {
-                            Console.WriteLine(ex);
+                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, threshold);
                         }
-                        finally
-                        {
-                            Console.WriteLine("Sleeping ...");
-                            Thread.Sleep(1000 * 60);
-                        }
-
-                    }
-
+                        break;
+                    case "trade":
+                        break;
+                    default:
+                        break;
                 }
 
                 Console.WriteLine("Engine Complete...");
@@ -85,6 +71,14 @@ namespace Engine
             {
                 Console.WriteLine(e);
             }
+        }
+
+        private static void PrintUsage()
+        {
+            Console.WriteLine("CommandLine Syntax: ");
+            Console.WriteLine("log -- logs potential trades on all exhanges and all pairs");
+            Console.WriteLine("log <BaseExchange> <ArbExchange> -- logs potential trades for given exchange pair");
+            Console.ReadLine();
         }
     }
 }
