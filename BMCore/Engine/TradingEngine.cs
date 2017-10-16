@@ -117,7 +117,7 @@ namespace BMCore.Engine
                 baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (this.baseExchange.Fee + this.arbExchange.Fee);
 
                 //Execute trades
-                if (baseBuy < arbSell && baseBuySpread >= 0.01m && baseBase > 2m * txThreshold && arbQuote > 2m * txThreshold)
+                if (baseBuy < arbSell && baseBuySpread >= 0.005m && baseBase > txThreshold && arbQuote > txThreshold)
                 {
                     //basebuy arbsell
                     long baseId = await EngineHelper.Buy(this.baseExchange, this.baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseBuy, baseBuy);
@@ -125,7 +125,7 @@ namespace BMCore.Engine
                     dbService.SaveOrderPair(baseId, arbId);
 
                 }
-                else if (baseBuy < arbSell && baseBuySpread >= 0.01m)
+                else if (baseBuy < arbSell && baseBuySpread >= 0.005m)
                 {
                     dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, "FindOpportunity", "Insufficient Funds", "");
                 }
@@ -134,14 +134,14 @@ namespace BMCore.Engine
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseBuy, arbSell, baseBuySpread);
                 }
 
-                if (baseSell > arbBuy && baseSellSpread >= 0.01m && baseQuote > 2m * txThreshold && arbBase > 2m * txThreshold)
+                if (baseSell > arbBuy && baseSellSpread >= 0.005m && baseQuote > txThreshold && arbBase > txThreshold)
                 {
                     //arbbuy basesell
                     long baseId = await EngineHelper.Sell(this.baseExchange, this.baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold, baseSell);
                     long arbId = await EngineHelper.Buy(this.arbExchange, this.arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbBuy, arbBuy);
                     dbService.SaveOrderPair(baseId, arbId);
                 }
-                else if (baseSell > arbBuy && baseSellSpread >= 0.01m)
+                else if (baseSell > arbBuy && baseSellSpread >= 0.005m)
                 {
                     dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, "FindOpportunity", "Insufficient Funds", "");
                 }
