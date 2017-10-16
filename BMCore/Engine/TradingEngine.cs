@@ -101,11 +101,6 @@ namespace BMCore.Engine
             decimal baseBuySpread = 0M;
             decimal baseSellSpread = 0M;
 
-            var baseBase = this.baseExchangeBalances.ContainsKey(am.baseMarket.BaseCurrency) ? this.baseExchangeBalances[am.baseMarket.BaseCurrency].Amount : 0m;
-            var baseQuote = this.baseExchangeBalances.ContainsKey(am.baseMarket.QuoteCurrency) ? this.baseExchangeBalances[am.baseMarket.QuoteCurrency].Amount * am.baseMarket.Last : 0m;
-            var arbBase = this.arbitrageExchangeBalances.ContainsKey(am.arbitrageMarket.BaseCurrency) ? this.arbitrageExchangeBalances[am.arbitrageMarket.BaseCurrency].Amount : 0m;
-            var arbQuote = this.arbitrageExchangeBalances.ContainsKey(am.arbitrageMarket.QuoteCurrency) ? this.arbitrageExchangeBalances[am.arbitrageMarket.QuoteCurrency].Amount * am.arbitrageMarket.Last : 0m;
-
             baseBuy = GetPriceAtVolumeThreshold(txThreshold, am.baseBook.asks);
             baseSell = GetPriceAtVolumeThreshold(txThreshold, am.baseBook.bids);
             arbBuy = GetPriceAtVolumeThreshold(txThreshold, am.arbitrageBook.asks);
@@ -116,36 +111,12 @@ namespace BMCore.Engine
                 baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (this.baseExchange.Fee + this.arbExchange.Fee);
                 baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (this.baseExchange.Fee + this.arbExchange.Fee);
 
-                //Execute trades
-                if (baseBuy < arbSell && baseBuySpread >= 0.005m && baseBase > txThreshold && arbQuote > txThreshold)
-                {
-                    //basebuy arbsell
-                    long baseId = await EngineHelper.Buy(this.baseExchange, this.baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseBuy, baseBuy);
-                    long arbId = await EngineHelper.Sell(this.arbExchange, this.arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold, arbSell);
-                    dbService.SaveOrderPair(baseId, arbId);
-
-                }
-                else if (baseBuy < arbSell && baseBuySpread >= 0.005m)
-                {
-                    dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, "FindOpportunity", "Insufficient Funds", "");
-                }
-                else if (baseBuy < arbSell && baseBuySpread > 0)
+                if (baseBuy < arbSell && baseBuySpread > 0)
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseBuy, arbSell, baseBuySpread);
                 }
 
-                if (baseSell > arbBuy && baseSellSpread >= 0.005m && baseQuote > txThreshold && arbBase > txThreshold)
-                {
-                    //arbbuy basesell
-                    long baseId = await EngineHelper.Sell(this.baseExchange, this.baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold, baseSell);
-                    long arbId = await EngineHelper.Buy(this.arbExchange, this.arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbBuy, arbBuy);
-                    dbService.SaveOrderPair(baseId, arbId);
-                }
-                else if (baseSell > arbBuy && baseSellSpread >= 0.005m)
-                {
-                    dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, "FindOpportunity", "Insufficient Funds", "");
-                }
-                else if (baseSell > arbBuy && baseSellSpread >= 0)
+                if (baseSell > arbBuy && baseSellSpread >= 0)
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseSell, arbBuy, baseSellSpread);
                 }
