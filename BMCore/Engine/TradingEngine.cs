@@ -115,7 +115,7 @@ namespace BMCore.Engine
                 baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (this.baseExchange.Fee + this.arbExchange.Fee);
 
                 //Execute trades
-                if (baseBuy < arbSell && baseBuySpread >= 0.01m && baseBase > .2m && arbQuote > .2m)
+                if (baseBuy < arbSell && baseBuySpread >= 0.01m && baseBase > 2m * txThreshold && arbQuote > 2m * txThreshold)
                 {
                     //basebuy arbsell
                     long baseId = await EngineHelper.Buy(this.baseExchange, this.baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseBuy, baseBuy);
@@ -128,7 +128,7 @@ namespace BMCore.Engine
                     dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, "FindOpportunity", "Insufficient Funds", "");
                 }
 
-                if (baseSell > arbBuy && baseSellSpread >= 0.01m && baseQuote > .2m && arbBase > .2m)
+                if (baseSell > arbBuy && baseSellSpread >= 0.01m && baseQuote > 2m * txThreshold && arbBase > 2m * txThreshold)
                 {
                     //arbbuy basesell
                     long baseId = await EngineHelper.Sell(this.baseExchange, this.baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold, baseSell);
