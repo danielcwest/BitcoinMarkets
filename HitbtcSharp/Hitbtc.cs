@@ -228,7 +228,7 @@ namespace HitbtcSharp
 
         public async Task<IEnumerable<ICurrencyBalance>> GetBalances()
         {
-            return await _hitbtc.GetMainBalances();
+            return await _hitbtc.GetTradingBalances();
         }
     }
 }
