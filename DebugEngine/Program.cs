@@ -39,6 +39,8 @@ namespace DebugEngine
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
                 var bittrex = (Bittrex)exchanges["Bittrex"];
 
+                var addr = bittrex.GetDepositAddress("SNT").Result;
+                var tx = hitbtc.Withdraw("SNT", 25000m, addr.Address).Result;
 
                 Console.WriteLine("Complete");
             }

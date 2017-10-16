@@ -125,9 +125,13 @@ namespace BMCore.Engine
                     dbService.SaveOrderPair(baseId, arbId);
 
                 }
-                else
+                else if (baseBuy < arbSell && baseBuySpread >= 0.01m)
                 {
                     dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, "FindOpportunity", "Insufficient Funds", "");
+                }
+                else if (baseBuy < arbSell && baseBuySpread > 0)
+                {
+                    dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseBuy, arbSell, baseBuySpread);
                 }
 
                 if (baseSell > arbBuy && baseSellSpread >= 0.01m && baseQuote > 2m * txThreshold && arbBase > 2m * txThreshold)
@@ -137,16 +141,11 @@ namespace BMCore.Engine
                     long arbId = await EngineHelper.Buy(this.arbExchange, this.arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbBuy, arbBuy);
                     dbService.SaveOrderPair(baseId, arbId);
                 }
-                else
+                else if (baseSell > arbBuy && baseSellSpread >= 0.01m)
                 {
                     dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, "FindOpportunity", "Insufficient Funds", "");
                 }
-
-                if (baseBuy < arbSell && baseBuySpread > 0)
-                {
-                    dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseBuy, arbSell, baseBuySpread);
-                }
-                if (baseSell > arbBuy && baseSellSpread > 0)
+                else if (baseSell > arbBuy && baseSellSpread >= 0)
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, baseSell, arbBuy, baseSellSpread);
                 }
