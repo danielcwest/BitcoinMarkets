@@ -133,5 +133,10 @@ namespace BittrexSharp
                 return null;
             }
         }
+
+        public Task<IEnumerable<ICurrencyBalance>> GetBalances()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

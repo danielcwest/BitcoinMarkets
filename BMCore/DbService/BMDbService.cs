@@ -67,20 +67,20 @@ namespace BMCore.DbService
                 });
         }
 
-        public IEnumerable<DbOrder> GetOrders(long id = -1, string uuid = null)
+        public long InsertWithdrawal(string uuid, long orderId, string currency, string fromExchange, decimal amount)
         {
-            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetOrders", 15,
+            return (long)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertWithdrawal", 15,
                 new SqlParameter[]
                 {
-                        new SqlParameter { ParameterName = "@id", Value = id },
-                        new SqlParameter { ParameterName = "@uuid", Value = uuid }
-                }))
-            {
-                return reader.ToList<DbOrder>();
-            }
+                    new SqlParameter { ParameterName = "@uuid", Value = uuid },
+                    new SqlParameter { ParameterName = "@orderId", Value = orderId },
+                    new SqlParameter { ParameterName = "@currency", Value = currency },
+                    new SqlParameter { ParameterName = "@fromExchange", Value = fromExchange },
+                    new SqlParameter { ParameterName = "@amount", Value = amount },
+                });
         }
 
-        public void UpdateOrderUuid(long id, string uuid, string status, long counterId = 0, decimal quantity = 0m, decimal price = 0m, decimal commission = 0m)
+        public void UpdateOrderUuid(long id, string uuid, string status = "", long counterId = 0, decimal quantity = 0m, decimal price = 0m, decimal commission = 0m)
         {
             DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateOrderUuid", 15,
                 new SqlParameter[]
@@ -95,42 +95,97 @@ namespace BMCore.DbService
                 });
         }
 
-        public long InsertWithdrawal(string uuid, long orderId, string currency, string fromExchange, decimal amount)
+        public void FillOrder(long id, decimal quantity, decimal price, decimal fee = 0)
         {
-            return (long)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertWithdrawal", 15,
-                new SqlParameter[]
-                {
-                    new SqlParameter { ParameterName = "@uuid", Value = uuid },
-                    new SqlParameter { ParameterName = "@orderId", Value = orderId },
-                    new SqlParameter { ParameterName = "@currency", Value = currency },
-                    new SqlParameter { ParameterName = "@fromExchange", Value = fromExchange },
-                    new SqlParameter { ParameterName = "@amount", Value = amount },
-                });
-        }
-
-        public void UpdateWithdrawal(long id, long counterId, decimal actualAmount, string txId)
-        {
-            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateWithdrawal", 15,
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.CloseOrder", 15,
                 new SqlParameter[]
                 {
                     new SqlParameter { ParameterName = "@id", Value = id },
-                    new SqlParameter { ParameterName = "@counterId", Value = counterId },
-                    new SqlParameter { ParameterName = "@amount", Value = actualAmount },
-                    new SqlParameter { ParameterName = "@txId", Value = txId }
+                    new SqlParameter { ParameterName = "@quantity", Value = quantity },
+                    new SqlParameter { ParameterName = "@price", Value = price },
+                    new SqlParameter { ParameterName = "@commission", Value = fee }
                 });
         }
 
-        public IEnumerable<DbWithdrawal> GetWithdrawals(long id = -1, string uuid = null)
+        public void CloseWithdrawal(long id, decimal actualAmount, string txId)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.CloseWithdrawal", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@amount", Value = actualAmount },
+                    new SqlParameter { ParameterName = "@txid", Value = txId }
+                });
+        }
+
+        public IEnumerable<DbOrder> GetOrders(long id = -1, string uuid = null, string status = "")
+        {
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetOrders", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@id", Value = id },
+                        new SqlParameter { ParameterName = "@uuid", Value = uuid },
+                        new SqlParameter { ParameterName = "@status", Value = status }
+                }))
+            {
+                return reader.ToList<DbOrder>();
+            }
+        }
+
+        public IEnumerable<DbWithdrawal> GetWithdrawals(long id = -1, string uuid = null, string status = "")
         {
             using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetWithdrawals", 15,
                 new SqlParameter[]
                 {
                         new SqlParameter { ParameterName = "@id", Value = id },
-                        new SqlParameter { ParameterName = "@uuid", Value = uuid }
+                        new SqlParameter { ParameterName = "@uuid", Value = uuid },
+                        new SqlParameter { ParameterName = "@status", Value = status }
                 }))
             {
                 return reader.ToList<DbWithdrawal>();
             }
+        }
+
+        public void SaveOrderPair(long orderId1, long orderId2)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.SaveOrderPair", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@order1Id", Value = orderId1 },
+                    new SqlParameter { ParameterName = "@order2Id", Value = orderId2 }
+                });
+        }
+
+        public void SaveWithdrawalPair(long withdrawalId1, long withdrawalId2)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.SaveWithdrawalPair", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@order1Id", Value = withdrawalId1 },
+                    new SqlParameter { ParameterName = "@order2Id", Value = withdrawalId2 }
+                });
+        }
+
+        public void UpdateOrderStatus(long id, string status, Exception e = null)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateOrderStatus", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@status", Value = status },
+                    new SqlParameter { ParameterName = "@meta", Value = (e == null) ? "" : e.ToString()}
+                });
+        }
+
+        public void UpdateWithdrawalStatus(long id, string status, Exception e = null)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateWithdrawalStatus", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@status", Value = status },
+                    new SqlParameter { ParameterName = "@meta", Value = (e == null) ? "" : e.ToString()}
+                });
         }
     }
 

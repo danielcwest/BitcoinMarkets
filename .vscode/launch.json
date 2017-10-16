@@ -30,7 +30,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
             "args": [
-                "Binance",
+                "Bittrex",
                 "Hitbtc"
             ],
             "cwd": "${workspaceRoot}/Engine",

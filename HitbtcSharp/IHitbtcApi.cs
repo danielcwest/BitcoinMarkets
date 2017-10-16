@@ -9,6 +9,8 @@ namespace HitbtcSharp
 {
     public interface IHitbtcApi
     {
+        [Header("Authorization")]
+        string Authorization { get; set; }
         [Get("/api/2/public/symbol")]
         Task<IEnumerable<SymbolV2>> GetSymbols();
 
@@ -22,38 +24,39 @@ namespace HitbtcSharp
         Task<OrderbookResponse> GetOrderBook([Path] string symbol);
 
 
-        [Get("/api/1/payment/address/{currency}?nonce={nonce}&apikey={apiKey}")]
-        Task<Address> GetAddress([Header("X-Signature")] string sig, [Path] long nonce, [Path] string apiKey, [Path] string currency);
+        [Get("/api/2/account/crypto/address/{currency}")]
+        Task<Address> GetAddress([Path] string currency);
 
-        [Get("/api/1/payment/balance?nonce={nonce}&apikey={apiKey}")]
-        Task<MultiCurrencyBalance> GetMainBalances([Header("X-Signature")] string sig, [Path] long nonce, [Path] string apiKey);
+        [Get("/api/2/account/balance")]
+        Task<IEnumerable<HitBalance>> GetMainBalances();
 
-        [Get("/api/1/trading/balance?nonce={nonce}&apikey={apiKey}")]
-        Task<MultiCurrencyBalance> GetTradingBalances([Header("X-Signature")] string sig, [Path] long nonce, [Path] string apiKey);
+        [Get("/api/2/trading/balance")]
+        Task<IEnumerable<HitBalance>> GetTradingBalances();
 
-        [Post("/api/1/trading/new_order")]
-        Task<HitbtcOrder> PlaceOrder([Header("X-Signature")] string sig, [Query("nonce")] long nonce, [Query("apikey")] string apikey, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
+        [Post("/api/2/order")]
+        Task<HitbtcOrder> PlaceOrder([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
 
-        [Post("/api/1/trading/cancel_order?nonce={nonce}&apikey={apiKey}&clientOrderId={clientOrderId}")]
-        Task<ExecutionResponse> CancelOrder([Header("X-Signature")] string sig, [Path] long nonce, [Path] string apiKey, [Path] string clientOrderId);
+        [Delete("/api/2/order/{clientOrderId}")]
+        Task<HitbtcOrder> CancelOrder([Path] string clientOrderId);
 
-        [Post("/api/1/trading/cancel_orders?nonce={nonce}&apikey={apiKey}")]
-        Task<ExecutionResponseMany> CancelOrders([Header("X-Signature")] string sig, [Path] long nonce, [Path] string apiKey);
+        [Get("/api/2/order")]
+        Task<IEnumerable<HitbtcOrder>> GetOrders();
 
-        [Get("/api/1/trading/orders/recent?nonce={nonce}&apikey={apiKey}&max_results={limit}")]
-        Task<OrderResponse> GetOrders([Header("X-Signature")] string sig, [Path] long nonce, [Path] string apiKey, [Path] int limit);
+        [Get("/api/2/order/{clientOrderId}")]
+        Task<HitbtcOrder> GetOrder([Path] string clientOrderId);
+
+        [Post("/api/2/account/crypto/withdraw")]
+        Task<CryptoTransaction> Withdraw([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
+
+        [Get("/api/2/account/transactions/{id}")]
+        Task<Transaction> GetWithdrawal([Path] string id);
+
+        [Post("/api/2/account/transfer")]
+        Task<CryptoTransaction> Transfer([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
 
         [Post("/api/1/payment/payout")]
-        Task<CryptoTransaction> Withdraw([Header("X-Signature")] string sig, [Query("nonce")] long nonce, [Query("apikey")] string apikey, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
+        Task<PayoutTransaction> WithdrawV1([Header("X-Signature")] string sig, [Query("nonce")] long nonce, [Query("apikey")] string apikey, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
 
-        [Get("/api/1/payment/transactions/{id}")]
-        Task<TransactionObject> GetWithdrawal([Header("X-Signature")] string sig, [Query("nonce")] long nonce, [Query("apikey")] string apikey, [Path] string id);
-
-        [Post("/api/1/payment/transfer_to_trading")]
-        Task<CryptoTransaction> TransferToTrading([Header("X-Signature")] string sig, [Query("nonce")] long nonce, [Query("apikey")] string apikey, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
-
-        [Post("/api/1/payment/transfer_to_main")]
-        Task<CryptoTransaction> TransferToMain([Header("X-Signature")] string sig, [Query("nonce")] long nonce, [Query("apikey")] string apikey, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
 
     }
 }

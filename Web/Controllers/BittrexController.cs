@@ -59,7 +59,7 @@ namespace Web.Controllers
             //Has Balance to Sell
             var b = await _bittrex.GetBalance(marketCurrency);
 
-            if (b.Balance < quantity)
+            if (b.Amount < quantity)
                 throw new Exception("Insufficient Balance");
 
             //Sell On Exchange
@@ -77,7 +77,7 @@ namespace Web.Controllers
             //Has Balance to Sell
             var b = await _bittrex.GetBalance(marketCurrency);
 
-            if (b.Balance < quantity)
+            if (b.Amount < quantity)
                 throw new Exception("Insufficient Balance");
 
             //Buy On Exchange 
@@ -95,7 +95,7 @@ namespace Web.Controllers
             //Has Balance to Sell
             var b = await _bittrex.GetBalance(currency);
 
-            if (b.Balance < quantity)
+            if (b.Amount < quantity)
                 throw new Exception("Insufficient Balance");
 
             //Sell On Exchange

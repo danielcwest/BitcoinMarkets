@@ -9,6 +9,7 @@ using BMCore.Contracts;
 using BMCore;
 using System.Security.Cryptography;
 using System.Text;
+using System.Net.Http.Headers;
 
 namespace HitbtcSharp
 {
@@ -39,6 +40,10 @@ namespace HitbtcSharp
             _config = config;
             name = config.Name;
             fee = config.Fee;
+
+            string auth = string.Format("Basic {0}", Convert.ToBase64String(Encoding.ASCII.GetBytes(string.Format("{0}:{1}", _config.ApiKey, _config.Secret))));
+            _hitbtc.Authorization = auth;
+
         }
 
         public async Task<IEnumerable<ISymbol>> Symbols()
@@ -73,69 +78,46 @@ namespace HitbtcSharp
             return book;
         }
 
-        public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate)
+        public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal price)
         {
-            long nonce = GetNonce();
-
-            string pathAndQuery = string.Format("/api/1/trading/new_order?nonce={0}&apikey={1}clientOrderId={2}&symbol={3}&side=buy&price={4}&quantity={5}&type=limit", nonce, _config.ApiKey, nonce, symbol, rate, quantity);
-
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
 
             var data = new Dictionary<string, object> {
                 {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "buy"},
-                {"price", rate},
+                {"price", price},
                 {"quantity", quantity},
                 {"type", "limit" }
             };
 
-            var order = await _hitbtc.PlaceOrder(sign, nonce, _config.ApiKey, data);
+            var order = await _hitbtc.PlaceOrder(data);
 
             return order;
         }
 
-        public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate)
+        public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal price)
         {
-            long nonce = GetNonce();
-
-            string pathAndQuery = string.Format("/api/1/trading/new_order?nonce={0}&apikey={1}clientOrderId={2}&symbol={3}&side=sell&price={4}&quantity={5}&type=limit", nonce, _config.ApiKey, nonce, symbol, rate, quantity);
-
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
-
             var data = new Dictionary<string, object> {
                 {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "sell"},
-                {"price", rate},
+                {"price", price},
                 {"quantity", quantity},
                 {"type", "limit" }
             };
 
-            var order = await _hitbtc.PlaceOrder(sign, nonce, _config.ApiKey, data);
+            var order = await _hitbtc.PlaceOrder(data);
 
             return order;
         }
 
         public async Task CancelOrder(string orderId)
         {
-            long nonce = GetNonce();
-            string pathAndQuery = string.Format("/api/1/trading/cancel_order?nonce={0}&apikey={1}&clientOrderId={2}", nonce, _config.ApiKey, orderId);
-
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
-
-            await _hitbtc.CancelOrder(sign, nonce, _config.ApiKey, orderId);
+            await _hitbtc.CancelOrder(orderId);
         }
         public async Task<IOrder> CheckOrder(string orderId)
         {
-            int limit = 25;
-            long nonce = GetNonce();
-            string pathAndQuery = string.Format("/api/1/trading/orders/recent?nonce={0}&apikey={1}&max_results={2}", nonce, _config.ApiKey, limit);
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
-
-            var orders = await _hitbtc.GetOrders(sign, nonce, _config.ApiKey, limit);
-            var order = orders.orders.Find(o => o.Uuid == orderId);
-
+            var order = await _hitbtc.GetOrder(orderId);
             return new Order(order);
         }
 
@@ -145,13 +127,13 @@ namespace HitbtcSharp
             var balance = await GetMainBalance(currency);
 
             CryptoTransaction tx;
-            if (quantity > balance.Balance)
+            if (quantity > balance.Amount)
                 tx = await TransferToMain(quantity, currency);
 
             return await WithdrawFromMain(currency, quantity, address, paymentId);
         }
 
-        private async Task<IAcceptedAction> WithdrawFromMain(string currency, decimal quantity, string address, string paymentId = null)
+        private async Task<PayoutTransaction> WithdrawFromMain(string currency, decimal quantity, string address, string paymentId = null)
         {
             long nonce = GetNonce();
             string pathAndQuery = string.Format("/api/1/payment/payout?nonce={0}&apikey={1}amount={2}&currency_code={3}&address={4}", nonce, _config.ApiKey, quantity, currency, address);
@@ -163,24 +145,18 @@ namespace HitbtcSharp
                 {"address", address}
             };
 
-            return await _hitbtc.Withdraw(sign, nonce, _config.ApiKey, data);
+            return await _hitbtc.WithdrawV1(sign, nonce, _config.ApiKey, data);
         }
 
         public async Task<IWithdrawal> GetWithdrawal(string uuid)
         {
-            long nonce = GetNonce();
-            string pathAndQuery = string.Format("/api/1/payment/transactions/{0}?nonce={1}&apikey={2}", uuid, nonce, _config.ApiKey);
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
-            var tx = await _hitbtc.GetWithdrawal(sign, nonce, _config.ApiKey, uuid);
-            return new Withdrawal(tx.transaction);
+            var tx = await _hitbtc.GetWithdrawal(uuid);
+            return new Withdrawal(tx);
         }
 
         public async Task<IDepositAddress> GetDepositAddress(string currency)
         {
-            long nonce = GetNonce();
-            string pathAndQuery = string.Format("/api/1/payment/address/{0}?nonce={1}&apikey={2}", currency, nonce, _config.ApiKey);
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
-            var address = await _hitbtc.GetAddress(sign, nonce, _config.ApiKey, currency);
+            var address = await _hitbtc.GetAddress(currency);
             return new DepositAddress() { Currency = currency, Address = address.address };
         }
 
@@ -201,59 +177,39 @@ namespace HitbtcSharp
         //Type: trading or payment
         public async Task<IEnumerable<ICurrencyBalance>> GetBalances(string type, bool filterZero = true)
         {
-            long nonce = GetNonce();
-            string pathAndQuery = string.Format("/api/1/{0}/balance?nonce={1}&apikey={2}", type, nonce, _config.ApiKey);
-
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
-
-            MultiCurrencyBalance multiBalance;
+            IEnumerable<ICurrencyBalance> balances;
 
             if (type == "trading")
-                multiBalance = await _hitbtc.GetTradingBalances(sign, nonce, _config.ApiKey);
+                balances = await _hitbtc.GetTradingBalances();
             else
-                multiBalance = await _hitbtc.GetMainBalances(sign, nonce, _config.ApiKey);
+                balances = await _hitbtc.GetMainBalances();
 
             if (filterZero)
-                return multiBalance.balance.Where(b => b.Balance > 0);
+                return balances.Where(b => b.Amount > 0);
             else
-                return multiBalance.balance;
+                return balances;
         }
 
         public async Task<CryptoTransaction> TransferToTrading(decimal amount, string currency)
         {
-            long nonce = GetNonce();
-            string pathAndQuery = string.Format("/api/1/payment/transfer_to_trading?nonce={0}&apikey={1}amount={2}&currency_code={3}", nonce, _config.ApiKey, amount, currency);
-
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
-
             var data = new Dictionary<string, object> {
                 {"amount", amount},
-                {"currency_code", currency }
+                {"currency", currency },
+                {"type", "bankToExchange" }
             };
 
-            return await _hitbtc.TransferToTrading(sign, nonce, _config.ApiKey, data);
+            return await _hitbtc.Transfer(data);
         }
 
         public async Task<CryptoTransaction> TransferToMain(decimal amount, string currency)
         {
-            long nonce = GetNonce();
-            string pathAndQuery = string.Format("/api/1/payment/transfer_to_main?nonce={0}&apikey={1}amount={2}&currency_code={3}", nonce, _config.ApiKey, amount, currency);
-
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
-
             var data = new Dictionary<string, object> {
                 {"amount", amount},
-                {"currency_code", currency }
+                {"currency", currency },
+                {"type", "exchangeToBank" }
             };
 
-            return await _hitbtc.TransferToMain(sign, nonce, _config.ApiKey, data);
-        }
-
-        private static string GetClientId()
-        {
-
-
-            return "";
+            return await _hitbtc.Transfer(data);
         }
 
         private static long GetNonce()
@@ -270,6 +226,9 @@ namespace HitbtcSharp
             }
         }
 
-
+        public Task<IEnumerable<ICurrencyBalance>> GetBalances()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

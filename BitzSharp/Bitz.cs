@@ -142,5 +142,10 @@ namespace BitzSharp
         {
             throw new NotImplementedException();
         }
+
+        public Task<IEnumerable<ICurrencyBalance>> GetBalances()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

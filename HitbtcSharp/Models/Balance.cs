@@ -20,7 +20,7 @@ namespace HitbtcSharp.Models
         /// Funds amount
         /// </summary>
         [JsonProperty("amount")]
-        public decimal Balance { get; set; }
+        public decimal Amount { get; set; }
         [JsonProperty("reserved")]
         public decimal Reserved { get; set; }
     }

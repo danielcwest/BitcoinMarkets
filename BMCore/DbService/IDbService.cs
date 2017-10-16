@@ -12,16 +12,20 @@ namespace BMCore.DbService
 
         void LogError(string baseX, string arbX, string symbol, string method, string message, string stackTrace);
 
+
+        IEnumerable<DbOrder> GetOrders(long id = -1, string uuid = null, string status = "");
         long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side);
-
-        IEnumerable<DbOrder> GetOrders(long id = -1, string uuid = null);
-
-        void UpdateOrderUuid(long id, string uuid, string status, long counterId = 0, decimal quantity = 0m, decimal price = 0m, decimal commission = 0m);
-
+        void UpdateOrderUuid(long id, string uuid, string status = "", long counterId = 0, decimal quantity = 0m, decimal price = 0m, decimal commission = 0m);
+        void FillOrder(long id, decimal quantity, decimal price, decimal fee = 0m);
         long InsertWithdrawal(string uuid, long orderId, string currency, string fromExchange, decimal amount);
+        void CloseWithdrawal(long id, decimal actualAmount, string txId);
 
-        void UpdateWithdrawal(long id, long counterId, decimal actualAmount, string txId);
+        IEnumerable<DbWithdrawal> GetWithdrawals(long id = -1, string uuid = null, string status = "");
 
-        IEnumerable<DbWithdrawal> GetWithdrawals(long id = -1, string uuid = null);
+        void SaveOrderPair(long orderId1, long orderId2);
+        void SaveWithdrawalPair(long withdrawalId1, long withdrawalId2);
+
+        void UpdateOrderStatus(long id, string status, Exception e = null);
+        void UpdateWithdrawalStatus(long id, string status, Exception e = null);
     }
 }

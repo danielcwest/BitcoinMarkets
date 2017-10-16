@@ -66,61 +66,102 @@ namespace BMCore.Engine
             }
         }
 
-        public static async Task<long> ExecuteTransaction(IExchange baseExchange, IExchange arbExchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, string side)
+        public static async Task<long> Sell(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price)
         {
-            //Base Exchange
-            long orderId = dbService.InsertOrder(baseExchange.Name, symbol, market.BaseCurrency, market.MarketCurrency, side);
-
-            //Buy On Exchange
-            IAcceptedAction tradeResult;
-            IDepositAddress depositAddress;
-
-            if (side == "buy")
-            {
-                depositAddress = await arbExchange.GetDepositAddress(market.MarketCurrency);
-
-                if (string.IsNullOrWhiteSpace(depositAddress.Currency))
-                    depositAddress.Currency = market.MarketCurrency; //If we are buying, we need to move the market currency
-
-                tradeResult = await baseExchange.Buy(orderId.ToString(), market.ExchangeSymbol, quantity, price);
-            }
-            else
-            {
-                depositAddress = await arbExchange.GetDepositAddress(market.BaseCurrency);
-
-                if (string.IsNullOrWhiteSpace(depositAddress.Currency))
-                    depositAddress.Currency = market.BaseCurrency; //If we are executing a sell we will need to move the base currency
-
-                tradeResult = await baseExchange.Sell(orderId.ToString(), market.ExchangeSymbol, quantity, price);
-            }
-
-            //Success
-            if (!string.IsNullOrWhiteSpace(tradeResult.Uuid))
-            {
-                var order = await baseExchange.CheckOrder(tradeResult.Uuid);
-                string status = order.IsFilled ? "filled" : "open";
-                dbService.UpdateOrderUuid(orderId, order.OrderUuid, status, 0, order.Quantity, order.Price);
-
-                //TODO: This should be done before executing trades
-                if (string.IsNullOrWhiteSpace(depositAddress.Address))
-                    throw new Exception(string.Format("No deposit Address for {0} at {1} exchange", depositAddress.Currency, arbExchange.Name));
-
-                var withdrawalResult = await baseExchange.Withdraw(market.MarketCurrency, order.Quantity, depositAddress.Address);
-
-                return dbService.InsertWithdrawal(withdrawalResult.Uuid, orderId, depositAddress.Currency, baseExchange.Name, order.Quantity);
-            }
-
-            return await Task.FromResult(0);
+            return await Trade(exchange, market, dbService, symbol, quantity, price, "sell");
         }
 
-        public static async Task UpdateWithdrawals(IDbService dbService, Dictionary<string, IExchange> exchanges)
+        public static async Task<long> Buy(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price)
         {
-            foreach (var withdrawal in dbService.GetWithdrawals().Where(w => string.IsNullOrEmpty(w.TxId)))
+            return await Trade(exchange, market, dbService, symbol, quantity, price, "buy");
+        }
+
+        public static async Task<long> Trade(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, string side)
+        {
+            long orderId = dbService.InsertOrder(exchange.Name, symbol, market.BaseCurrency, market.MarketCurrency, side);
+            var tradeResult = await exchange.Sell(orderId.ToString(), market.ExchangeSymbol, quantity, price);
+            dbService.UpdateOrderUuid(orderId, tradeResult.Uuid);
+            return orderId;
+        }
+
+        public static async Task UpdateWithdrawalStatus(IDbService dbService, Dictionary<string, IExchange> exchanges)
+        {
+            foreach (var withdrawal in dbService.GetWithdrawals(status: "pending"))
             {
-                var exchange = exchanges[withdrawal.FromExchange];
-                var w = await exchange.GetWithdrawal(withdrawal.Uuid);
-                if (w != null && !string.IsNullOrWhiteSpace(w.TxId))
-                    dbService.UpdateWithdrawal(withdrawal.Id, withdrawal.CounterId, w.Amount, w.TxId);
+                try
+                {
+                    var exchange = exchanges[withdrawal.FromExchange];
+                    var w = await exchange.GetWithdrawal(withdrawal.Uuid);
+                    if (!string.IsNullOrWhiteSpace(w.TxId))
+                        dbService.CloseWithdrawal(withdrawal.Id, w.Amount, w.TxId);
+                }
+                catch (Exception ex)
+                {
+                    dbService.UpdateWithdrawalStatus(withdrawal.Id, "error", ex);
+                    dbService.LogError(withdrawal.FromExchange, "", withdrawal.Uuid, "UpdateWithdrawalStatus", ex.Message, ex.StackTrace);
+
+                }
+
+            }
+            await Task.FromResult(0);
+        }
+
+        public static async Task UpdateOrderStatus(IDbService dbService, Dictionary<string, IExchange> exchanges)
+        {
+            foreach (var order in dbService.GetOrders(status: "pending"))
+            {
+                try
+                {
+                    var exchange = exchanges[order.Exchange];
+                    var o = await exchange.CheckOrder(order.Uuid);
+                    if (o != null && o.IsFilled)
+                        dbService.FillOrder(order.Id, o.Quantity, o.Price);
+                }
+                catch (Exception ex)
+                {
+                    dbService.UpdateOrderStatus(order.Id, "error", ex);
+                    dbService.LogError(order.Exchange, order.ToExchange, order.Uuid, "ProcessWithdrawals", ex.Message, ex.StackTrace);
+
+                }
+
+            }
+            await Task.FromResult(0);
+        }
+
+        public static async Task ProcessWithdrawals(IDbService dbService, Dictionary<string, IExchange> exchanges)
+        {
+            foreach (var order in dbService.GetOrders(status: "filled").Where(o => !string.IsNullOrWhiteSpace(o.ToExchange)))
+            {
+                try
+                {
+                    var fromExchange = exchanges[order.Exchange];
+                    var toExchange = exchanges[order.ToExchange];
+                    string address;
+                    string currency;
+
+                    if (order.Side == "buy")
+                    {
+                        var result = await toExchange.GetDepositAddress(order.MarketCurrency);
+                        address = result.Address;
+                        currency = result.Currency;
+                    }
+                    else
+                    {
+                        var result = await toExchange.GetDepositAddress(order.BaseCurrency);
+                        address = result.Address;
+                        currency = result.Currency;
+                    }
+
+                    var tx = await fromExchange.Withdraw(currency, order.Quantity, address);
+                    dbService.InsertWithdrawal(tx.Uuid, order.Id, currency, fromExchange.Name, order.Quantity);
+                }
+                catch (Exception ex)
+                {
+                    dbService.UpdateOrderStatus(order.Id, "error", ex);
+                    dbService.LogError(order.Exchange, order.ToExchange, order.Uuid, "ProcessWithdrawals", ex.Message, ex.StackTrace);
+
+                }
+
             }
             await Task.FromResult(0);
         }

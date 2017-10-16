@@ -36,8 +36,15 @@ namespace DebugEngine
             try
             {
 
+                var hitbtc = (Hitbtc)exchanges["Hitbtc"];
+                var bittrex = (Bittrex)exchanges["Bittrex"];
+
 
                 Console.WriteLine("Complete");
+            }
+            catch (RestEase.ApiException e)
+            {
+                Console.WriteLine(e);
             }
             catch (Exception e)
             {

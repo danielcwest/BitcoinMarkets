@@ -29,8 +29,8 @@ namespace BMCore.Contracts
 
 
         //Authenticated API Endpoints
-        Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate);
-        Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate);
+        Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal price);
+        Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal price);
 
         Task CancelOrder(string orderId);
         Task<IOrder> CheckOrder(string uuid);
@@ -40,7 +40,7 @@ namespace BMCore.Contracts
         Task<IDepositAddress> GetDepositAddress(string currency);
 
         Task<ICurrencyBalance> GetBalance(string currency);
-
+        Task<IEnumerable<ICurrencyBalance>> GetBalances();
     }
 
 }
