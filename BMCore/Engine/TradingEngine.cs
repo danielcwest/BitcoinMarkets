@@ -51,6 +51,8 @@ namespace BMCore.Engine
 
         public async Task AnalyzeMarkets()
         {
+            await RefreshBalances();
+
             var baseMarkets = await this.baseExchange.Symbols();
             this.baseExchangeMarkets = baseMarkets.ToDictionary(m => m.LocalSymbol);
 
@@ -99,10 +101,10 @@ namespace BMCore.Engine
             decimal baseBuySpread = 0M;
             decimal baseSellSpread = 0M;
 
-            var baseBase = this.baseExchangeBalances[am.baseMarket.BaseCurrency].Amount;
-            var baseQuote = this.baseExchangeBalances[am.baseMarket.QuoteCurrency].Amount * am.baseMarket.Last;
-            var arbBase = this.arbitrageExchangeBalances[am.arbitrageMarket.BaseCurrency].Amount;
-            var arbQuote = this.arbitrageExchangeBalances[am.arbitrageMarket.QuoteCurrency].Amount * am.arbitrageMarket.Last;
+            var baseBase = this.baseExchangeBalances.ContainsKey(am.baseMarket.BaseCurrency) ? this.baseExchangeBalances[am.baseMarket.BaseCurrency].Amount : 0m;
+            var baseQuote = this.baseExchangeBalances.ContainsKey(am.baseMarket.QuoteCurrency) ? this.baseExchangeBalances[am.baseMarket.QuoteCurrency].Amount * am.baseMarket.Last : 0m;
+            var arbBase = this.arbitrageExchangeBalances.ContainsKey(am.arbitrageMarket.BaseCurrency) ? this.arbitrageExchangeBalances[am.arbitrageMarket.BaseCurrency].Amount : 0m;
+            var arbQuote = this.arbitrageExchangeBalances.ContainsKey(am.arbitrageMarket.QuoteCurrency) ? this.arbitrageExchangeBalances[am.arbitrageMarket.QuoteCurrency].Amount * am.arbitrageMarket.Last : 0m;
 
             baseBuy = GetPriceAtVolumeThreshold(txThreshold, am.baseBook.asks);
             baseSell = GetPriceAtVolumeThreshold(txThreshold, am.baseBook.bids);

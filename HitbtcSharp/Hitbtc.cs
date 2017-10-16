@@ -226,9 +226,9 @@ namespace HitbtcSharp
             }
         }
 
-        public Task<IEnumerable<ICurrencyBalance>> GetBalances()
+        public async Task<IEnumerable<ICurrencyBalance>> GetBalances()
         {
-            throw new NotImplementedException();
+            return await _hitbtc.GetMainBalances();
         }
     }
 }

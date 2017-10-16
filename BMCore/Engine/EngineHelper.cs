@@ -54,6 +54,7 @@ namespace BMCore.Engine
             {
                 Console.WriteLine("Starting: {0} {1}", baseExchange.Name, arbExchange.Name);
                 var engine = new TradingEngine(baseExchange, arbExchange, dbService, threshold);
+                engine.RefreshBalances().Wait();
                 engine.AnalyzeMarkets().Wait();
                 Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);
             }

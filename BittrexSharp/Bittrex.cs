@@ -134,9 +134,9 @@ namespace BittrexSharp
             }
         }
 
-        public Task<IEnumerable<ICurrencyBalance>> GetBalances()
+        public async Task<IEnumerable<ICurrencyBalance>> GetBalances()
         {
-            throw new NotImplementedException();
+            return await _bittrex.GetBalances();
         }
     }
 }

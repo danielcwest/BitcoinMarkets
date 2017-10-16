@@ -47,7 +47,17 @@ namespace Engine
                 }
                 else if (args.Length == 2)
                 {
+                    Console.WriteLine("Finding Opportunities...");
                     EngineHelper.ExecuteExchangePair(exchanges[args[0]], exchanges[args[1]], dbService, threshold);
+
+                    Console.WriteLine("Updating Order Statuses...");
+                    EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
+
+                    Console.WriteLine("Processing Withdrawals");
+                    EngineHelper.ProcessWithdrawals(dbService, exchanges).Wait();
+
+                    Console.WriteLine("Updating Withdrawal Statuses...");
+                    EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
                 }
 
                 Console.WriteLine("Engine Complete...");
