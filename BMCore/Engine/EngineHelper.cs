@@ -50,24 +50,24 @@ namespace BMCore.Engine
             {
                 //Console.WriteLine(e);
                 Console.WriteLine("Error: {0} {1}", baseExchange.Name, arbExchange.Name);
-                dbService.LogError(baseExchange.Name, arbExchange.Name, "", "Main", e.Message, e.StackTrace);
+                dbService.LogError(baseExchange.Name, arbExchange.Name, "", "Main", e);
                 if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
             }
         }
 
-        public static async Task<long> Sell(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price)
+        public static async Task<long> Sell(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, int pId)
         {
-            return await Trade(exchange, market, dbService, symbol, quantity, price, "sell");
+            return await Trade(exchange, market, dbService, symbol, quantity, price, "sell", pId);
         }
 
-        public static async Task<long> Buy(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price)
+        public static async Task<long> Buy(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, int pId)
         {
-            return await Trade(exchange, market, dbService, symbol, quantity, price, "buy");
+            return await Trade(exchange, market, dbService, symbol, quantity, price, "buy", pId);
         }
 
-        public static async Task<long> Trade(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, string side)
+        public static async Task<long> Trade(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, string side, int pId)
         {
-            long orderId = dbService.InsertOrder(exchange.Name, symbol, market.BaseCurrency, market.MarketCurrency, side);
+            long orderId = dbService.InsertOrder(exchange.Name, symbol, market.BaseCurrency, market.MarketCurrency, side, pId);
             IAcceptedAction tradeResult;
             if (side == "buy")
             {
@@ -95,7 +95,7 @@ namespace BMCore.Engine
                 catch (Exception ex)
                 {
                     dbService.UpdateWithdrawalStatus(withdrawal.Id, "error", ex);
-                    dbService.LogError(withdrawal.FromExchange, "", withdrawal.Uuid, "UpdateWithdrawalStatus", ex.Message, ex.StackTrace);
+                    dbService.LogError(withdrawal.FromExchange, "", withdrawal.Uuid, "UpdateWithdrawalStatus", ex);
 
                 }
 
@@ -117,7 +117,7 @@ namespace BMCore.Engine
                 catch (Exception ex)
                 {
                     dbService.UpdateOrderStatus(order.Id, "error", ex);
-                    dbService.LogError(order.Exchange, "", order.Uuid, "ProcessWithdrawals", ex.Message, ex.StackTrace);
+                    dbService.LogError(order.Exchange, "", order.Uuid, "UpdateOrderStatus", ex);
 
                 }
 
@@ -157,13 +157,13 @@ namespace BMCore.Engine
                     if (quantity > 0 && !string.IsNullOrWhiteSpace(address) && !string.IsNullOrWhiteSpace(currency))
                     {
                         var tx = await fromExchange.Withdraw(currency, quantity, address);
-                        dbService.InsertWithdrawal(tx.Uuid, order.Id, currency, fromExchange.Name, quantity);
+                        dbService.InsertWithdrawal(tx.Uuid, order.Id, currency, fromExchange.Name, quantity, order.ProcessId);
                     }
                 }
                 catch (Exception ex)
                 {
                     dbService.UpdateOrderStatus(order.Id, "error", ex);
-                    dbService.LogError(order.Exchange, "", order.Uuid, "ProcessWithdrawals", ex.Message, ex.StackTrace);
+                    dbService.LogError(order.Exchange, "", order.Uuid, "ProcessWithdrawals", ex);
                 }
 
             }

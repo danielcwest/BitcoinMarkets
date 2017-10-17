@@ -17,6 +17,7 @@ namespace BMCore.DbService
     {
         public long Id; //Client ID (Our ID)
         public long CounterId;
+        public int ProcessId;
         public string Exchange;
         public string Symbol;
         public string BaseCurrency;
@@ -35,6 +36,7 @@ namespace BMCore.DbService
     {
         public long Id; //Client ID (Our ID)
         public long CounterId;
+        public int ProcessId;
         public long OrderId;
         public string FromExchange;
         public string Currency;

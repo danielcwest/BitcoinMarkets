@@ -43,8 +43,16 @@ namespace BMCore.DbService
             }
         }
 
-        public void LogError(string baseX, string arbX, string symbol, string method, string message, string stackTrace)
+        public void LogError(string baseX, string arbX, string symbol, string method, Exception ex)
         {
+            string message = ex.Message;
+            string stackTrace = ex.StackTrace;
+            if (ex.InnerException != null)
+            {
+                message = ex.InnerException.Message;
+                message = ex.InnerException.StackTrace;
+            }
+
             try
             {
                 DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertError", 15,
@@ -65,7 +73,7 @@ namespace BMCore.DbService
 
         }
 
-        public long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side)
+        public long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side, int processId)
         {
             return (long)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertOrder", 15,
                 new SqlParameter[]
@@ -78,7 +86,7 @@ namespace BMCore.DbService
                 });
         }
 
-        public long InsertWithdrawal(string uuid, long orderId, string currency, string fromExchange, decimal amount)
+        public long InsertWithdrawal(string uuid, long orderId, string currency, string fromExchange, decimal amount, int processId)
         {
             return (long)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertWithdrawal", 15,
                 new SqlParameter[]

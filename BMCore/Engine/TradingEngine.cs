@@ -125,7 +125,7 @@ namespace BMCore.Engine
 
                 if (bMarket == null || bBook == null || rMarket == null || rBook == null)
                 {
-                    dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, symbol, "AnalyzeMarkets", "Market Data Null", "");
+                    dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, symbol, "AnalyzeMarkets", new Exception("No Market Data"));
                     Console.WriteLine("{0}: Null Market Data", symbol);
                 }
                 else
@@ -136,7 +136,7 @@ namespace BMCore.Engine
             }
             catch (Exception e)
             {
-                dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, symbol, "AnalyzeMarkets", e.Message, e.StackTrace);
+                dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, symbol, "AnalyzeMarkets", e);
             }
         }
 
@@ -162,16 +162,16 @@ namespace BMCore.Engine
                 if (baseBuy < arbSell && baseBuySpread > 0 && runType == "trade")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseBuy, arbSell, baseBuySpread, txThreshold);
-                    long buyId = await EngineHelper.Buy(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseBuy, baseBuy);
-                    long sellId = await EngineHelper.Sell(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbSell, arbSell);
+                    long buyId = await EngineHelper.Buy(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseBuy, baseBuy, this.pId);
+                    long sellId = await EngineHelper.Sell(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbSell, arbSell, this.pId);
                     dbService.SaveOrderPair(buyId, sellId);
                 }
 
                 if (baseSell > arbBuy && baseSellSpread >= 0 && runType == "trade")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseSell, arbBuy, baseSellSpread, txThreshold);
-                    long buyId = await EngineHelper.Buy(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbBuy, arbBuy);
-                    long sellId = await EngineHelper.Sell(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseSell, baseSell);
+                    long buyId = await EngineHelper.Buy(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbBuy, arbBuy, this.pId);
+                    long sellId = await EngineHelper.Sell(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseSell, baseSell, this.pId);
                     dbService.SaveOrderPair(buyId, sellId);
                 }
             }

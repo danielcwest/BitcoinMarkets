@@ -10,14 +10,14 @@ namespace BMCore.DbService
 
         IEnumerable<DbTradeLog> GetTrades(int limit = 100);
 
-        void LogError(string baseX, string arbX, string symbol, string method, string message, string stackTrace);
+        void LogError(string baseX, string arbX, string symbol, string method, Exception ex);
 
 
         IEnumerable<DbOrder> GetOrders(long id = -1, string uuid = null, string status = "");
-        long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side);
+        long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side, int processId);
         void UpdateOrderUuid(long id, string uuid);
         void FillOrder(long id, decimal quantity, decimal price, decimal rate, decimal fee = 0m);
-        long InsertWithdrawal(string uuid, long orderId, string currency, string fromExchange, decimal amount);
+        long InsertWithdrawal(string uuid, long orderId, string currency, string fromExchange, decimal amount, int processId);
         void CloseWithdrawal(long id, decimal actualAmount, string txId);
 
         IEnumerable<DbWithdrawal> GetWithdrawals(long id = -1, string uuid = null, string status = "");
