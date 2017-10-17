@@ -24,11 +24,11 @@ namespace BittrexSharp.BittrexOrderSimulation
         {
             var existingBalance = simulatedBalances.SingleOrDefault(b => b.Currency == currency);
             if (existingBalance != null)
-                existingBalance.Amount += quantity;
+                existingBalance.Available += quantity;
             else
                 simulatedBalances.Add(new CurrencyBalance
                 {
-                    Amount = quantity,
+                    Available = quantity,
                     Currency = currency
                 });
         }
@@ -36,7 +36,7 @@ namespace BittrexSharp.BittrexOrderSimulation
         private void removeBalance(string currency, decimal quantity)
         {
             var existingBalance = simulatedBalances.Single(b => b.Currency == currency);
-            existingBalance.Amount -= quantity;
+            existingBalance.Available -= quantity;
         }
 
         public override async Task<AcceptedOrder> BuyLimit(string marketName, decimal quantity, decimal rate)
@@ -154,7 +154,7 @@ namespace BittrexSharp.BittrexOrderSimulation
         {
             return await Task.FromResult(simulatedBalances.SingleOrDefault(b => b.Currency == currency) ?? new CurrencyBalance
             {
-                Amount = 0,
+                Available = 0,
                 Currency = currency
             });
         }

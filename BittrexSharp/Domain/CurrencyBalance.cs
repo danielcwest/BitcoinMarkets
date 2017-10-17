@@ -8,7 +8,7 @@ namespace BittrexSharp
     public class CurrencyBalance : ICurrencyBalance
     {
         public string Currency { get; set; }
-        public decimal Amount { get; set; }
+        public decimal Amouunt { get; set; }
         public decimal Available { get; set; }
         public decimal Pending { get; set; }
         public string CryptoAddress { get; set; }

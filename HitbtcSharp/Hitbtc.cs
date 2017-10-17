@@ -127,7 +127,7 @@ namespace HitbtcSharp
             var balance = await GetMainBalance(currency);
 
             CryptoTransaction tx;
-            if (quantity > balance.Amount)
+            if (quantity > balance.Available)
                 tx = await TransferToMain(quantity, currency);
 
             return await WithdrawFromMain(currency, quantity, address, paymentId);
@@ -185,7 +185,7 @@ namespace HitbtcSharp
                 balances = await _hitbtc.GetMainBalances();
 
             if (filterZero)
-                return balances.Where(b => b.Amount > 0);
+                return balances.Where(b => b.Available > 0);
             else
                 return balances;
         }

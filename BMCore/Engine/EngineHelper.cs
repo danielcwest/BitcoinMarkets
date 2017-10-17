@@ -11,7 +11,7 @@ namespace BMCore.Engine
 {
     public class EngineHelper
     {
-        public static void ExecuteAllExchanges(IExchange[] exchanges, BMDbService dbService, decimal threshold)
+        public static void ExecuteAllExchanges(IExchange[] exchanges, BMDbService dbService, decimal threshold, string runType)
         {
             for (var i = 0; i < exchanges.Length; i++)
             {
@@ -22,22 +22,27 @@ namespace BMCore.Engine
 
                     if (baseExchange != arbExchange)
                     {
-                        ExecuteExchangePair(baseExchange, arbExchange, dbService, threshold);
+                        ExecuteExchangePair(baseExchange, arbExchange, dbService, threshold, runType);
                     }
 
                 }
             }
         }
 
-        public static void ExecuteExchangePair(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, decimal threshold)
+        public static void ExecuteExchangePair(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, decimal threshold, string runType)
         {
             int pId = -1;
             try
             {
                 Console.WriteLine("Starting: {0} {1}", baseExchange.Name, arbExchange.Name);
-                pId = dbService.StartEngineProcess(baseExchange.Name, arbExchange.Name, "log");
+                pId = dbService.StartEngineProcess(baseExchange.Name, arbExchange.Name, runType);
                 var engine = new TradingEngine(baseExchange, arbExchange, dbService, threshold);
-                engine.AnalyzeMarkets().Wait();
+
+                if (runType == "log")
+                    engine.AnalyzeMarkets().Wait();
+                else if (runType == "trade")
+                    engine.AnalyzeFundedPairs().Wait();
+
                 dbService.EndEngineProcess(pId, "success");
                 Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);
             }

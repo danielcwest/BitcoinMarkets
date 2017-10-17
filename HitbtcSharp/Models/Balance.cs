@@ -19,14 +19,9 @@ namespace HitbtcSharp.Models
         /// <summary>
         /// Funds amount
         /// </summary>
-        [JsonProperty("amount")]
-        public decimal Amount { get; set; }
+        [JsonProperty("available")]
+        public decimal Available { get; set; }
         [JsonProperty("reserved")]
         public decimal Reserved { get; set; }
-    }
-
-    public class MultiCurrencyBalance
-    {
-        public List<HitBalance> balance { get; set; }
     }
 }

@@ -39,6 +39,20 @@
             "cwd": "${workspaceRoot}/Engine",
             "stopAtEntry": false,
             "console": "internalConsole"
+        },
+        {
+            "name": "Engine Log Binance Hitbtc",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
+            "args": [
+                "log",
+                "Binance",
+                "Hitbtc"
+            ],
+            "cwd": "${workspaceRoot}/Engine",
+            "stopAtEntry": false,
+            "console": "internalConsole"
         }
     ]
 }

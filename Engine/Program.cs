@@ -52,14 +52,18 @@ namespace Engine
                     case "log":
                         if (args.Length == 1)
                         {
-                            EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService, threshold);
+                            EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService, threshold, "log");
                         }
                         else if (args.Length == 3)
                         {
-                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, threshold);
+                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, threshold, "log");
                         }
                         break;
                     case "trade":
+                        if (args.Length == 3)
+                        {
+                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, threshold, "trade");
+                        }
                         break;
                     default:
                         break;

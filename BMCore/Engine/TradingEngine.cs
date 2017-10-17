@@ -40,12 +40,47 @@ namespace BMCore.Engine
             this.txThreshold = txThreshold;
         }
 
-        public async Task RefreshBalances()
+        public async Task AnalyzeFundedPairs()
         {
             var baseBalances = await this.baseExchange.GetBalances();
             var arbBalances = await this.arbExchange.GetBalances();
-            this.baseExchangeBalances = baseBalances.ToDictionary(b => b.Currency);
-            this.arbitrageExchangeBalances = arbBalances.ToDictionary(b => b.Currency);
+            this.baseExchangeBalances = baseBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
+            this.arbitrageExchangeBalances = arbBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
+
+            //Ethereum Markets
+            if (CurrencyAvailable("ETH"))
+            {
+                await AnalyzeEthereumPairs();
+            }
+
+
+            await Task.FromResult(0);
+        }
+
+        private bool CurrencyAvailable(string currency)
+        {
+            return this.baseExchangeBalances.ContainsKey(currency) &&
+            this.baseExchangeBalances[currency].Available > txThreshold
+            && this.arbitrageExchangeBalances.ContainsKey(currency) &&
+            this.arbitrageExchangeBalances[currency].Available > txThreshold;
+        }
+
+
+        private static bool IsBaseCurrency(string currency)
+        {
+            return currency == "ETH" || currency == "BTC";
+        }
+
+        private async Task AnalyzeEthereumPairs()
+        {
+            foreach (var kvp in this.baseExchangeBalances.Where(kvp => !IsBaseCurrency(kvp.Value.Currency)))
+            {
+                if (this.arbitrageExchangeBalances.ContainsKey(kvp.Key))
+                {
+                    string symbol = string.Format("{0}ETH", kvp.Key);
+                    await AnalyzeMarket(symbol);
+                }
+            }
             await Task.FromResult(0);
         }
 
@@ -61,33 +96,38 @@ namespace BMCore.Engine
             {
                 if (this.arbitrageExchangeMarkets.ContainsKey(kvp.Key))
                 {
-                    try
-                    {
-                        //Always get the freshest data
-                        var bMarket = await this.baseExchange.MarketSummary(kvp.Key);
-                        var bBook = await this.baseExchange.OrderBook(kvp.Key);
-                        var rMarket = await this.arbExchange.MarketSummary(kvp.Key);
-                        var rBook = await this.arbExchange.OrderBook(kvp.Key);
-
-                        if (bMarket == null || bBook == null || rMarket == null || rBook == null)
-                        {
-                            dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, kvp.Key, "AnalyzeMarkets", "Market Data Null", "");
-                            Console.WriteLine("{0}: Null Market Data", kvp.Key);
-                        }
-                        else
-                        {
-                            await FindOpportunity(new ArbitrageMarket(bMarket, bBook, rMarket, rBook));
-                            Console.WriteLine("Analyzing {0}", kvp.Key);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, kvp.Key, "AnalyzeMarkets", e.Message, e.StackTrace);
-                    }
+                    await AnalyzeMarket(kvp.Key);
                 }
             }
 
             await Task.FromResult(0);
+        }
+
+        private async Task AnalyzeMarket(string symbol)
+        {
+            try
+            {
+                //Always get the freshest data
+                var bMarket = await this.baseExchange.MarketSummary(symbol);
+                var bBook = await this.baseExchange.OrderBook(symbol);
+                var rMarket = await this.arbExchange.MarketSummary(symbol);
+                var rBook = await this.arbExchange.OrderBook(symbol);
+
+                if (bMarket == null || bBook == null || rMarket == null || rBook == null)
+                {
+                    dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, symbol, "AnalyzeMarkets", "Market Data Null", "");
+                    Console.WriteLine("{0}: Null Market Data", symbol);
+                }
+                else
+                {
+                    await FindOpportunity(new ArbitrageMarket(bMarket, bBook, rMarket, rBook));
+                    Console.WriteLine("Analyzing {0}", symbol);
+                }
+            }
+            catch (Exception e)
+            {
+                dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, symbol, "AnalyzeMarkets", e.Message, e.StackTrace);
+            }
         }
 
         public async Task FindOpportunity(ArbitrageMarket am)

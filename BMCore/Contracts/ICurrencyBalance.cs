@@ -7,6 +7,6 @@ namespace BMCore.Contracts
     public interface ICurrencyBalance
     {
         string Currency { get; set; }
-        decimal Amount { get; set; }
+        decimal Available { get; set; }
     }
 }
