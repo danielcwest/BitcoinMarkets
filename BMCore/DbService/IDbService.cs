@@ -16,7 +16,7 @@ namespace BMCore.DbService
         IEnumerable<DbOrder> GetOrders(long id = -1, string uuid = null, string status = "");
         long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side);
         void UpdateOrderUuid(long id, string uuid);
-        void FillOrder(long id, decimal quantity, decimal price, decimal fee = 0m);
+        void FillOrder(long id, decimal quantity, decimal price, decimal rate, decimal fee = 0m);
         long InsertWithdrawal(string uuid, long orderId, string currency, string fromExchange, decimal amount);
         void CloseWithdrawal(long id, decimal actualAmount, string txId);
 

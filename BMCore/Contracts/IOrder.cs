@@ -11,6 +11,7 @@ namespace BMCore.Contracts
         decimal Quantity { get; set; }
         decimal QuantityRemaining { get; set; }
         decimal Price { get; set; }
+        decimal Rate { get; set; }
         bool IsOpen { get; set; }
         bool IsFilled { get; set; }
     }

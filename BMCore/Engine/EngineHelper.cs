@@ -104,7 +104,7 @@ namespace BMCore.Engine
                     var exchange = exchanges[order.Exchange];
                     var o = await exchange.CheckOrder(order.Uuid);
                     if (o != null && o.IsFilled)
-                        dbService.FillOrder(order.Id, o.Quantity, o.Price);
+                        dbService.FillOrder(order.Id, o.Quantity, o.Price, o.Rate);
                 }
                 catch (Exception ex)
                 {

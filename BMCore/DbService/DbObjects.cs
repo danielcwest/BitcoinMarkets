@@ -25,6 +25,7 @@ namespace BMCore.DbService
         public string Status; //Open, Filled, Partial, Canceled, Rejected 
         public decimal Quantity;
         public decimal Price;
+        public decimal Rate;
         public decimal Commission; //Fee paid
         public string Side; //Buy or Sell
         public DateTime CreatedUtc;

@@ -101,7 +101,7 @@ namespace BMCore.DbService
                 });
         }
 
-        public void FillOrder(long id, decimal quantity, decimal price, decimal fee = 0)
+        public void FillOrder(long id, decimal quantity, decimal price, decimal rate, decimal fee = 0)
         {
             DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.CloseOrder", 15,
                 new SqlParameter[]
@@ -109,6 +109,7 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@id", Value = id },
                     new SqlParameter { ParameterName = "@quantity", Value = quantity },
                     new SqlParameter { ParameterName = "@price", Value = price },
+                    new SqlParameter { ParameterName = "@rate", Value = rate },
                     new SqlParameter { ParameterName = "@commission", Value = fee }
                 });
         }

@@ -20,6 +20,7 @@ namespace HitbtcSharp.Models
         public bool IsFilled { get; set; }
         public string Side { get; set; }
         public string ClientOrderId { get; set; }
+        public decimal Rate { get; set; }
 
         public Order(HitbtcSharp.Models.HitbtcOrder order)
         {
@@ -34,6 +35,7 @@ namespace HitbtcSharp.Models
             this.ClientOrderId = order.clientOrderId;
             this.IsOpen = order.orderStatus == "new" || order.orderStatus == "partiallyFilled";
             this.IsFilled = order.orderStatus == "filled";
+            this.Rate = 0m;
         }
     }
 }
