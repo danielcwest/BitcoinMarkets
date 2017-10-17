@@ -40,9 +40,6 @@ namespace BMCore.Engine
             this.arbitrageMarkets = new ConcurrentDictionary<string, ArbitrageMarket>();
             results = new ConcurrentBag<string>();
             this.txThreshold = txThreshold;
-
-            if (dbService.GetInvalidOrderCount() > 0)
-                throw new Exception("Fix Invalid orders");
         }
 
         public async Task AnalyzeFundedPairs()

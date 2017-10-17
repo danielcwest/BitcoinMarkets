@@ -62,8 +62,10 @@ namespace Engine
                     case "trade":
                         if (args.Length == 3)
                         {
-                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, threshold, "trade");
+                            if (dbService.GetInvalidOrderCount() > 0)
+                                throw new Exception("Fix Invalid orders");
 
+                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, threshold, "trade");
 
                         }
                         break;

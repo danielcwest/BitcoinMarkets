@@ -86,7 +86,7 @@ namespace HitbtcSharp
                 {"symbol", symbol },
                 {"side", "buy"},
                 {"price", price},
-                {"quantity", quantity.ToString("N4")},
+                {"quantity", quantity.ToString("{0:#.####}")},
                 {"type", "limit" }
             };
 
