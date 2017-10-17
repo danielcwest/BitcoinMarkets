@@ -53,7 +53,7 @@ namespace BMCore.Engine
             await RefreshSymbols();
 
             //Ethereum Markets
-            if (CurrencyAvailable("ETH"))
+            if (BaseCurrencyAvailable("ETH"))
             {
                 await AnalyzeEthereumPairs();
             }
@@ -62,7 +62,7 @@ namespace BMCore.Engine
             await Task.FromResult(0);
         }
 
-        private bool CurrencyAvailable(string currency)
+        private bool BaseCurrencyAvailable(string currency)
         {
             return this.baseExchangeBalances.ContainsKey(currency) &&
             this.baseExchangeBalances[currency].Available > txThreshold

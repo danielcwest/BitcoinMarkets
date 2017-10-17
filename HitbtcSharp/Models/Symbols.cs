@@ -32,8 +32,8 @@ namespace HitbtcSharp.Models
         public Symbol(SymbolV2 symbol)
         {
             ExchangeSymbol = symbol.id;
-            MarketCurrency = symbol.quoteCurrency;
-            BaseCurrency = symbol.baseCurrency;
+            MarketCurrency = symbol.baseCurrency;
+            BaseCurrency = symbol.quoteCurrency;
             Fee = Math.Abs(symbol.provideLiquidityRate);
             LocalSymbol = symbol.id;
             FeeCurrency = symbol.feeCurrency;
