@@ -57,6 +57,11 @@ namespace HitbtcSharp
         [Post("/api/1/payment/payout")]
         Task<PayoutTransaction> WithdrawV1([Header("X-Signature")] string sig, [Query("nonce")] long nonce, [Query("apikey")] string apikey, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
 
+        [Post("/api/1/payment/transfer_to_trading")]
+        Task<PayoutTransaction> TransferToTrading([Header("X-Signature")] string sig, [Query("nonce")] long nonce, [Query("apikey")] string apikey, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
+
+        [Post("/api/1/payment/transfer_to_main")]
+        Task<PayoutTransaction> TransferToMain([Header("X-Signature")] string sig, [Query("nonce")] long nonce, [Query("apikey")] string apikey, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
 
     }
 }

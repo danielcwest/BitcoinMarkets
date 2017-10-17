@@ -128,7 +128,7 @@ namespace HitbtcSharp
         {
             var balance = await GetMainBalance(currency);
 
-            CryptoTransaction tx;
+            PayoutTransaction tx;
             if (quantity > balance.Available)
                 tx = await TransferToMain(quantity, currency);
 
@@ -192,26 +192,34 @@ namespace HitbtcSharp
                 return balances;
         }
 
-        public async Task<CryptoTransaction> TransferToTrading(decimal amount, string currency)
+        public async Task<PayoutTransaction> TransferToTrading(decimal amount, string currency)
         {
+            long nonce = GetNonce();
+            string pathAndQuery = string.Format("/api/1/payment/transfer_to_trading?nonce={0}&apikey={1}amount={2}&currency_code={3}", nonce, _config.ApiKey, amount, currency);
+
+            string sign = CalculateSignature(pathAndQuery, _config.Secret);
+
             var data = new Dictionary<string, object> {
                 {"amount", amount},
-                {"currency", currency },
-                {"type", "bankToExchange" }
+                {"currency_code", currency }
             };
 
-            return await _hitbtc.Transfer(data);
+            return await _hitbtc.TransferToTrading(sign, nonce, _config.ApiKey, data);
         }
 
-        public async Task<CryptoTransaction> TransferToMain(decimal amount, string currency)
+        public async Task<PayoutTransaction> TransferToMain(decimal amount, string currency)
         {
+            long nonce = GetNonce();
+            string pathAndQuery = string.Format("/api/1/payment/transfer_to_main?nonce={0}&apikey={1}amount={2}&currency_code={3}", nonce, _config.ApiKey, amount, currency);
+
+            string sign = CalculateSignature(pathAndQuery, _config.Secret);
+
             var data = new Dictionary<string, object> {
                 {"amount", amount},
-                {"currency", currency },
-                {"type", "exchangeToBank" }
+                {"currency_code", currency }
             };
 
-            return await _hitbtc.Transfer(data);
+            return await _hitbtc.TransferToMain(sign, nonce, _config.ApiKey, data);
         }
 
         private static long GetNonce()
