@@ -82,7 +82,9 @@ namespace BittrexSharp
 
         public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate)
         {
-            return await _bittrex.SellLimit(GetMarketNameFromSymbol(symbol), quantity, rate);
+            if (!symbol.Contains("-"))
+                symbol = GetMarketNameFromSymbol(symbol);
+            return await _bittrex.SellLimit(symbol, quantity, rate);
         }
 
         public async Task CancelOrder(string orderId)

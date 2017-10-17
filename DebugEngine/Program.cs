@@ -38,14 +38,6 @@ namespace DebugEngine
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
                 var bittrex = (Bittrex)exchanges["Bittrex"];
 
-                decimal num = 123.124134556423453m;
-                string n = num.ToString("N3");
-
-                decimal txThreshold = .1m;
-                decimal arbBuy = 0.002591m;
-                var symbols = hitbtc.Symbols().Result.ToDictionary(s => s.ExchangeSymbol);
-                long buyId = EngineHelper.Sell(hitbtc, symbols["ADXETH"], dbService, "ADXETH", txThreshold / arbBuy, arbBuy).Result;
-
 
                 Console.WriteLine("Complete");
             }
