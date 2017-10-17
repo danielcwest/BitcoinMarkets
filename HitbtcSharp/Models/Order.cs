@@ -27,8 +27,8 @@ namespace HitbtcSharp.Models
             this.Exchange = "Hitbtc";
             this.Symbol = order.symbol;
             this.Type = order.type;
-            this.Quantity = Convert.ToDecimal(order.quantity);
-            this.QuantityRemaining = Convert.ToDecimal(order.quantity) - Convert.ToDecimal(order.cumQuantity);
+            this.Quantity = order.quantity.HasValue ? Convert.ToDecimal(order.quantity.Value) : 0m;
+            this.QuantityRemaining = 0m;
             this.Price = Convert.ToDecimal(order.orderPrice);
             this.Side = order.side;
             this.ClientOrderId = order.clientOrderId;

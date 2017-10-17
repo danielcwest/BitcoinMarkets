@@ -64,12 +64,15 @@ namespace Engine
                         {
                             EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, threshold, "trade");
 
-                            EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
 
-                            EngineHelper.ProcessWithdrawals(dbService, exchanges).Wait();
-
-                            EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
                         }
+                        break;
+                    case "withdraw":
+                        EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
+
+                        EngineHelper.ProcessWithdrawals(dbService, exchanges).Wait();
+
+                        EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
                         break;
                     default:
                         break;

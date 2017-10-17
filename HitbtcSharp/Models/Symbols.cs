@@ -27,6 +27,7 @@ namespace HitbtcSharp.Models
         public string MarketCurrency { get; set; }
         public decimal Fee { get; set; }
         public string FeeCurrency { get; set; }
+        public decimal TickSize { get; set; }
 
         public Symbol(SymbolV2 symbol)
         {
@@ -36,6 +37,7 @@ namespace HitbtcSharp.Models
             Fee = Math.Abs(symbol.provideLiquidityRate);
             LocalSymbol = symbol.id;
             FeeCurrency = symbol.feeCurrency;
+            TickSize = symbol.tickSize;
         }
     }
 }

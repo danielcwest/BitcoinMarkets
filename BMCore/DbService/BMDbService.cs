@@ -91,18 +91,13 @@ namespace BMCore.DbService
                 });
         }
 
-        public void UpdateOrderUuid(long id, string uuid, string status = "", long counterId = 0, decimal quantity = 0m, decimal price = 0m, decimal commission = 0m)
+        public void UpdateOrderUuid(long id, string uuid)
         {
             DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateOrderUuid", 15,
                 new SqlParameter[]
                 {
                     new SqlParameter { ParameterName = "@id", Value = id },
-                    new SqlParameter { ParameterName = "@counterId", Value = counterId },
-                    new SqlParameter { ParameterName = "@uuid", Value = uuid },
-                    new SqlParameter { ParameterName = "@status", Value = status },
-                    new SqlParameter { ParameterName = "@quantity", Value = quantity},
-                    new SqlParameter { ParameterName = "@price", Value = price},
-                    new SqlParameter { ParameterName = "@commission", Value = commission}
+                    new SqlParameter { ParameterName = "@uuid", Value = uuid }
                 });
         }
 

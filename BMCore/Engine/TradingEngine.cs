@@ -165,7 +165,7 @@ namespace BMCore.Engine
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseBuy, arbSell, baseBuySpread, txThreshold);
                     long buyId = await EngineHelper.Buy(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseBuy, baseBuy);
                     long sellId = await EngineHelper.Sell(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbSell, arbSell);
-
+                    dbService.SaveOrderPair(buyId, sellId);
                 }
 
                 if (baseSell > arbBuy && baseSellSpread >= 0 && runType == "trade")
@@ -173,6 +173,7 @@ namespace BMCore.Engine
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseSell, arbBuy, baseSellSpread, txThreshold);
                     long buyId = await EngineHelper.Buy(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbBuy, arbBuy);
                     long sellId = await EngineHelper.Sell(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseSell, baseSell);
+                    dbService.SaveOrderPair(buyId, sellId);
                 }
             }
             await Task.FromResult(0);

@@ -25,7 +25,7 @@ namespace HitbtcSharp.Models
         /// <summary>
         /// UTC timestamp of the last change, in milliseconds
         /// </summary>
-        public long lastTimestamp { get; set; }
+        public long? lastTimestamp { get; set; }
 
         /// <summary>
         /// Order price
@@ -35,7 +35,7 @@ namespace HitbtcSharp.Models
         /// <summary>
         /// Order quantity, in lots
         /// </summary>
-        public int quantity { get; set; }
+        public decimal? quantity { get; set; }
 
         /// <summary>
         /// Type of an order
@@ -51,7 +51,7 @@ namespace HitbtcSharp.Models
         /// <summary>
         /// Cumulative quantity
         /// </summary>
-        public int? cumQuantity { get; set; }
+        public decimal? cumQuantity { get; set; }
 
         /// <summary>
         /// Unique client-generated ID
