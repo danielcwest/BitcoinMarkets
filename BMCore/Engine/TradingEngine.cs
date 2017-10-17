@@ -31,6 +31,7 @@ namespace BMCore.Engine
         BMDbService dbService;
 
         string runType = "log";
+        int pId = 0;
 
         public TradingEngine(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, decimal txThreshold)
         {
@@ -42,9 +43,10 @@ namespace BMCore.Engine
             this.txThreshold = txThreshold;
         }
 
-        public async Task AnalyzeFundedPairs()
+        public async Task AnalyzeFundedPairs(int pId)
         {
             this.runType = "trade";
+            this.pId = pId;
             var baseBalances = await this.baseExchange.GetBalances();
             var arbBalances = await this.arbExchange.GetBalances();
             this.baseExchangeBalances = baseBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);

@@ -41,7 +41,7 @@ namespace BMCore.Engine
                 if (runType == "log")
                     engine.AnalyzeMarkets().Wait();
                 else if (runType == "trade")
-                    engine.AnalyzeFundedPairs().Wait();
+                    engine.AnalyzeFundedPairs(pId).Wait();
 
                 dbService.EndEngineProcess(pId, "success");
                 Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);

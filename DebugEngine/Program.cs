@@ -36,7 +36,7 @@ namespace DebugEngine
             try
             {
 
-                string num = string.Format("{0:0.###}", 1233214.234235465344566);
+                string num = 1233214.234235465344566m.ToString("#.####");
 
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
                 var bittrex = (Bittrex)exchanges["Bittrex"];
