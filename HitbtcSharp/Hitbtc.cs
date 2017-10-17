@@ -119,6 +119,7 @@ namespace HitbtcSharp
         {
             var orders = await _hitbtc.GetOrders();
             var order = orders.Where(o => o.Uuid == orderId).FirstOrDefault();
+            if (order == null) return null;
             return new Order(order);
         }
 

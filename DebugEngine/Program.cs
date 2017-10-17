@@ -35,6 +35,11 @@ namespace DebugEngine
 
             try
             {
+                var hitbtc = (Hitbtc)exchanges["Hitbtc"];
+                var bittrex = (Bittrex)exchanges["Bittrex"];
+
+                var o = hitbtc.CheckOrder("4189718031").Result;
+                //EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
 
                 Console.WriteLine("Complete");
             }
