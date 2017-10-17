@@ -49,7 +49,7 @@ namespace DebugEngine
 
                 //EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
 
-                EngineHelper.ProcessWithdrawals(dbService, exchanges, 0.25m).Wait();
+                var tx = hitbtc.TransferToMain(10m, "QTUM").Result;
 
                 Console.WriteLine("Complete");
             }
