@@ -117,7 +117,7 @@ namespace BMCore.Engine
                 catch (Exception ex)
                 {
                     dbService.UpdateOrderStatus(order.Id, "error", ex);
-                    dbService.LogError(order.Exchange, order.ToExchange, order.Uuid, "ProcessWithdrawals", ex.Message, ex.StackTrace);
+                    dbService.LogError(order.Exchange, "", order.Uuid, "ProcessWithdrawals", ex.Message, ex.StackTrace);
 
                 }
 
@@ -125,14 +125,16 @@ namespace BMCore.Engine
             await Task.FromResult(0);
         }
 
-        public static async Task ProcessWithdrawals(IDbService dbService, Dictionary<string, IExchange> exchanges)
+        public static async Task ProcessWithdrawals(IDbService dbService, Dictionary<string, IExchange> exchanges, decimal threshold)
         {
-            foreach (var order in dbService.GetOrders(status: "filled").Where(o => !string.IsNullOrWhiteSpace(o.ToExchange)))
+            foreach (var order in dbService.GetOrders(status: "filled"))
             {
                 try
                 {
+                    var counter = dbService.GetOrders(id: order.CounterId).FirstOrDefault();
+
                     var fromExchange = exchanges[order.Exchange];
-                    var toExchange = exchanges[order.ToExchange];
+                    var toExchange = exchanges[counter.Exchange];
                     string address;
                     string currency;
 
@@ -149,14 +151,19 @@ namespace BMCore.Engine
                         currency = result.Currency;
                     }
 
-                    var tx = await fromExchange.Withdraw(currency, order.Quantity, address);
-                    dbService.InsertWithdrawal(tx.Uuid, order.Id, currency, fromExchange.Name, order.Quantity);
+                    //TODO: CHange quantity based on BaseCurrency
+                    decimal quantity = IsBaseCurrency(currency) ? threshold : order.Quantity;
+
+                    if (quantity > 0 && !string.IsNullOrWhiteSpace(address) && !string.IsNullOrWhiteSpace(currency))
+                    {
+                        var tx = await fromExchange.Withdraw(currency, quantity, address);
+                        dbService.InsertWithdrawal(tx.Uuid, order.Id, currency, fromExchange.Name, quantity);
+                    }
                 }
                 catch (Exception ex)
                 {
                     dbService.UpdateOrderStatus(order.Id, "error", ex);
-                    dbService.LogError(order.Exchange, order.ToExchange, order.Uuid, "ProcessWithdrawals", ex.Message, ex.StackTrace);
-
+                    dbService.LogError(order.Exchange, "", order.Uuid, "ProcessWithdrawals", ex.Message, ex.StackTrace);
                 }
 
             }
@@ -175,6 +182,11 @@ namespace BMCore.Engine
                 }
             }
             return result;
+        }
+
+        public static bool IsBaseCurrency(string currency)
+        {
+            return currency == "ETH" || currency == "BTC";
         }
     }
 }

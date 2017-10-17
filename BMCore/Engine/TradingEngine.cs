@@ -74,14 +74,11 @@ namespace BMCore.Engine
         }
 
 
-        private static bool IsBaseCurrency(string currency)
-        {
-            return currency == "ETH" || currency == "BTC";
-        }
+
 
         private async Task AnalyzeEthereumPairs()
         {
-            foreach (var kvp in this.baseExchangeBalances.Where(kvp => !IsBaseCurrency(kvp.Value.Currency)))
+            foreach (var kvp in this.baseExchangeBalances.Where(kvp => !EngineHelper.IsBaseCurrency(kvp.Value.Currency)))
             {
                 if (this.arbitrageExchangeBalances.ContainsKey(kvp.Key))
                 {

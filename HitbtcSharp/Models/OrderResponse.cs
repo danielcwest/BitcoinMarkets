@@ -20,17 +20,7 @@ namespace HitbtcSharp.Models
         /// Order status
         /// new, partiallyFilled, filled, canceled, expired, rejected
         /// </summary>
-        public string orderStatus { get; set; }
-
-        /// <summary>
-        /// UTC timestamp of the last change, in milliseconds
-        /// </summary>
-        public long? lastTimestamp { get; set; }
-
-        /// <summary>
-        /// Order price
-        /// </summary>
-        public string orderPrice { get; set; }
+        public string status { get; set; }
 
         /// <summary>
         /// Order quantity, in lots

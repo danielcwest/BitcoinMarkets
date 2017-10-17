@@ -29,7 +29,6 @@ namespace BMCore.DbService
         public decimal Commission; //Fee paid
         public string Side; //Buy or Sell
         public DateTime CreatedUtc;
-        public string ToExchange;
     }
 
     public class DbWithdrawal

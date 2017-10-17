@@ -30,11 +30,11 @@ namespace HitbtcSharp.Models
             this.Type = order.type;
             this.Quantity = order.quantity.HasValue ? Convert.ToDecimal(order.quantity.Value) : 0m;
             this.QuantityRemaining = 0m;
-            this.Price = Convert.ToDecimal(order.orderPrice);
+            this.Price = 0m;
             this.Side = order.side;
             this.ClientOrderId = order.clientOrderId;
-            this.IsOpen = order.orderStatus == "new" || order.orderStatus == "partiallyFilled";
-            this.IsFilled = order.orderStatus == "filled";
+            this.IsOpen = order.status == "new" || order.status == "partiallyFilled";
+            this.IsFilled = order.status == "filled";
             this.Rate = 0m;
         }
     }
