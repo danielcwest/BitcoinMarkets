@@ -30,5 +30,7 @@ namespace BMCore.DbService
 
         int StartEngineProcess(string baseExchange, string arbExchange, string runType);
         void EndEngineProcess(int id, string resultStatus, object payload = null);
+
+        int GetInvalidOrderCount();
     }
 }

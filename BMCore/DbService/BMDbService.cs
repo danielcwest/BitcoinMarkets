@@ -216,6 +216,11 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@meta", Value = (payload == null) ? "" : JsonConvert.SerializeObject(payload)}
                 });
         }
+
+        public int GetInvalidOrderCount()
+        {
+            return (int)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.GetInvalidOrderCount", 15);
+        }
     }
 
 }
