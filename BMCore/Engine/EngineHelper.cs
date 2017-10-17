@@ -162,7 +162,7 @@ namespace BMCore.Engine
                 }
                 catch (Exception ex)
                 {
-                    dbService.UpdateOrderStatus(order.Id, "error", ex);
+                    //dbService.UpdateOrderStatus(order.Id, "error", ex);
                     dbService.LogError(order.Exchange, "", order.Uuid, "ProcessWithdrawals", ex);
                 }
 
