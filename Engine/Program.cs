@@ -63,6 +63,12 @@ namespace Engine
                         if (args.Length == 3)
                         {
                             EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, threshold, "trade");
+
+                            EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
+
+                            EngineHelper.ProcessWithdrawals(dbService, exchanges).Wait();
+
+                            EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
                         }
                         break;
                     default:

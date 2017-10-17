@@ -50,6 +50,8 @@ namespace BMCore.Engine
             this.baseExchangeBalances = baseBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
             this.arbitrageExchangeBalances = arbBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
 
+            await RefreshSymbols();
+
             //Ethereum Markets
             if (CurrencyAvailable("ETH"))
             {
@@ -89,12 +91,7 @@ namespace BMCore.Engine
 
         public async Task AnalyzeMarkets()
         {
-            var baseMarkets = await this.baseExchange.Symbols();
-            this.baseExchangeMarkets = baseMarkets.ToDictionary(m => m.LocalSymbol);
-
-            var arbExchange = await this.arbExchange.Symbols();
-            this.arbitrageExchangeMarkets = arbExchange.ToDictionary(m => m.LocalSymbol);
-
+            await RefreshSymbols();
             foreach (var kvp in this.baseExchangeMarkets)
             {
                 if (this.arbitrageExchangeMarkets.ContainsKey(kvp.Key))
@@ -102,6 +99,17 @@ namespace BMCore.Engine
                     await AnalyzeMarket(kvp.Key);
                 }
             }
+
+            await Task.FromResult(0);
+        }
+
+        public async Task RefreshSymbols()
+        {
+            var baseMarkets = await this.baseExchange.Symbols();
+            this.baseExchangeMarkets = baseMarkets.ToDictionary(m => m.LocalSymbol);
+
+            var arbExchange = await this.arbExchange.Symbols();
+            this.arbitrageExchangeMarkets = arbExchange.ToDictionary(m => m.LocalSymbol);
 
             await Task.FromResult(0);
         }
@@ -152,14 +160,19 @@ namespace BMCore.Engine
                 baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (this.baseExchange.Fee + this.arbExchange.Fee);
                 baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (this.baseExchange.Fee + this.arbExchange.Fee);
 
-                if (baseBuy < arbSell && baseBuySpread > 0)
+                if (baseBuy < arbSell && baseBuySpread > 0 && runType == "trade")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseBuy, arbSell, baseBuySpread, txThreshold);
+                    long buyId = await EngineHelper.Buy(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseBuy, baseBuy);
+                    long sellId = await EngineHelper.Sell(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbSell, arbSell);
+
                 }
 
-                if (baseSell > arbBuy && baseSellSpread >= 0)
+                if (baseSell > arbBuy && baseSellSpread >= 0 && runType == "trade")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseSell, arbBuy, baseSellSpread, txThreshold);
+                    long buyId = await EngineHelper.Buy(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbBuy, arbBuy);
+                    long sellId = await EngineHelper.Sell(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseSell, baseSell);
                 }
             }
             await Task.FromResult(0);
