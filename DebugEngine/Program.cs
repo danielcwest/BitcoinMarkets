@@ -38,10 +38,6 @@ namespace DebugEngine
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
                 var bittrex = (Bittrex)exchanges["Bittrex"];
 
-                var engine = new TradingEngine(bittrex, hitbtc, dbService, threshold);
-
-                engine.AnalyzeFundedPairs().Wait();
-
                 Console.WriteLine("Complete");
             }
             catch (Exception e)

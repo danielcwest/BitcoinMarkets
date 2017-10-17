@@ -41,13 +41,13 @@
             "console": "internalConsole"
         },
         {
-            "name": "Engine Log Binance Hitbtc",
+            "name": "Engine Trade Bittrex Hitbtc",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
             "args": [
-                "log",
-                "Binance",
+                "trade",
+                "Bittrex",
                 "Hitbtc"
             ],
             "cwd": "${workspaceRoot}/Engine",

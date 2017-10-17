@@ -15,7 +15,7 @@ namespace BMCore.DbService
             this.sqlConnectionString = sqlConnectionString;
         }
 
-        public void LogTrade(string baseX, string arbX, string symbol, decimal basePrice, decimal arbPrice, decimal spread, decimal threshold)
+        public void LogTrade(string baseX, string arbX, string symbol, string runType, decimal basePrice, decimal arbPrice, decimal spread, decimal threshold)
         {
             DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertTrade", 15,
                 new SqlParameter[]
@@ -26,7 +26,8 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@basePrice", Value = basePrice },
                     new SqlParameter { ParameterName = "@arbPrice", Value = arbPrice},
                     new SqlParameter { ParameterName = "@spread", Value = spread},
-                    new SqlParameter { ParameterName = "@threshold", Value = threshold}
+                    new SqlParameter { ParameterName = "@threshold", Value = threshold},
+                    new SqlParameter { ParameterName = "@type", Value = runType}
                 });
         }
 
