@@ -68,7 +68,15 @@ namespace BMCore.Engine
         public static async Task<long> Trade(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, string side)
         {
             long orderId = dbService.InsertOrder(exchange.Name, symbol, market.BaseCurrency, market.MarketCurrency, side);
-            var tradeResult = await exchange.Sell(orderId.ToString(), market.ExchangeSymbol, quantity, price);
+            IAcceptedAction tradeResult;
+            if (side == "buy")
+            {
+                tradeResult = await exchange.Buy(orderId.ToString(), market.ExchangeSymbol, quantity, price);
+            }
+            else
+            {
+                tradeResult = await exchange.Sell(orderId.ToString(), market.ExchangeSymbol, quantity, price);
+            }
             dbService.UpdateOrderUuid(orderId, tradeResult.Uuid);
             return orderId;
         }

@@ -117,7 +117,8 @@ namespace HitbtcSharp
         }
         public async Task<IOrder> CheckOrder(string orderId)
         {
-            var order = await _hitbtc.GetOrder(orderId);
+            var orders = await _hitbtc.GetOrders();
+            var order = orders.Where(o => o.Uuid == orderId).FirstOrDefault();
             return new Order(order);
         }
 
