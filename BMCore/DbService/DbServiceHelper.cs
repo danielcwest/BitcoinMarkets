@@ -113,6 +113,16 @@ namespace BMCore.DbService
                 return table;
             }
 
+            if (typeof(T) == typeof(long))
+            {
+                table.Columns.Add("LongValue", typeof(long));
+                foreach (var item in list)
+                {
+                    table.Rows.Add(item);
+                }
+                return table;
+            }
+
             //Get the fields for these objects
             FieldInfo[] fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Instance);
 

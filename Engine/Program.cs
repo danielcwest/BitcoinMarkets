@@ -72,9 +72,9 @@ namespace Engine
                     case "withdraw":
                         EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
 
-                        EngineHelper.ProcessWithdrawals(dbService, exchanges, threshold).Wait();
+                        EngineHelper.ProcessWithdrawals(dbService, exchanges.Values.ToArray(), threshold).Wait();
 
-                        Thread.Sleep(1000 * 60 * 3); //Wait 3 minutes for withdrawals to go through on exchange
+                        Thread.Sleep(1000 * 60); //Wait 1 minute for withdrawals to go through on exchange
 
                         EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
                         break;

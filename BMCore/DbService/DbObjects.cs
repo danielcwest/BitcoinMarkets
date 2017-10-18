@@ -19,6 +19,7 @@ namespace BMCore.DbService
         public long CounterId;
         public int ProcessId;
         public string Exchange;
+        public string CounterExchange;
         public string Symbol;
         public string BaseCurrency;
         public string MarketCurrency;
@@ -30,6 +31,21 @@ namespace BMCore.DbService
         public decimal Commission; //Fee paid
         public string Side; //Buy or Sell
         public DateTime CreatedUtc;
+    }
+
+    public class DbWithdrawOrder
+    {
+        public long Id; //Client ID (Our ID)
+        public string Exchange;
+        public string CounterExchange;
+        public string Symbol;
+        public string Currency;
+        public string Uuid; //Exchange ID
+        public string Status; //Open, Filled, Partial, Canceled, Rejected 
+        public decimal Quantity;
+        public decimal Price;
+        public decimal Rate;
+        public string Side; //Buy or Sell
     }
 
     public class DbWithdrawal

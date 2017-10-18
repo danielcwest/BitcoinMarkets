@@ -47,9 +47,7 @@ namespace DebugEngine
 
                 //  var res = EngineHelper.Buy(hitbtc, symbols["SNTETH"], dbService, "SNTETH", threshold / arbBuy, arbBuy).Result;
 
-                //EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
-
-                var tx = hitbtc.TransferToMain(10m, "QTUM").Result;
+                EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
 
                 Console.WriteLine("Complete");
             }

@@ -163,13 +163,15 @@ namespace BMCore.DbService
             }
         }
 
-        public void SaveOrderPair(long orderId1, long orderId2)
+        public void SaveOrderPair(long orderId1, string exchange1, long orderId2, string exchange2)
         {
             DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.SaveOrderPair", 15,
                 new SqlParameter[]
                 {
                     new SqlParameter { ParameterName = "@order1Id", Value = orderId1 },
-                    new SqlParameter { ParameterName = "@order2Id", Value = orderId2 }
+                    new SqlParameter { ParameterName = "@order1Exchange", Value = exchange1 },
+                    new SqlParameter { ParameterName = "@order2Id", Value = orderId2 },
+                    new SqlParameter { ParameterName = "@order2Exchange", Value = exchange2 }
                 });
         }
 
@@ -230,6 +232,30 @@ namespace BMCore.DbService
         public int GetInvalidOrderCount()
         {
             return (int)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.GetInvalidOrderCount", 15);
+        }
+
+        public IEnumerable<DbWithdrawOrder> GetOrdersToWithdraw(string fromExchange, string toExchange, string side, decimal threshold)
+        {
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetOrdersToWithdrawal", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@fromExchange", Value = fromExchange },
+                        new SqlParameter { ParameterName = "@toExchange", Value = toExchange },
+                        new SqlParameter { ParameterName = "@side", Value = side },
+                        new SqlParameter { ParameterName = "@threshold", Value = threshold }
+                }))
+            {
+                return reader.ToList<DbWithdrawOrder>();
+            }
+        }
+
+        public void CloseOrders(IEnumerable<long> ids)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.CloseOrders", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@ids", Value = ids.ToDataTable(), TypeName = "dbo.LongCollection" }
+                });
         }
     }
 

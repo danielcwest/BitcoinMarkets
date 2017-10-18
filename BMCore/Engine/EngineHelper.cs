@@ -125,45 +125,50 @@ namespace BMCore.Engine
             await Task.FromResult(0);
         }
 
-        public static async Task ProcessWithdrawals(IDbService dbService, Dictionary<string, IExchange> exchanges, decimal threshold)
+        public static async Task ProcessWithdrawals(IDbService dbService, IExchange[] exchanges, decimal threshold)
         {
-            foreach (var order in dbService.GetOrders(status: "filled"))
+            for (var i = 0; i < exchanges.Length; i++)
+            {
+                var baseExchange = exchanges[i];
+                for (var j = 0; j < exchanges.Length; j++)
+                {
+                    var arbExchange = exchanges[j];
+
+                    if (baseExchange != arbExchange)
+                    {
+                        await ProcessWithdrawOrders(baseExchange, arbExchange, dbService, threshold, "buy");
+                        await ProcessWithdrawOrders(baseExchange, arbExchange, dbService, threshold, "sell");
+                    }
+
+                }
+            }
+            await Task.FromResult(0);
+        }
+
+        private static async Task ProcessWithdrawOrders(IExchange from, IExchange to, IDbService dbService, decimal threshold, string side)
+        {
+            var ordersDic = dbService.GetOrdersToWithdraw(from.Name, to.Name, side, threshold).GroupBy(g => g.Currency).ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var kvp in ordersDic)
             {
                 try
                 {
-                    var counter = dbService.GetOrders(id: order.CounterId).FirstOrDefault();
+                    var depAddress = await to.GetDepositAddress(kvp.Key);
 
-                    var fromExchange = exchanges[order.Exchange];
-                    var toExchange = exchanges[counter.Exchange];
-                    string address;
-                    string currency;
+                    decimal quantity = kvp.Value.Sum(o => o.Quantity);
 
-                    if (order.Side == "buy")
+                    string symbol = kvp.Value.FirstOrDefault().Symbol;
+
+                    if (quantity > 0 && !string.IsNullOrWhiteSpace(depAddress.Address) && !string.IsNullOrWhiteSpace(kvp.Key))
                     {
-                        var result = await toExchange.GetDepositAddress(order.MarketCurrency);
-                        address = result.Address;
-                        currency = result.Currency;
-                    }
-                    else
-                    {
-                        var result = await toExchange.GetDepositAddress(order.BaseCurrency);
-                        address = result.Address;
-                        currency = result.Currency;
-                    }
-
-                    //TODO: CHange quantity based on BaseCurrency
-                    decimal quantity = IsBaseCurrency(currency) ? threshold : order.Quantity;
-
-                    if (quantity > 0 && !string.IsNullOrWhiteSpace(address) && !string.IsNullOrWhiteSpace(currency))
-                    {
-                        var tx = await fromExchange.Withdraw(currency, quantity, address);
-                        dbService.InsertWithdrawal(tx.Uuid, order.Id, currency, fromExchange.Name, quantity, order.ProcessId);
+                        var tx = await from.Withdraw(kvp.Key, quantity, depAddress.Address);
+                        dbService.InsertWithdrawal(tx.Uuid, 0, kvp.Key, from.Name, quantity, 0);
+                        dbService.CloseOrders(kvp.Value.Select(o => o.Id));
                     }
                 }
                 catch (Exception ex)
                 {
-                    //dbService.UpdateOrderStatus(order.Id, "error", ex);
-                    dbService.LogError(order.Exchange, "", order.Uuid, "ProcessWithdrawals", ex);
+                    dbService.LogError(from.Name, to.Name, "", "ProcessWithdrawOrders", ex);
                 }
 
             }
@@ -184,6 +189,7 @@ namespace BMCore.Engine
             return result;
         }
 
+        //TODO: Domain
         public static bool IsBaseCurrency(string currency)
         {
             return currency == "ETH" || currency == "BTC";
