@@ -47,7 +47,7 @@ namespace Engine
                 var arbitrageConfig = new ArbitrageConfig();
                 configuration.GetSection("ArbitrageConfig").Bind(arbitrageConfig);
 
-                var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"));
+                var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"), arbitrageConfig.Gmail);
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
                 var baseCurrencies = arbitrageConfig.BaseCurrencies.Where(c => c.Enabled).ToDictionary(e => e.Name);
 
