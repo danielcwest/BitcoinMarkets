@@ -53,58 +53,5 @@ namespace Web.Controllers
             var summaries = await _hitbtc.MarketSummaries();
             return summaries.Select(s => s.MarketName);
         }
-
-        [HttpPost]
-        public async Task<IOrder> Sell(string marketCurrency, string baseCurrency, decimal quantity, decimal price)
-        {
-            //Has Balance to Sell
-            var b = await _hitbtc.GetBalance(marketCurrency);
-
-            if (b.Available < quantity)
-                throw new Exception("Insufficient Balance");
-
-            //Sell On Exchange
-            var result = await _hitbtc.Sell("", string.Format("{0}-{1}", baseCurrency, marketCurrency), quantity, price);
-
-            //If Order went through, Withdraw Base Currency to Arb Exchange (only amount bought on other exchange)
-            var order = await _hitbtc.CheckOrder(result.Uuid);
-
-            return await Task.FromResult<IOrder>(order);
-        }
-
-        [HttpPost]
-        public async Task<IOrder> Buy(string marketCurrency, string baseCurrency, decimal quantity, decimal price)
-        {
-            //Has Balance to Sell
-            var b = await _hitbtc.GetBalance(marketCurrency);
-
-            if (b.Available < quantity)
-                throw new Exception("Insufficient Balance");
-
-            //Sell On Exchange
-            var result = await _hitbtc.Buy("", string.Format("{0}-{1}", baseCurrency, marketCurrency), quantity, price);
-
-            //If Order went through, Withdraw Base Currency to Arb Exchange (only amount bought on other exchange)
-            var order = await _hitbtc.CheckOrder(result.Uuid);
-
-            return await Task.FromResult<IOrder>(order);
-        }
-
-        [HttpGet]
-        public async Task<IWithdrawal> Withdraw(string currency, decimal quantity, string address)
-        {
-            //Has Balance to Sell
-            var b = await _hitbtc.GetBalance(currency);
-
-            if (b.Available < quantity)
-                throw new Exception("Insufficient Balance");
-
-            //Sell On Exchange
-            var result = await _hitbtc.Withdraw(currency, quantity, address);
-
-            //If Order went through, Withdraw Base Currency to Arb Exchange (only amount bought on other exchange)
-            return await _hitbtc.GetWithdrawal(result.Uuid);
-        }
-
     }
 }

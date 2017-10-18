@@ -42,11 +42,12 @@ namespace DebugEngine
 
             try
             {
-                var p = (Poloniex)exchanges["Poloniex"];
-                var l = (Liqui)exchanges["Liqui"];
+                var bittrex = (Bittrex)exchanges["Bittrex"];
+                var hitbtc = (Hitbtc)exchanges["Hitbtc"];
 
-                var ps = p.Symbols().Result;
-                var ls = l.Symbols().Result;
+                string sym = "SNTETH";
+                var symbols = bittrex.Symbols().Result.ToDictionary(s => s.LocalSymbol);
+                EngineHelper.Buy(bittrex, symbols[sym], dbService, sym, 1000m, 0.00009052m, -1).Wait();
 
                 Console.WriteLine("Complete");
             }

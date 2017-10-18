@@ -78,7 +78,7 @@ namespace BittrexSharp
 
         public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate)
         {
-            return await _bittrex.BuyLimit(GetMarketNameFromSymbol(symbol), quantity, rate);
+            return await _bittrex.BuyLimit(symbol, quantity, rate);
         }
 
         public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate)
