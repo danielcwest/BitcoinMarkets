@@ -44,17 +44,25 @@ namespace HitbtcSharp
             string auth = string.Format("Basic {0}", Convert.ToBase64String(Encoding.ASCII.GetBytes(string.Format("{0}:{1}", _config.ApiKey, _config.Secret))));
             _hitbtc.Authorization = auth;
 
-            foreach (var b in GetBalances("main").Result)
+            try
             {
-                try
+                foreach (var b in GetBalances("main").Result)
                 {
-                    var result = TransferToTrading(b.Available, b.Currency).Result;
-                }
-                catch (Exception)
-                {
-                    //Fail silently for now
+                    try
+                    {
+                        var result = TransferToTrading(b.Available, b.Currency).Result;
+                    }
+                    catch (Exception)
+                    {
+                        //Fail silently for now
+                    }
                 }
             }
+            catch (Exception)
+            {
+                //Fail silently for now
+            }
+
 
         }
 
