@@ -7,7 +7,7 @@ namespace BMCore.DbService
 
     public interface IDbService
     {
-        void LogTrade(string baseX, string arbX, string symbol, string runType, decimal basePrice, decimal arbPrice, decimal spread, decimal threshold);
+        void LogTrade(string baseX, string arbX, string symbol, string runType, decimal basePrice, decimal arbPrice, decimal spread, decimal threshold, int processId);
 
         IEnumerable<DbTradeLog> GetTrades(int limit = 100);
 

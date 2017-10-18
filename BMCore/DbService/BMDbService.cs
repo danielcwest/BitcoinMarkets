@@ -19,7 +19,7 @@ namespace BMCore.DbService
             this.sqlConnectionString = sqlConnectionString;
         }
 
-        public void LogTrade(string baseX, string arbX, string symbol, string runType, decimal basePrice, decimal arbPrice, decimal spread, decimal threshold)
+        public void LogTrade(string baseX, string arbX, string symbol, string runType, decimal basePrice, decimal arbPrice, decimal spread, decimal threshold, int processId)
         {
             DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertTrade", 15,
                 new SqlParameter[]
@@ -31,7 +31,8 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@arbPrice", Value = arbPrice},
                     new SqlParameter { ParameterName = "@spread", Value = spread},
                     new SqlParameter { ParameterName = "@threshold", Value = threshold},
-                    new SqlParameter { ParameterName = "@type", Value = runType}
+                    new SqlParameter { ParameterName = "@type", Value = runType},
+                    new SqlParameter { ParameterName = "@processId", Value = processId}
                 });
 
             if (gmail != null)
