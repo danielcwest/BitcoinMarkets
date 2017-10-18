@@ -76,7 +76,7 @@ namespace BMCore.DbService
                                 });
 
                 if (gmail != null)
-                    EmailHelper.SendSimpleMailAsync(gmail, string.Format("Error: {0}", message), string.Format("{0} - {1} {2} {3}", baseX, arbX, Environment.NewLine, stackTrace));
+                    EmailHelper.SendSimpleMailAsync(gmail, string.Format("Error: {0}", ex.Message), string.Format("{0} - {1} {2} {3}", baseX, arbX, Environment.NewLine, stackTrace));
             }
             catch (Exception)
             {

@@ -37,13 +37,13 @@ namespace BMCore.Engine
             {
                 Console.WriteLine("Starting: {0} {1}", baseExchange.Name, arbExchange.Name);
                 pId = dbService.StartEngineProcess(baseExchange.Name, arbExchange.Name, runType, baseCurrency);
-                var engine = new TradingEngine(baseExchange, arbExchange, dbService, baseCurrency, gmail);
+                var engine = new TradingEngine(baseExchange, arbExchange, dbService, baseCurrency, gmail, pId);
 
                 int count = 0;
                 if (runType == "log")
                     count = engine.AnalyzeMarkets().Result;
                 else if (runType == "trade")
-                    count = engine.AnalyzeFundedPairs(pId).Result;
+                    count = engine.AnalyzeFundedPairs().Result;
 
                 dbService.EndEngineProcess(pId, "success", new { MarketCount = count });
                 Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);

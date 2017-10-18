@@ -29,18 +29,18 @@ namespace BMCore.Engine
         string runType = "log";
         int pId = 0;
 
-        public TradingEngine(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, CurrencyConfig baseCurrency, GmailConfig gmail)
+        public TradingEngine(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, CurrencyConfig baseCurrency, GmailConfig gmail, int pId)
         {
             this.dbService = dbService;
             this.baseExchange = baseExchange;
             this.arbExchange = arbExchange;
             this.baseCurrency = baseCurrency;
+            this.pId = pId;
         }
 
-        public async Task<int> AnalyzeFundedPairs(int pId)
+        public async Task<int> AnalyzeFundedPairs()
         {
             this.runType = "trade";
-            this.pId = pId;
             var baseBalances = await this.baseExchange.GetBalances();
             var arbBalances = await this.arbExchange.GetBalances();
             this.baseExchangeBalances = baseBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
