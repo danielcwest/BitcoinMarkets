@@ -11,7 +11,7 @@ namespace BMCore.Engine
 {
     public class EngineHelper
     {
-        public static void ExecuteAllExchanges(IExchange[] exchanges, BMDbService dbService, decimal threshold, string runType)
+        public static void ExecuteAllExchanges(IExchange[] exchanges, BMDbService dbService, decimal threshold, string runType, decimal spreadThreshold)
         {
             for (var i = 0; i < exchanges.Length; i++)
             {
@@ -22,14 +22,14 @@ namespace BMCore.Engine
 
                     if (baseExchange != arbExchange)
                     {
-                        ExecuteExchangePair(baseExchange, arbExchange, dbService, threshold, runType);
+                        ExecuteExchangePair(baseExchange, arbExchange, dbService, threshold, runType, spreadThreshold);
                     }
 
                 }
             }
         }
 
-        public static void ExecuteExchangePair(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, decimal threshold, string runType)
+        public static void ExecuteExchangePair(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, decimal threshold, string runType, decimal spreadThreshold)
         {
             int pId = -1;
             try
@@ -39,9 +39,9 @@ namespace BMCore.Engine
                 var engine = new TradingEngine(baseExchange, arbExchange, dbService, threshold);
 
                 if (runType == "log")
-                    engine.AnalyzeMarkets().Wait();
+                    engine.AnalyzeMarkets(spreadThreshold).Wait();
                 else if (runType == "trade")
-                    engine.AnalyzeFundedPairs(pId).Wait();
+                    engine.AnalyzeFundedPairs(pId, spreadThreshold).Wait();
 
                 dbService.EndEngineProcess(pId, "success");
                 Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);

@@ -83,7 +83,8 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@side", Value = side },
                     new SqlParameter { ParameterName = "@baseCurrency", Value = baseCurrency },
                     new SqlParameter { ParameterName = "@marketCurrency", Value = marketCurrency },
-                    new SqlParameter { ParameterName = "@pId", Value = processId }
+                    new SqlParameter { ParameterName = "@pId", Value = processId },
+                    new SqlParameter { ParameterName = "@price", Value = price }
                 });
         }
 

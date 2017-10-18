@@ -37,7 +37,8 @@ namespace Engine
                 IConfigurationRoot configuration = builder.Build();
                 var configs = new List<ConfigExchange>();
                 configuration.GetSection("Exchanges").Bind(configs);
-                var threshold = configuration.GetValue<decimal>("TradeThreshold");
+                var tradeThreshold = configuration.GetValue<decimal>("TradeThreshold:ETH");
+                var spreadThreshold = configuration.GetValue<decimal>("SpreadThreshold:ETH");
                 var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"));
                 var exchanges = configs.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
 
@@ -52,11 +53,11 @@ namespace Engine
                     case "log":
                         if (args.Length == 1)
                         {
-                            EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService, threshold, "log");
+                            EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService, tradeThreshold, "log", spreadThreshold);
                         }
                         else if (args.Length == 3)
                         {
-                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, threshold, "log");
+                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, tradeThreshold, "log", spreadThreshold);
                         }
                         break;
                     case "trade":
@@ -65,14 +66,14 @@ namespace Engine
                             if (dbService.GetInvalidOrderCount() > 0)
                                 throw new Exception("Fix Invalid orders");
 
-                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, threshold, "trade");
+                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, tradeThreshold, "trade", spreadThreshold);
 
                         }
                         break;
                     case "withdraw":
                         EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
 
-                        EngineHelper.ProcessWithdrawals(dbService, exchanges.Values.ToArray(), threshold).Wait();
+                        EngineHelper.ProcessWithdrawals(dbService, exchanges.Values.ToArray(), tradeThreshold).Wait();
 
                         Thread.Sleep(1000 * 60); //Wait 1 minute for withdrawals to go through on exchange
 

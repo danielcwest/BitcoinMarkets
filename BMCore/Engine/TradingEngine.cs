@@ -43,7 +43,7 @@ namespace BMCore.Engine
             this.txThreshold = txThreshold;
         }
 
-        public async Task AnalyzeFundedPairs(int pId)
+        public async Task AnalyzeFundedPairs(int pId, decimal spreadThreshold)
         {
             this.runType = "trade";
             this.pId = pId;
@@ -57,7 +57,7 @@ namespace BMCore.Engine
             //Ethereum Markets
             if (BaseCurrencyAvailable("ETH"))
             {
-                await AnalyzeEthereumPairs();
+                await AnalyzeEthereumPairs(spreadThreshold);
             }
 
 
@@ -75,27 +75,27 @@ namespace BMCore.Engine
 
 
 
-        private async Task AnalyzeEthereumPairs()
+        private async Task AnalyzeEthereumPairs(decimal spreadThreshold)
         {
             foreach (var kvp in this.baseExchangeBalances.Where(kvp => !EngineHelper.IsBaseCurrency(kvp.Value.Currency)))
             {
                 if (this.arbitrageExchangeBalances.ContainsKey(kvp.Key))
                 {
                     string symbol = string.Format("{0}ETH", kvp.Key);
-                    await AnalyzeMarket(symbol);
+                    await AnalyzeMarket(symbol, spreadThreshold);
                 }
             }
             await Task.FromResult(0);
         }
 
-        public async Task AnalyzeMarkets()
+        public async Task AnalyzeMarkets(decimal spreadThreshold)
         {
             await RefreshSymbols();
             foreach (var kvp in this.baseExchangeMarkets)
             {
                 if (this.arbitrageExchangeMarkets.ContainsKey(kvp.Key))
                 {
-                    await AnalyzeMarket(kvp.Key);
+                    await AnalyzeMarket(kvp.Key, spreadThreshold);
                 }
             }
 
@@ -113,7 +113,7 @@ namespace BMCore.Engine
             await Task.FromResult(0);
         }
 
-        private async Task AnalyzeMarket(string symbol)
+        private async Task AnalyzeMarket(string symbol, decimal spreadThreshold)
         {
             try
             {
@@ -130,7 +130,7 @@ namespace BMCore.Engine
                 }
                 else
                 {
-                    await FindOpportunity(new ArbitrageMarket(bMarket, bBook, rMarket, rBook, 0.01m));
+                    await FindOpportunity(new ArbitrageMarket(bMarket, bBook, rMarket, rBook, spreadThreshold));
                     Console.WriteLine("Analyzing {0}", symbol);
                 }
             }
