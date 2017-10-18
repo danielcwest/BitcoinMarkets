@@ -36,7 +36,7 @@ namespace BMCore.DbService
                 });
 
             if (gmail != null)
-                EmailHelper.SendSimpleMailAsync(gmail, string.Format("Log Trade: {0} {1:P2}", symbol, spread), string.Format("{0} - {1} {2} Base Price: {3}, Arb Price {4} ", baseX, arbX, Environment.NewLine, basePrice, arbPrice));
+                EmailHelper.SendSimpleMailAsync(gmail, string.Format("{2} - {3}: {0} {1:P2}", symbol, spread, baseX, arbX), string.Format("{0} - {1} {2} Base Price: {3}, Arb Price {4} ", baseX, arbX, Environment.NewLine, basePrice, arbPrice));
         }
 
         public IEnumerable<DbTradeLog> GetTrades(int limit = 100)
