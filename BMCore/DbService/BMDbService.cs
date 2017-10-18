@@ -73,7 +73,7 @@ namespace BMCore.DbService
 
         }
 
-        public long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side, int processId)
+        public long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side, int processId, decimal price)
         {
             return (long)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertOrder", 15,
                 new SqlParameter[]
