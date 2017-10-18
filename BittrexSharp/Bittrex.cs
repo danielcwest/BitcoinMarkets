@@ -78,6 +78,8 @@ namespace BittrexSharp
 
         public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate)
         {
+            if (!symbol.Contains("-"))
+                symbol = GetMarketNameFromSymbol(symbol);
             return await _bittrex.BuyLimit(symbol, quantity, rate);
         }
 
