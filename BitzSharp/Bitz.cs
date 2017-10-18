@@ -7,6 +7,7 @@ using BMCore.Models;
 using System.Linq;
 using BMCore.Contracts;
 using BMCore;
+using BMCore.Config;
 
 namespace BitzSharp
 {
@@ -36,7 +37,7 @@ namespace BitzSharp
             throw new NotImplementedException();
         }
 
-        public Bitz(ConfigExchange config)
+        public Bitz(ExchangeConfig config)
         {
             _bitz = RestClient.For<IBitzApi>("https://www.bit-z.com");
             name = config.Name;

@@ -8,6 +8,7 @@ using System.Text;
 using LiquiSharp.Models;
 using BMCore.Contracts;
 using BMCore;
+using BMCore.Config;
 
 namespace LiquiSharp
 {
@@ -31,7 +32,7 @@ namespace LiquiSharp
             }
         }
 
-        public Liqui(ConfigExchange config)
+        public Liqui(ExchangeConfig config)
         {
             _liqui = RestClient.For<ILiquiApi>("https://api.liqui.io");
             name = config.Name;

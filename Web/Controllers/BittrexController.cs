@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using BMCore.Models;
 using BMCore.Contracts;
+using BMCore.Config;
 
 namespace Web.Controllers
 {
@@ -22,7 +23,7 @@ namespace Web.Controllers
         {
             _iconfiguration = iconfiguration;
 
-            var exchanges = new List<ConfigExchange>();
+            var exchanges = new List<ExchangeConfig>();
             _iconfiguration.GetSection("Exchanges").Bind(exchanges);
             var config = exchanges.Find(e => e.Name == "Bittrex");
             _bittrex = new Bittrex(config);
@@ -51,60 +52,6 @@ namespace Web.Controllers
         {
             var summaries = await _bittrex.Symbols();
             return summaries.Select(s => s.LocalSymbol);
-        }
-
-        [HttpPost]
-        public async Task<IOrder> Sell(string marketCurrency, string baseCurrency, decimal quantity, decimal price)
-        {
-            //Has Balance to Sell
-            var b = await _bittrex.GetBalance(marketCurrency);
-
-            if (b.Available < quantity)
-                throw new Exception("Insufficient Balance");
-
-            //Sell On Exchange
-            var result = await _bittrex.Sell("", string.Format("{0}-{1}", baseCurrency, marketCurrency), quantity, price);
-
-            //If Order went through, Withdraw Base Currency to Arb Exchange (only amount bought on other exchange)
-            var order = await _bittrex.CheckOrder(result.Uuid);
-
-            return await Task.FromResult<IOrder>(order);
-        }
-
-        [HttpPost]
-        public async Task<IOrder> Buy(string marketCurrency, string baseCurrency, decimal quantity, decimal price)
-        {
-            //Has Balance to Sell
-            var b = await _bittrex.GetBalance(marketCurrency);
-
-            if (b.Available < quantity)
-                throw new Exception("Insufficient Balance");
-
-            //Buy On Exchange 
-            var result = await _bittrex.Buy("", string.Format("{0}-{1}", baseCurrency, marketCurrency), quantity, price);
-
-            //If Order went through, Withdraw Base Currency to Arb Exchange (only amount bought on other exchange)
-            var order = await _bittrex.CheckOrder(result.Uuid);
-
-            return await Task.FromResult<IOrder>(order);
-        }
-
-        [HttpPost]
-        public async Task<IWithdrawal> Withdraw(string currency, decimal quantity, string address)
-        {
-            //Has Balance to Sell
-            var b = await _bittrex.GetBalance(currency);
-
-            if (b.Available < quantity)
-                throw new Exception("Insufficient Balance");
-
-            //Sell On Exchange
-            var result = await _bittrex.Withdraw(currency, quantity, address);
-
-            //If Order went through, Withdraw Base Currency to Arb Exchange (only amount bought on other exchange)
-            var w = await _bittrex.GetWithdrawal(result.Uuid);
-
-            return await Task.FromResult<IWithdrawal>(w);
         }
     }
 }

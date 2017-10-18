@@ -15,54 +15,56 @@
             "console": "internalConsole"
         },
         {
-            "name": "Engine Log",
+            "name": "Engine Log ETH",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
             "args": [
-                "log"
+                "log",
+                "ETH"
             ],
             "cwd": "${workspaceRoot}/Engine",
             "stopAtEntry": false,
             "console": "internalConsole"
         },
         {
-            "name": "Engine Log Bittrex Hitbtc",
+            "name": "Engine Log Bittrex Hitbtc ETH",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
             "args": [
                 "log",
                 "Bittrex",
-                "Hitbtc"
+                "Hitbtc",
+                "ETH"
             ],
             "cwd": "${workspaceRoot}/Engine",
             "stopAtEntry": false,
             "console": "internalConsole"
         },
         {
-            "name": "Engine Trade Bittrex Hitbtc",
+            "name": "Engine Trade Bittrex Hitbtc ETH",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
             "args": [
                 "trade",
                 "Bittrex",
-                "Hitbtc"
+                "Hitbtc",
+                "ETH"
             ],
             "cwd": "${workspaceRoot}/Engine",
             "stopAtEntry": false,
             "console": "internalConsole"
         },
         {
-            "name": "Engine Withdraw Bittrex Hitbtc",
+            "name": "Engine Withdraw ETH",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
             "args": [
                 "withdraw",
-                "Bittrex",
-                "Hitbtc"
+                "ETH"
             ],
             "cwd": "${workspaceRoot}/Engine",
             "stopAtEntry": false,

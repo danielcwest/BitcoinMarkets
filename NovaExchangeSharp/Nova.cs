@@ -7,6 +7,7 @@ using System.Linq;
 using BMCore.Models;
 using BMCore.Contracts;
 using BMCore;
+using BMCore.Config;
 
 namespace NovaExchangeSharp
 {
@@ -29,7 +30,7 @@ namespace NovaExchangeSharp
                 return fee;
             }
         }
-        public Nova(ConfigExchange config)
+        public Nova(ExchangeConfig config)
         {
             _nova = RestClient.For<INovaExchangeApi>("https://novaexchange.com");
             name = config.Name;

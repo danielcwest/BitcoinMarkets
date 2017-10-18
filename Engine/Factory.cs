@@ -11,26 +11,27 @@ using PoloniexSharp;
 using TidexSharp;
 using CoinExchangeSharp;
 using BMCore.Models;
+using BMCore.Config;
 
 namespace Engine
 {
     public class ExchangeFactory
     {
-        public static IExchange GetInstance(ConfigExchange configExchange)
+        public static IExchange GetInstance(ExchangeConfig ExchangeConfig)
         {
-            switch (configExchange.Name)
+            switch (ExchangeConfig.Name)
             {
-                case "Bittrex": return new Bittrex(configExchange);
-                case "Binance": return new Binance(configExchange);
-                case "Bitz": return new Bitz(configExchange);
+                case "Bittrex": return new Bittrex(ExchangeConfig);
+                case "Binance": return new Binance(ExchangeConfig);
+                case "Bitz": return new Bitz(ExchangeConfig);
                 case "CoinExchange": return null;
                 case "EtherDelta": return null;
-                case "Hitbtc": return new Hitbtc(configExchange);
-                case "Liqui": return new Liqui(configExchange);
-                case "Livecoin": return new Livecoin(configExchange);
-                case "Nova": return new Nova(configExchange);
-                case "Poloniex": return new Poloniex(configExchange);
-                case "Tidex": return new Tidex(configExchange);
+                case "Hitbtc": return new Hitbtc(ExchangeConfig);
+                case "Liqui": return new Liqui(ExchangeConfig);
+                case "Livecoin": return new Livecoin(ExchangeConfig);
+                case "Nova": return new Nova(ExchangeConfig);
+                case "Poloniex": return new Poloniex(ExchangeConfig);
+                case "Tidex": return new Tidex(ExchangeConfig);
                 default: return null;
             }
         }

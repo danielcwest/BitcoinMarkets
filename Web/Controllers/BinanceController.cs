@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using BMCore.Contracts;
 using RestEase;
+using BMCore.Config;
 
 namespace Web.Controllers
 {
@@ -22,7 +23,7 @@ namespace Web.Controllers
         public BinanceController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            var exchanges = new List<BMCore.Models.ConfigExchange>();
+            var exchanges = new List<ExchangeConfig>();
             _iconfiguration.GetSection("Exchanges").Bind(exchanges);
             var config = exchanges.Find(e => e.Name == "Binance");
             _binance = new Binance(config);

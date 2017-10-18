@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BMCore.Config;
 using BMCore.Contracts;
 using BMCore.DbService;
 using BMCore.Models;
@@ -11,7 +12,7 @@ namespace BMCore.Engine
 {
     public class EngineHelper
     {
-        public static void ExecuteAllExchanges(IExchange[] exchanges, BMDbService dbService, decimal threshold, string runType, decimal spreadThreshold)
+        public static void ExecuteAllExchanges(IExchange[] exchanges, BMDbService dbService, CurrencyConfig baseCurrency, GmailConfig gmail, string runType)
         {
             for (var i = 0; i < exchanges.Length; i++)
             {
@@ -22,26 +23,26 @@ namespace BMCore.Engine
 
                     if (baseExchange != arbExchange)
                     {
-                        ExecuteExchangePair(baseExchange, arbExchange, dbService, threshold, runType, spreadThreshold);
+                        ExecuteExchangePair(baseExchange, arbExchange, dbService, baseCurrency, gmail, runType);
                     }
 
                 }
             }
         }
 
-        public static void ExecuteExchangePair(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, decimal threshold, string runType, decimal spreadThreshold)
+        public static void ExecuteExchangePair(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, CurrencyConfig baseCurrency, GmailConfig gmail, string runType)
         {
             int pId = -1;
             try
             {
                 Console.WriteLine("Starting: {0} {1}", baseExchange.Name, arbExchange.Name);
-                pId = dbService.StartEngineProcess(baseExchange.Name, arbExchange.Name, runType);
-                var engine = new TradingEngine(baseExchange, arbExchange, dbService, threshold);
+                pId = dbService.StartEngineProcess(baseExchange.Name, arbExchange.Name, runType, baseCurrency);
+                var engine = new TradingEngine(baseExchange, arbExchange, dbService, baseCurrency, gmail);
 
                 if (runType == "log")
-                    engine.AnalyzeMarkets(spreadThreshold).Wait();
+                    engine.AnalyzeMarkets().Wait();
                 else if (runType == "trade")
-                    engine.AnalyzeFundedPairs(pId, spreadThreshold).Wait();
+                    engine.AnalyzeFundedPairs(pId).Wait();
 
                 dbService.EndEngineProcess(pId, "success");
                 Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);
@@ -50,7 +51,7 @@ namespace BMCore.Engine
             {
                 //Console.WriteLine(e);
                 Console.WriteLine("Error: {0} {1}", baseExchange.Name, arbExchange.Name);
-                dbService.LogError(baseExchange.Name, arbExchange.Name, "", "Main", e);
+                dbService.LogError(baseExchange.Name, arbExchange.Name, "", "Main", e, pId);
                 if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
             }
         }
@@ -125,7 +126,7 @@ namespace BMCore.Engine
             await Task.FromResult(0);
         }
 
-        public static async Task ProcessWithdrawals(IDbService dbService, IExchange[] exchanges, decimal threshold)
+        public static async Task ProcessWithdrawals(IDbService dbService, IExchange[] exchanges, CurrencyConfig baseCurrency)
         {
             for (var i = 0; i < exchanges.Length; i++)
             {
@@ -136,8 +137,8 @@ namespace BMCore.Engine
 
                     if (baseExchange != arbExchange)
                     {
-                        await ProcessWithdrawOrders(baseExchange, arbExchange, dbService, threshold, "buy");
-                        await ProcessWithdrawOrders(baseExchange, arbExchange, dbService, threshold, "sell");
+                        await ProcessWithdrawOrders(baseExchange, arbExchange, dbService, baseCurrency.TradeThreshold, "buy");
+                        await ProcessWithdrawOrders(baseExchange, arbExchange, dbService, baseCurrency.TradeThreshold, "sell");
                     }
 
                 }

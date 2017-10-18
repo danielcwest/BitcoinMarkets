@@ -7,6 +7,7 @@ using System.Linq;
 using BMCore.Models;
 using BMCore.Contracts;
 using BMCore;
+using BMCore.Config;
 
 namespace LivecoinSharp
 {
@@ -31,7 +32,7 @@ namespace LivecoinSharp
             }
         }
 
-        public Livecoin(ConfigExchange config)
+        public Livecoin(ExchangeConfig config)
         {
             _livecoin = RestClient.For<ILivecoinApi>("https://api.livecoin.net/");
             name = config.Name;

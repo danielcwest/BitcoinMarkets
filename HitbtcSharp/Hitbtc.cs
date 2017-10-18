@@ -10,13 +10,14 @@ using BMCore;
 using System.Security.Cryptography;
 using System.Text;
 using System.Net.Http.Headers;
+using BMCore.Config;
 
 namespace HitbtcSharp
 {
     public class Hitbtc : IExchange
     {
         IHitbtcApi _hitbtc;
-        ConfigExchange _config;
+        ExchangeConfig _config;
         private string name;
         public string Name
         {
@@ -34,7 +35,7 @@ namespace HitbtcSharp
             }
         }
 
-        public Hitbtc(ConfigExchange config)
+        public Hitbtc(ExchangeConfig config)
         {
             _hitbtc = RestClient.For<IHitbtcApi>("https://api.hitbtc.com");
             _config = config;

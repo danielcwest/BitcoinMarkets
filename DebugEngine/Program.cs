@@ -15,6 +15,8 @@ using System.Text;
 using System.Threading.Tasks;
 using BittrexSharp;
 using BMCore.Engine;
+using BMCore.Config;
+using BMCore;
 
 namespace DebugEngine
 {
@@ -24,21 +26,23 @@ namespace DebugEngine
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.log.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables();
             IConfigurationRoot configuration = builder.Build();
-            var configs = new List<ConfigExchange>();
-            configuration.GetSection("Exchanges").Bind(configs);
-            var threshold = configuration.GetValue<decimal>("TradeThreshold");
-            var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"));
-            var exchanges = configs.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
+
+            var arbitrageConfig = new ArbitrageConfig();
+            configuration.GetSection("ArbitrageConfig").Bind(arbitrageConfig);
+
+            var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"), arbitrageConfig.Gmail);
+            var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
+            var baseCurrencies = arbitrageConfig.BaseCurrencies.Where(c => c.Enabled).ToDictionary(e => e.Name);
+
 
             try
             {
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
                 var bittrex = (Bittrex)exchanges["Bittrex"];
 
-                // EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
 
                 Console.WriteLine("Complete");
             }

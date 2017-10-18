@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using BMCore.Models;
 using RestEase;
 using BMCore.Contracts;
+using BMCore.Config;
 
 namespace Web.Controllers
 {
@@ -22,7 +23,7 @@ namespace Web.Controllers
         public HitbtcController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            var exchanges = new List<ConfigExchange>();
+            var exchanges = new List<ExchangeConfig>();
             _iconfiguration.GetSection("Exchanges").Bind(exchanges);
             var config = exchanges.Find(e => e.Name == "Hitbtc");
             _hitbtc = new Hitbtc(config);

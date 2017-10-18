@@ -11,6 +11,7 @@ using BMCore.Contracts;
 using RestEase;
 using System.Text;
 using BMCore.Models;
+using BMCore.Config;
 
 namespace Web.Controllers
 {
@@ -23,7 +24,7 @@ namespace Web.Controllers
         public LiquiController(IConfiguration iconfiguration)
         {
             _iconfiguration = iconfiguration;
-            var exchanges = new List<ConfigExchange>();
+            var exchanges = new List<ExchangeConfig>();
             _iconfiguration.GetSection("Exchanges").Bind(exchanges);
             var config = exchanges.Find(e => e.Name == "Liqui");
             _liqui = new Liqui(config);

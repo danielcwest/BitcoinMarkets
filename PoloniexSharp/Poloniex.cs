@@ -7,6 +7,7 @@ using BMCore.Models;
 using BMCore.Contracts;
 using PoloniexSharp.Models;
 using BMCore;
+using BMCore.Config;
 
 namespace PoloniexSharp
 {
@@ -29,7 +30,7 @@ namespace PoloniexSharp
                 return fee;
             }
         }
-        public Poloniex(ConfigExchange config)
+        public Poloniex(ExchangeConfig config)
         {
             _poloniex = RestClient.For<IPoloniexApi>("https://poloniex.com");
             name = config.Name;

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BMCore.Contracts;
 using BMCore.Models;
+using BMCore.Config;
 
 namespace EtherdeltaSharp
 {
@@ -16,7 +17,7 @@ namespace EtherdeltaSharp
         string Name;
         decimal Fee;
 
-        public Etherdelta(ConfigExchange config)
+        public Etherdelta(ExchangeConfig config)
         {
             _etherdelta = RestClient.For<IEtherdeltaApi>("https://api.etherdelta.com");
             Name = config.Name;

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using BMCore.Contracts;
 using System.Linq;
 using BMCore.Models;
+using BMCore.Config;
 
 namespace CoinExchangeSharp
 {
@@ -16,7 +17,7 @@ namespace CoinExchangeSharp
         string Name;
         decimal Fee;
 
-        public CoinExchange(ConfigExchange config)
+        public CoinExchange(ExchangeConfig config)
         {
             _coin = RestClient.For<ICoinExchangeApi>("https://www.coinexchange.io");
             Name = config.Name;

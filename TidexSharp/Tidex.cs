@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using BMCore.Contracts;
 using BMCore;
+using BMCore.Config;
 
 namespace TidexSharp
 {
@@ -31,7 +32,7 @@ namespace TidexSharp
             }
         }
 
-        public Tidex(ConfigExchange config)
+        public Tidex(ExchangeConfig config)
         {
             _tidex = RestClient.For<ITidexApi>("https://api.tidex.com");
             name = config.Name;

@@ -6,6 +6,7 @@ using RestEase;
 using BMCore.Models;
 using BMCore.Contracts;
 using System.Threading.Tasks;
+using BMCore.Config;
 
 namespace BittrexSharp
 {
@@ -31,7 +32,7 @@ namespace BittrexSharp
             }
         }
 
-        public Bittrex(ConfigExchange config)
+        public Bittrex(ExchangeConfig config)
         {
             _bittrex = new BittrexApi(config.ApiKey, config.Secret);
             name = config.Name;

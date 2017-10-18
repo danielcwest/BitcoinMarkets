@@ -7,6 +7,7 @@ using BMCore.Models;
 using System.Linq;
 using BMCore.Contracts;
 using BMCore;
+using BMCore.Config;
 
 namespace BinanceSharp
 {
@@ -32,7 +33,7 @@ namespace BinanceSharp
             }
         }
 
-        public Binance(ConfigExchange config)
+        public Binance(ExchangeConfig config)
         {
             _binance = RestClient.For<IBinanceApi>("https://www.binance.com");
             name = config.Name;

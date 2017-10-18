@@ -19,6 +19,7 @@ using System.Linq;
 using BMCore.Models;
 using BMCore.DbService;
 using BMCore.Engine;
+using BMCore.Config;
 
 namespace Engine
 {
@@ -28,52 +29,56 @@ namespace Engine
         {
             try
             {
-                Console.WriteLine("Starting Engine ...");
-
-                var builder = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                    .AddEnvironmentVariables();
-                IConfigurationRoot configuration = builder.Build();
-                var configs = new List<ConfigExchange>();
-                configuration.GetSection("Exchanges").Bind(configs);
-                var tradeThreshold = configuration.GetValue<decimal>("TradeThreshold:ETH");
-                var spreadThreshold = configuration.GetValue<decimal>("SpreadThreshold:ETH");
-                var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"));
-                var exchanges = configs.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
-
                 if (args.Length < 1)
                 {
                     PrintUsage();
                     return;
                 }
 
+                Console.WriteLine("Starting Engine ...");
+
+                string configFile = args[0] == "log" ? "appsettings.log.json" : "appsettings.json";
+
+                var builder = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile(configFile, optional: false, reloadOnChange: true)
+                    .AddEnvironmentVariables();
+                IConfigurationRoot configuration = builder.Build();
+                var arbitrageConfig = new ArbitrageConfig();
+                configuration.GetSection("ArbitrageConfig").Bind(arbitrageConfig);
+
+                var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"));
+                var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
+                var baseCurrencies = arbitrageConfig.BaseCurrencies.Where(c => c.Enabled).ToDictionary(e => e.Name);
+
+
+
                 switch (args[0])
                 {
                     case "log":
-                        if (args.Length == 1)
+                        if (args.Length == 2)
                         {
-                            EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService, tradeThreshold, "log", spreadThreshold);
+                            EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService, baseCurrencies[args[1]], arbitrageConfig.Gmail, "log");
                         }
-                        else if (args.Length == 3)
+                        else if (args.Length == 4)
                         {
-                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, tradeThreshold, "log", spreadThreshold);
+                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, baseCurrencies[args[3]], arbitrageConfig.Gmail, "log");
                         }
                         break;
                     case "trade":
-                        if (args.Length == 3)
+                        if (args.Length == 4)
                         {
                             if (dbService.GetInvalidOrderCount() > 0)
                                 throw new Exception("Fix Invalid orders");
 
-                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, tradeThreshold, "trade", spreadThreshold);
+                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, baseCurrencies[args[3]], arbitrageConfig.Gmail, "trade");
 
                         }
                         break;
                     case "withdraw":
                         EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
 
-                        EngineHelper.ProcessWithdrawals(dbService, exchanges.Values.ToArray(), tradeThreshold).Wait();
+                        EngineHelper.ProcessWithdrawals(dbService, exchanges.Values.ToArray(), baseCurrencies[args[1]]).Wait();
 
                         Thread.Sleep(1000 * 60); //Wait 1 minute for withdrawals to go through on exchange
 

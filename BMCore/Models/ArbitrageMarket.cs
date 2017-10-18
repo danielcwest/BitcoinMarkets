@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BMCore.Config;
 using BMCore.Contracts;
 using BMCore.Util;
 using Newtonsoft.Json;
@@ -15,9 +16,9 @@ namespace BMCore.Models
         public IMarket arbitrageMarket { get; set; }
         public OrderBook arbitrageBook { get; set; }
 
-        public decimal spreadThreshold { get; set; }
+        public CurrencyConfig baseCurrency { get; set; }
 
-        public ArbitrageMarket(IMarket baseM, OrderBook baseBook, IMarket arbM, OrderBook arbBook, decimal spreadThreshold)
+        public ArbitrageMarket(IMarket baseM, OrderBook baseBook, IMarket arbM, OrderBook arbBook, CurrencyConfig baseCurrency)
         {
             if (baseM == null || baseBook == null || arbM == null || arbBook == null)
                 throw new Exception("Market data was null");
@@ -27,7 +28,7 @@ namespace BMCore.Models
             this.baseBook = baseBook;
             this.arbitrageMarket = arbM;
             this.arbitrageBook = arbBook;
-            this.spreadThreshold = spreadThreshold;
+            this.baseCurrency = baseCurrency;
         }
     }
 }

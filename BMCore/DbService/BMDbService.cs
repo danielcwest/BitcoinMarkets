@@ -2,6 +2,7 @@ using System;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using BMCore.Config;
 
 namespace BMCore.DbService
 {
@@ -9,9 +10,12 @@ namespace BMCore.DbService
     {
         private string sqlConnectionString = string.Empty;
 
+        //TODO: Email stuff doesn't belong here, but its super nice for now
+        GmailConfig gmail;
         // constructor
-        public BMDbService(string sqlConnectionString)
+        public BMDbService(string sqlConnectionString, GmailConfig gmail = null)
         {
+            this.gmail = gmail;
             this.sqlConnectionString = sqlConnectionString;
         }
 
@@ -43,7 +47,7 @@ namespace BMCore.DbService
             }
         }
 
-        public void LogError(string baseX, string arbX, string symbol, string method, Exception ex)
+        public void LogError(string baseX, string arbX, string symbol, string method, Exception ex, int processId = -1)
         {
             string message = ex.Message;
             string stackTrace = ex.StackTrace;
@@ -63,8 +67,12 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@symbol", Value = symbol },
                     new SqlParameter { ParameterName = "@method", Value = method },
                     new SqlParameter { ParameterName = "@message", Value = message},
-                    new SqlParameter { ParameterName = "@exception", Value = stackTrace}
+                    new SqlParameter { ParameterName = "@exception", Value = stackTrace},
+                    new SqlParameter { ParameterName = "@processId", Value = processId}
                                 });
+
+                if (gmail != null)
+                    EmailHelper.SendSimpleMailAsync(gmail, string.Format("Error: {0}", message), string.Format("{0} - {1} {2} {3}", baseX, arbX, Environment.NewLine, stackTrace));
             }
             catch (Exception)
             {
@@ -75,6 +83,9 @@ namespace BMCore.DbService
 
         public long InsertOrder(string exchange, string symbol, string baseCurrency, string marketCurrency, string side, int processId, decimal price)
         {
+            if (gmail != null)
+                EmailHelper.SendSimpleMailAsync(gmail, string.Format("New Order: {0} {1} {2}", exchange, side, symbol), string.Format("{0}", processId));
+
             return (long)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertOrder", 15,
                 new SqlParameter[]
                 {
@@ -90,6 +101,9 @@ namespace BMCore.DbService
 
         public long InsertWithdrawal(string uuid, long orderId, string currency, string fromExchange, decimal amount, int processId)
         {
+            if (gmail != null)
+                EmailHelper.SendSimpleMailAsync(gmail, string.Format("Withdraw Order From {0}: {1}", fromExchange, uuid), string.Format("{0}: {1}", currency, amount));
+
             return (long)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertWithdrawal", 15,
                 new SqlParameter[]
                 {
@@ -114,6 +128,9 @@ namespace BMCore.DbService
 
         public void FillOrder(long id, decimal quantity, decimal price, decimal rate, decimal fee = 0)
         {
+            if (gmail != null)
+                EmailHelper.SendSimpleMailAsync(gmail, string.Format("Order Filled: {0}", id), "");
+
             DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.CloseOrder", 15,
                 new SqlParameter[]
                 {
@@ -208,14 +225,15 @@ namespace BMCore.DbService
                 });
         }
 
-        public int StartEngineProcess(string baseExchange, string arbExchange, string runType)
+        public int StartEngineProcess(string baseExchange, string arbExchange, string runType, CurrencyConfig baseCurrency)
         {
             return (int)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.StartEngineProcess", 15,
                 new SqlParameter[]
                 {
                     new SqlParameter { ParameterName = "@baseExchange", Value = baseExchange },
                     new SqlParameter { ParameterName = "@arbExchange", Value = arbExchange },
-                    new SqlParameter { ParameterName = "@runType", Value = runType }
+                    new SqlParameter { ParameterName = "@runType", Value = runType },
+                    new SqlParameter { ParameterName = "@baseCurrency", Value = JsonConvert.SerializeObject(baseCurrency) }
                 });
         }
 

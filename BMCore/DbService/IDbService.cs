@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BMCore.Config;
 
 namespace BMCore.DbService
 {
@@ -10,7 +11,7 @@ namespace BMCore.DbService
 
         IEnumerable<DbTradeLog> GetTrades(int limit = 100);
 
-        void LogError(string baseX, string arbX, string symbol, string method, Exception ex);
+        void LogError(string baseX, string arbX, string symbol, string method, Exception ex, int processId = -1);
 
 
         IEnumerable<DbOrder> GetOrders(long id = -1, string uuid = null, string status = "");
@@ -30,7 +31,7 @@ namespace BMCore.DbService
         void UpdateOrderStatus(long id, string status, Exception e = null);
         void UpdateWithdrawalStatus(long id, string status, Exception e = null);
 
-        int StartEngineProcess(string baseExchange, string arbExchange, string runType);
+        int StartEngineProcess(string baseExchange, string arbExchange, string runType, CurrencyConfig baseCurrency);
         void EndEngineProcess(int id, string resultStatus, object payload = null);
 
         int GetInvalidOrderCount();
