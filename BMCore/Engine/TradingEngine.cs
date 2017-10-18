@@ -160,12 +160,17 @@ namespace BMCore.Engine
                 baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (this.baseExchange.Fee + this.arbExchange.Fee);
 
                 //TODO: Domain and appsettings spread
-                if (baseBuy < arbSell && baseBuySpread > 1 && runType == "trade")
+                if (baseBuy < arbSell && baseBuySpread >= 1 && runType == "trade")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseBuy, arbSell, baseBuySpread, txThreshold);
                     long buyId = await EngineHelper.Buy(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseBuy, baseBuy, this.pId);
                     long sellId = await EngineHelper.Sell(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbSell, arbSell, this.pId);
                     dbService.SaveOrderPair(buyId, baseExchange.Name, sellId, arbExchange.Name);
+                }
+
+                if (baseBuy < arbSell && baseBuySpread >= 1 && runType == "log")
+                {
+                    dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseBuy, arbSell, baseBuySpread, txThreshold);
                 }
 
                 if (baseSell > arbBuy && baseSellSpread >= 1 && runType == "trade")
@@ -174,6 +179,11 @@ namespace BMCore.Engine
                     long buyId = await EngineHelper.Buy(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbBuy, arbBuy, this.pId);
                     long sellId = await EngineHelper.Sell(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseSell, baseSell, this.pId);
                     dbService.SaveOrderPair(buyId, arbExchange.Name, sellId, baseExchange.Name);
+                }
+
+                if (baseSell > arbBuy && baseSellSpread >= 1 && runType == "log")
+                {
+                    dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseSell, arbBuy, baseSellSpread, txThreshold);
                 }
             }
             await Task.FromResult(0);
