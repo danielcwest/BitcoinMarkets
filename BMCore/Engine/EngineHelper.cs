@@ -39,12 +39,13 @@ namespace BMCore.Engine
                 pId = dbService.StartEngineProcess(baseExchange.Name, arbExchange.Name, runType, baseCurrency);
                 var engine = new TradingEngine(baseExchange, arbExchange, dbService, baseCurrency, gmail);
 
+                int count = 0;
                 if (runType == "log")
-                    engine.AnalyzeMarkets().Wait();
+                    count = engine.AnalyzeMarkets().Result;
                 else if (runType == "trade")
-                    engine.AnalyzeFundedPairs(pId).Wait();
+                    count = engine.AnalyzeFundedPairs(pId).Result;
 
-                dbService.EndEngineProcess(pId, "success");
+                dbService.EndEngineProcess(pId, "success", new { MarketCount = count });
                 Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);
             }
             catch (Exception e)

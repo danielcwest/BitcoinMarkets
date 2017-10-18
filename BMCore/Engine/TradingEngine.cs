@@ -37,7 +37,7 @@ namespace BMCore.Engine
             this.baseCurrency = baseCurrency;
         }
 
-        public async Task AnalyzeFundedPairs(int pId)
+        public async Task<int> AnalyzeFundedPairs(int pId)
         {
             this.runType = "trade";
             this.pId = pId;
@@ -48,14 +48,12 @@ namespace BMCore.Engine
 
             await RefreshSymbols();
 
-            //Ethereum Markets
+            int count = 0;
             if (BaseCurrencyAvailable(baseCurrency.Name))
             {
-                await AnalyzePairs();
+                count = await AnalyzePairs();
             }
-
-
-            await Task.FromResult(0);
+            return count;
         }
 
         private bool BaseCurrencyAvailable(string currency)
@@ -69,31 +67,35 @@ namespace BMCore.Engine
 
 
 
-        private async Task AnalyzePairs()
+        private async Task<int> AnalyzePairs()
         {
+            int pairCount = 0;
             foreach (var kvp in this.baseExchangeBalances.Where(kvp => !EngineHelper.IsBaseCurrency(kvp.Value.Currency)))
             {
                 if (this.arbitrageExchangeBalances.ContainsKey(kvp.Key))
                 {
                     string symbol = string.Format("{0}{1}", kvp.Key, baseCurrency.Name);
                     await AnalyzeMarket(symbol);
+                    pairCount++;
                 }
             }
-            await Task.FromResult(0);
+            return pairCount;
         }
 
-        public async Task AnalyzeMarkets()
+        public async Task<int> AnalyzeMarkets()
         {
             await RefreshSymbols();
+
+            int marketCount = 0;
             foreach (var kvp in this.baseExchangeMarkets)
             {
                 if (this.arbitrageExchangeMarkets.ContainsKey(kvp.Key))
                 {
                     await AnalyzeMarket(kvp.Key);
+                    marketCount++;
                 }
             }
-
-            await Task.FromResult(0);
+            return marketCount;
         }
 
         public async Task RefreshSymbols()
