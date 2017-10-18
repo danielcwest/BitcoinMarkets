@@ -94,7 +94,7 @@ namespace BMCore.Engine
                 }
                 catch (Exception ex)
                 {
-                    dbService.UpdateWithdrawalStatus(withdrawal.Id, "error", ex);
+                    //dbService.UpdateWithdrawalStatus(withdrawal.Id, "error", ex);
                     dbService.LogError(withdrawal.FromExchange, "", withdrawal.Uuid, "UpdateWithdrawalStatus", ex);
 
                 }
