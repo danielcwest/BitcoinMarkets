@@ -130,7 +130,7 @@ namespace BMCore.Engine
                 }
                 else
                 {
-                    await FindOpportunity(new ArbitrageMarket(bMarket, bBook, rMarket, rBook));
+                    await FindOpportunity(new ArbitrageMarket(bMarket, bBook, rMarket, rBook, 0.01m));
                     Console.WriteLine("Analyzing {0}", symbol);
                 }
             }
@@ -160,7 +160,7 @@ namespace BMCore.Engine
                 baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (this.baseExchange.Fee + this.arbExchange.Fee);
 
                 //TODO: Domain and appsettings spread
-                if (baseBuy < arbSell && baseBuySpread >= 1 && runType == "trade")
+                if (baseBuy < arbSell && baseBuySpread >= am.spreadThreshold && runType == "trade")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseBuy, arbSell, baseBuySpread, txThreshold);
                     long buyId = await EngineHelper.Buy(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / baseBuy, baseBuy, this.pId);
@@ -168,12 +168,12 @@ namespace BMCore.Engine
                     dbService.SaveOrderPair(buyId, baseExchange.Name, sellId, arbExchange.Name);
                 }
 
-                if (baseBuy < arbSell && baseBuySpread >= 1 && runType == "log")
+                if (baseBuy < arbSell && baseBuySpread >= am.spreadThreshold && runType == "log")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseBuy, arbSell, baseBuySpread, txThreshold);
                 }
 
-                if (baseSell > arbBuy && baseSellSpread >= 1 && runType == "trade")
+                if (baseSell > arbBuy && baseSellSpread >= am.spreadThreshold && runType == "trade")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseSell, arbBuy, baseSellSpread, txThreshold);
                     long buyId = await EngineHelper.Buy(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, txThreshold / arbBuy, arbBuy, this.pId);
@@ -181,7 +181,7 @@ namespace BMCore.Engine
                     dbService.SaveOrderPair(buyId, arbExchange.Name, sellId, baseExchange.Name);
                 }
 
-                if (baseSell > arbBuy && baseSellSpread >= 1 && runType == "log")
+                if (baseSell > arbBuy && baseSellSpread >= am.spreadThreshold && runType == "log")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseSell, arbBuy, baseSellSpread, txThreshold);
                 }

@@ -38,7 +38,7 @@ namespace DebugEngine
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
                 var bittrex = (Bittrex)exchanges["Bittrex"];
 
-                EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
+                // EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
 
                 Console.WriteLine("Complete");
             }
