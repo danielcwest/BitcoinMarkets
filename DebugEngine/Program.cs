@@ -17,6 +17,8 @@ using BittrexSharp;
 using BMCore.Engine;
 using BMCore.Config;
 using BMCore;
+using PoloniexSharp;
+using LiquiSharp;
 
 namespace DebugEngine
 {
@@ -40,9 +42,11 @@ namespace DebugEngine
 
             try
             {
-                var hitbtc = (Hitbtc)exchanges["Hitbtc"];
-                var bittrex = (Bittrex)exchanges["Bittrex"];
+                var p = (Poloniex)exchanges["Poloniex"];
+                var l = (Liqui)exchanges["Liqui"];
 
+                var ps = p.Symbols().Result;
+                var ls = l.Symbols().Result;
 
                 Console.WriteLine("Complete");
             }

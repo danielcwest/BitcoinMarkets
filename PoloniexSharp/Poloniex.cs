@@ -37,6 +37,12 @@ namespace PoloniexSharp
             fee = config.Fee;
         }
 
+        public async Task<IEnumerable<ISymbol>> Symbols()
+        {
+            var summaries = await _poloniex.GetTickers();
+            return summaries.Where(s => s.Key.StartsWith("BTC") || s.Key.StartsWith("ETH")).Select(s => new Symbol(s.Key, s.Value));
+        }
+
         public async Task<IEnumerable<IMarket>> MarketSummaries()
         {
             var summaries = await _poloniex.GetTickers();
@@ -104,11 +110,6 @@ namespace PoloniexSharp
         }
 
         public Task<ICurrencyBalance> GetBalance(string currency)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<ISymbol>> Symbols()
         {
             throw new NotImplementedException();
         }

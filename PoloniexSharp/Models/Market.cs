@@ -31,7 +31,6 @@ namespace PoloniexSharp.Models
                 this.QuoteCurrency = name.Replace("BTC_", "");
                 this.MarketName = this.QuoteCurrency + "BTC";
                 this.Link = string.Format("https://poloniex.com/exchange#btc_{0}", this.QuoteCurrency);
-
             }
             else if (name.StartsWith("ETH"))
             {
@@ -39,7 +38,6 @@ namespace PoloniexSharp.Models
                 this.QuoteCurrency = name.Replace("ETH_", "");
                 this.MarketName = this.QuoteCurrency + "ETH";
                 this.Link = string.Format("https://poloniex.com/exchange#eth_{0}", this.QuoteCurrency);
-
             }
 
             this.Volume = decimal.Parse(ticker.baseVolume);

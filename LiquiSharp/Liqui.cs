@@ -39,11 +39,12 @@ namespace LiquiSharp
             fee = config.Fee;
         }
 
-        public async Task<IEnumerable<object>> Info()
+        public async Task<IEnumerable<ISymbol>> Symbols()
         {
             var summaries = await _liqui.Info();
-            return summaries.pairs.Keys;
+            return summaries.pairs.Select(kvp => new Symbol(kvp.Key, kvp.Value));
         }
+
         public async Task<Dictionary<string, Ticker>> Pairs()
         {
             var pairs = await _liqui.Info();
@@ -135,11 +136,6 @@ namespace LiquiSharp
         }
 
         public Task<ICurrencyBalance> GetBalance(string currency)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<ISymbol>> Symbols()
         {
             throw new NotImplementedException();
         }
