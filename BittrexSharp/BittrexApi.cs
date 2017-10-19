@@ -438,8 +438,8 @@ namespace BittrexSharp
             if (currency != null) parameters.Add("currency", currency);
 
             var jsonResponse = await request(HttpMethod.Get, uri, parameters);
-            var withdrawalHistory = jsonResponse.ToObject<IEnumerable<HistoricWithdrawal>>();
-            return withdrawalHistory;
+            var withdrawalHistory = jsonResponse.ToObject<IEnumerable<BittrexWithdrawal>>();
+            return withdrawalHistory.Select(w => new HistoricWithdrawal(w));
         }
 
         /// <summary>

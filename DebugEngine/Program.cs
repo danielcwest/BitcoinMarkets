@@ -45,9 +45,7 @@ namespace DebugEngine
                 var bittrex = (Bittrex)exchanges["Bittrex"];
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
 
-                string sym = "SNTETH";
-                var symbols = bittrex.Symbols().Result.ToDictionary(s => s.LocalSymbol);
-                EngineHelper.Buy(bittrex, symbols[sym], dbService, sym, 1000m, 0.00009052m, -1).Wait();
+                EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
 
                 Console.WriteLine("Complete");
             }

@@ -41,49 +41,26 @@ namespace BMCore.Engine
         public async Task<int> AnalyzeFundedPairs()
         {
             this.runType = "trade";
-            var baseBalances = await this.baseExchange.GetBalances();
-            var arbBalances = await this.arbExchange.GetBalances();
-            this.baseExchangeBalances = baseBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
-            this.arbitrageExchangeBalances = arbBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
 
             await RefreshSymbols();
 
             int count = 0;
-            if (BaseCurrencyAvailable(baseCurrency.Name))
-            {
-                count = await AnalyzePairs();
-            }
-            return count;
-        }
-
-        private bool BaseCurrencyAvailable(string currency)
-        {
-            return this.baseExchangeBalances.ContainsKey(currency) &&
-            this.baseExchangeBalances[currency].Available > baseCurrency.TradeThreshold
-            && this.arbitrageExchangeBalances.ContainsKey(currency) &&
-            this.arbitrageExchangeBalances[currency].Available > baseCurrency.TradeThreshold;
-        }
-
-
-
-
-        private async Task<int> AnalyzePairs()
-        {
-            int pairCount = 0;
             foreach (var kvp in this.baseExchangeBalances.Where(kvp => !EngineHelper.IsBaseCurrency(kvp.Value.Currency)))
             {
                 if (this.arbitrageExchangeBalances.ContainsKey(kvp.Key))
                 {
                     string symbol = string.Format("{0}{1}", kvp.Key, baseCurrency.Name);
-                    await AnalyzeMarket(symbol);
-                    pairCount++;
+                    bool valid = await AnalyzeMarket(symbol);
+                    if (valid) count++;
                 }
             }
-            return pairCount;
+            return count;
         }
 
         public async Task<int> AnalyzeMarkets()
         {
+            this.runType = "log";
+
             await RefreshSymbols();
 
             int marketCount = 0;
@@ -91,14 +68,28 @@ namespace BMCore.Engine
             {
                 if (this.arbitrageExchangeMarkets.ContainsKey(kvp.Key))
                 {
-                    await AnalyzeMarket(kvp.Key);
-                    marketCount++;
+                    bool valid = await AnalyzeMarket(kvp.Key);
+                    if (valid) marketCount++;
                 }
             }
             return marketCount;
         }
 
-        public async Task RefreshSymbols()
+        private bool HasAvailableBalance(IMarket market)
+        {
+            bool result = false;
+            if (this.baseExchangeBalances.ContainsKey(market.BaseCurrency) && this.baseExchangeBalances.ContainsKey(market.QuoteCurrency)
+            && this.arbitrageExchangeBalances.ContainsKey(market.BaseCurrency) && this.arbitrageExchangeBalances.ContainsKey(market.QuoteCurrency))
+            {
+                result = this.baseExchangeBalances[market.BaseCurrency].Available > baseCurrency.TradeThreshold &&
+                        this.baseExchangeBalances[market.QuoteCurrency].Available * market.Last > baseCurrency.TradeThreshold &&
+                        this.arbitrageExchangeBalances[market.BaseCurrency].Available > baseCurrency.TradeThreshold &&
+                        this.arbitrageExchangeBalances[market.QuoteCurrency].Available * market.Last > baseCurrency.TradeThreshold;
+            }
+            return result;
+        }
+
+        private async Task RefreshSymbols()
         {
             var baseMarkets = await this.baseExchange.Symbols();
             this.baseExchangeMarkets = baseMarkets.Where(m => m.BaseCurrency == baseCurrency.Name).ToDictionary(m => m.LocalSymbol);
@@ -106,10 +97,16 @@ namespace BMCore.Engine
             var arbExchange = await this.arbExchange.Symbols();
             this.arbitrageExchangeMarkets = arbExchange.Where(m => m.BaseCurrency == baseCurrency.Name).ToDictionary(m => m.LocalSymbol);
 
+            var baseBalances = await this.baseExchange.GetBalances();
+            this.baseExchangeBalances = baseBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
+
+            var arbBalances = await this.arbExchange.GetBalances();
+            this.arbitrageExchangeBalances = arbBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
+
             await Task.FromResult(0);
         }
 
-        private async Task AnalyzeMarket(string symbol)
+        private async Task<bool> AnalyzeMarket(string symbol)
         {
             try
             {
@@ -126,17 +123,26 @@ namespace BMCore.Engine
                 }
                 else
                 {
-                    await FindOpportunity(new ArbitrageMarket(bMarket, bBook, rMarket, rBook, this.baseCurrency));
                     Console.WriteLine("Analyzing {0}", symbol);
+                    if (runType == "trade" && HasAvailableBalance(bMarket) && HasAvailableBalance(rMarket))
+                    {
+                        await FindOpportunity(new ArbitrageMarket(bMarket, bBook, rMarket, rBook, this.baseCurrency));
+                    }
+                    else
+                    {
+                        await FindOpportunity(new ArbitrageMarket(bMarket, bBook, rMarket, rBook, this.baseCurrency));
+                    }
+                    return true;
                 }
             }
             catch (Exception e)
             {
                 dbService.LogError(this.baseExchange.Name, this.arbExchange.Name, symbol, "AnalyzeMarkets", e, pId);
             }
+            return false;
         }
 
-        public async Task FindOpportunity(ArbitrageMarket am)
+        private async Task FindOpportunity(ArbitrageMarket am)
         {
             decimal baseBuy = 0M;
             decimal baseSell = 0M;
@@ -159,8 +165,8 @@ namespace BMCore.Engine
                 if (baseBuy < arbSell && baseBuySpread >= am.baseCurrency.SpreadThreshold && runType == "trade")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseBuy, arbSell, baseBuySpread, baseCurrency.TradeThreshold, this.pId);
-                    long buyId = await EngineHelper.Buy(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, baseCurrency.TradeThreshold / baseBuy, baseBuy, this.pId);
                     long sellId = await EngineHelper.Sell(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, baseCurrency.TradeThreshold / arbSell, arbSell, this.pId);
+                    long buyId = await EngineHelper.Buy(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, baseCurrency.TradeThreshold / baseBuy, baseBuy, this.pId);
                     dbService.SaveOrderPair(buyId, baseExchange.Name, sellId, arbExchange.Name);
                 }
 
@@ -172,8 +178,8 @@ namespace BMCore.Engine
                 if (baseSell > arbBuy && baseSellSpread >= am.baseCurrency.SpreadThreshold && runType == "trade")
                 {
                     dbService.LogTrade(this.baseExchange.Name, this.arbExchange.Name, am.Symbol, this.runType, baseSell, arbBuy, baseSellSpread, baseCurrency.TradeThreshold, this.pId);
-                    long buyId = await EngineHelper.Buy(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, baseCurrency.TradeThreshold / arbBuy, arbBuy, this.pId);
                     long sellId = await EngineHelper.Sell(baseExchange, baseExchangeMarkets[am.Symbol], dbService, am.Symbol, baseCurrency.TradeThreshold / baseSell, baseSell, this.pId);
+                    long buyId = await EngineHelper.Buy(arbExchange, arbitrageExchangeMarkets[am.Symbol], dbService, am.Symbol, baseCurrency.TradeThreshold / arbBuy, arbBuy, this.pId);
                     dbService.SaveOrderPair(buyId, arbExchange.Name, sellId, baseExchange.Name);
                 }
 
