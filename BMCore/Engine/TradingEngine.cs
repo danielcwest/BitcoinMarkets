@@ -44,6 +44,12 @@ namespace BMCore.Engine
 
             await RefreshSymbols();
 
+            var baseBalances = await this.baseExchange.GetBalances();
+            this.baseExchangeBalances = baseBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
+
+            var arbBalances = await this.arbExchange.GetBalances();
+            this.arbitrageExchangeBalances = arbBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
+
             int count = 0;
             foreach (var kvp in this.baseExchangeBalances.Where(kvp => !EngineHelper.IsBaseCurrency(kvp.Value.Currency)))
             {
@@ -96,16 +102,6 @@ namespace BMCore.Engine
 
             var arbExchange = await this.arbExchange.Symbols();
             this.arbitrageExchangeMarkets = arbExchange.Where(m => m.BaseCurrency == baseCurrency.Name).ToDictionary(m => m.LocalSymbol);
-
-            if (this.runType == "trade")
-            {
-                var baseBalances = await this.baseExchange.GetBalances();
-                this.baseExchangeBalances = baseBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
-
-                var arbBalances = await this.arbExchange.GetBalances();
-                this.arbitrageExchangeBalances = arbBalances.Where(b => b.Available > 0).ToDictionary(b => b.Currency);
-            }
-
 
             await Task.FromResult(0);
         }
