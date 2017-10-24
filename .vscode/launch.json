@@ -27,15 +27,12 @@
             "console": "internalConsole"
         },
         {
-            "name": "Engine Trade Bittrex Hitbtc ETH",
+            "name": "Engine Trade",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
             "args": [
-                "trade",
-                "Bittrex",
-                "Hitbtc",
-                "ETH"
+                "trade"
             ],
             "cwd": "${workspaceRoot}/Engine",
             "stopAtEntry": false,

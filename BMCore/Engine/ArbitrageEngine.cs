@@ -86,6 +86,48 @@ namespace BMCore.Engine
             }
         }
 
+        public async Task ExecuteTrades(IEnumerable<ArbitragePair> pairs)
+        {
+            foreach (var p in pairs)
+            {
+                Console.WriteLine("Trading {0}", p.Symbol);
+                ArbitragePair pair = p;
+                bool isTrade = false;
+                bool isError = false;
+                try
+                {
+                    pair = await AppendMarketData(p);
+                    var opp = EngineHelper.FindOpportunity(pair);
+
+                    if (opp != null && opp.Type == "basebuy")
+                    {
+                        dbService.InsertArbitrageOpportunity(pair.Id, opp.BasePrice, opp.CounterPrice, opp.Spread, pair.TradeThreshold);
+                        long buyId = await EngineHelper.Buy(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opp.BasePrice, opp.BasePrice, pair.Id);
+                        long sellId = await EngineHelper.Sell(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opp.CounterPrice, opp.CounterPrice, pair.Id);
+                        dbService.SaveOrderPair(buyId, baseExchange.Name, sellId, counterExchange.Name);
+                        isTrade = true;
+
+                    }
+                    else if (opp != null && opp.Type == "basesell")
+                    {
+                        dbService.InsertArbitrageOpportunity(pair.Id, opp.BasePrice, opp.CounterPrice, opp.Spread, pair.TradeThreshold);
+                        long buyId = await EngineHelper.Buy(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opp.CounterPrice, opp.CounterPrice, pair.Id);
+                        long sellId = await EngineHelper.Sell(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opp.BasePrice, opp.BasePrice, pair.Id);
+                        dbService.SaveOrderPair(buyId, counterExchange.Name, sellId, baseExchange.Name);
+                        isTrade = true;
+                    }
+                }
+                catch (Exception e)
+                {
+                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "ExecuteTrades", e, pair.Id);
+                    isError = true;
+                }
+                finally
+                {
+                    dbService.UpdateArbitragePairById(pair.Id, isTrade: isTrade, isError: isError);
+                }
+            }
+        }
         private async Task<ArbitragePair> AppendMarketData(ArbitragePair pair)
         {
             //Always get the freshest data
