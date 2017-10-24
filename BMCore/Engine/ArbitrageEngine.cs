@@ -124,7 +124,7 @@ namespace BMCore.Engine
                 }
                 finally
                 {
-                    dbService.UpdateArbitragePairById(pair.Id, isTrade: isTrade, isError: isError);
+                    dbService.UpdateArbitragePairById(pair.Id, isTrade: isTrade, isError: isError, isFunded: true);
                 }
             }
         }
