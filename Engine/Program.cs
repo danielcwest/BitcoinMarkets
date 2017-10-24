@@ -56,8 +56,12 @@ namespace Engine
                 switch (args[0])
                 {
                     case "log":
-
-                        break;
+                        while (true)
+                        {
+                            EngineHelper.ExecuteArbitragePairs(exchanges, dbService);
+                            Console.WriteLine("Complete, Sleeping ...");
+                            Thread.Sleep(1000 * 60);
+                        }
                     case "withdraw":
                         EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
 
@@ -68,12 +72,6 @@ namespace Engine
                         EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
                         break;
                     default:
-                        while (true)
-                        {
-                            EngineHelper.ExecuteArbitragePairs(exchanges, dbService);
-                            Console.WriteLine("Complete, Sleeping ...");
-                            Thread.Sleep(1000 * 60);
-                        }
                         break;
                 }
 

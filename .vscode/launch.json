@@ -15,11 +15,13 @@
             "console": "internalConsole"
         },
         {
-            "name": "Engine",
+            "name": "Engine Log",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
-            "args": [],
+            "args": [
+                "log"
+            ],
             "cwd": "${workspaceRoot}/Engine",
             "stopAtEntry": false,
             "console": "internalConsole"
