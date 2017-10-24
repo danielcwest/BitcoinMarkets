@@ -119,9 +119,10 @@ namespace BinanceSharp
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<ICurrencyBalance>> GetBalances()
+        public async Task<IEnumerable<ICurrencyBalance>> GetBalances()
         {
-            throw new NotImplementedException();
+            var res = new List<BiBalance>();
+            return await Task.FromResult(res);
         }
     }
 

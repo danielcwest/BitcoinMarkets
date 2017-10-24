@@ -12,48 +12,44 @@ namespace BMCore.Engine
 {
     public class EngineHelper
     {
-        public static void ExecuteAllExchanges(IExchange[] exchanges, BMDbService dbService, CurrencyConfig baseCurrency, GmailConfig gmail, string runType)
-        {
-            for (var i = 0; i < exchanges.Length; i++)
-            {
-                var baseExchange = exchanges[i];
-                for (var j = 0; j < exchanges.Length; j++)
-                {
-                    var arbExchange = exchanges[j];
-
-                    if (baseExchange != arbExchange)
-                    {
-                        ExecuteExchangePair(baseExchange, arbExchange, dbService, baseCurrency, gmail, runType);
-                    }
-
-                }
-            }
-        }
-
-        public static void ExecuteExchangePair(IExchange baseExchange, IExchange arbExchange, BMDbService dbService, CurrencyConfig baseCurrency, GmailConfig gmail, string runType)
+        public static void ExecuteArbitragePairs(Dictionary<string, IExchange> exchanges, BMDbService dbService)
         {
             int pId = -1;
-            try
-            {
-                Console.WriteLine("Starting: {0} {1}", baseExchange.Name, arbExchange.Name);
-                pId = dbService.StartEngineProcess(baseExchange.Name, arbExchange.Name, runType, baseCurrency);
-                var engine = new TradingEngine(baseExchange, arbExchange, dbService, baseCurrency, gmail, pId);
 
-                int count = 0;
-                if (runType == "log")
-                    count = engine.AnalyzeMarkets().Result;
-                else if (runType == "trade")
-                    count = engine.AnalyzeFundedPairs().Result;
-
-                dbService.EndEngineProcess(pId, "success", new { MarketCount = count });
-                Console.WriteLine("Completed: {0} {1}", baseExchange.Name, arbExchange.Name);
-            }
-            catch (Exception e)
+            var groups = dbService.GetArbitragePairs("log").GroupBy(g => new { g.BaseExchange, g.CounterExchange }).Select(g => new ArbitrageGroup()
             {
-                //Console.WriteLine(e);
-                Console.WriteLine("Error: {0} {1}", baseExchange.Name, arbExchange.Name);
-                dbService.LogError(baseExchange.Name, arbExchange.Name, "", "Main", e, pId);
-                if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
+                BaseExchange = g.Key.BaseExchange,
+                CounterExchange = g.Key.CounterExchange,
+                Markets = g.Select(m => new ArbitragePair(m))
+            });
+
+            foreach (var group in groups)
+            {
+                var engine = new ArbitrageEngine(exchanges[group.BaseExchange], exchanges[group.CounterExchange], dbService);
+
+                try
+                {
+                    pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "opportunities", new CurrencyConfig());
+                    engine.LogOpportunities(group.Markets).Wait();
+                    dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
+                }
+                catch (Exception e)
+                {
+                    dbService.LogError(group.BaseExchange, group.CounterExchange, "", "Main", e, pId);
+                    if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
+                }
+
+                try
+                {
+                    pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "balances", new CurrencyConfig());
+                    engine.CheckBalances(group.Markets).Wait();
+                    dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
+                }
+                catch (Exception e)
+                {
+                    dbService.LogError(group.BaseExchange, group.CounterExchange, "", "Main", e, pId);
+                    if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
+                }
             }
         }
 
@@ -91,7 +87,7 @@ namespace BMCore.Engine
                 {
                     var exchange = exchanges[withdrawal.FromExchange];
                     var w = await exchange.GetWithdrawal(withdrawal.Uuid);
-                    if (!string.IsNullOrWhiteSpace(w.TxId))
+                    if (w != null && !string.IsNullOrWhiteSpace(w.TxId))
                         dbService.CloseWithdrawal(withdrawal.Id, w.Amount, w.TxId);
                 }
                 catch (Exception ex)
@@ -195,6 +191,49 @@ namespace BMCore.Engine
         public static bool IsBaseCurrency(string currency)
         {
             return currency == "ETH" || currency == "BTC";
+        }
+
+        public static ArbitrageOpportunity FindOpportunity(ArbitragePair pair)
+        {
+            decimal baseBuy = 0M;
+            decimal baseSell = 0M;
+            decimal arbBuy = 0M;
+            decimal arbSell = 0M;
+            decimal baseBuySpread = 0M;
+            decimal baseSellSpread = 0M;
+
+            baseBuy = GetPriceAtVolumeThreshold(pair.TradeThreshold, pair.baseBook.asks);
+            baseSell = GetPriceAtVolumeThreshold(pair.TradeThreshold, pair.baseBook.bids);
+            arbBuy = GetPriceAtVolumeThreshold(pair.TradeThreshold, pair.counterBook.asks);
+            arbSell = GetPriceAtVolumeThreshold(pair.TradeThreshold, pair.counterBook.bids);
+
+            if (baseBuy > 0 && baseSell > 0 && arbBuy > 0 && arbSell > 0)
+            {
+                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (pair.exchangeFees);
+                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (pair.exchangeFees);
+
+                if (baseBuy < arbSell && baseBuySpread >= pair.SpreadThreshold)
+                {
+                    return new ArbitrageOpportunity()
+                    {
+                        Type = "basebuy",
+                        BasePrice = baseBuy,
+                        CounterPrice = arbSell,
+                        Spread = baseBuySpread
+                    };
+                }
+                else if (baseSell > arbBuy && baseSellSpread >= pair.SpreadThreshold)
+                {
+                    return new ArbitrageOpportunity()
+                    {
+                        Type = "basesell",
+                        BasePrice = baseSell,
+                        CounterPrice = arbBuy,
+                        Spread = baseSellSpread
+                    };
+                }
+            }
+            return null;
         }
     }
 }

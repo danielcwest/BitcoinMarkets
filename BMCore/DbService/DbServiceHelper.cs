@@ -9,6 +9,21 @@ namespace BMCore.DbService
 {
     public static class DbServiceHelper
     {
+
+        public static void BulkCopySqlTable(DataTable sourceTable, string destinationTableName, string connectionString)
+        {
+            if (sourceTable == null || sourceTable.Rows.Count == 0)
+                return;
+
+            using (var destConnection = new SqlConnection(connectionString))
+            using (SqlBulkCopy s = new SqlBulkCopy(destConnection))
+            {
+                s.DestinationTableName = destinationTableName;
+                destConnection.Open();
+                s.WriteToServer(sourceTable);
+            }
+        }
+
         public static void ExecuteNonQuery(string sqlConnectionString, string sprocName, int commandTimeoutInSeconds, params object[] sqlParams)
         {
             using (var cn = new SqlConnection(sqlConnectionString))

@@ -8,7 +8,5 @@ namespace BMCore.Contracts
         string ExchangeSymbol { get; set; }
         string BaseCurrency { get; set; }
         string MarketCurrency { get; set; }
-        decimal Fee { get; set; }
-        string FeeCurrency { get; set; }
     }
 }

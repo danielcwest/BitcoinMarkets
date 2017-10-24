@@ -42,18 +42,20 @@ namespace BittrexSharp
         public async Task<IEnumerable<ISymbol>> Symbols()
         {
             var markets = await _bittrex.GetMarkets();
-            return markets.Where(m => m.BaseCurrency == "BTC" || m.BaseCurrency == "ETH").Select(m => new Symbol(m));
+            return markets.Select(m => new Symbol(m));
         }
 
         public async Task<IEnumerable<IMarket>> MarketSummaries()
         {
             var summaries = await _bittrex.GetMarketSummaries();
-            return summaries.Where(s => s.MarketName.StartsWith("BTC-") || s.MarketName.StartsWith("ETH-")).Select(s => new BMMarket(s));
+            return summaries.Select(s => new BMMarket(s));
         }
 
         public async Task<IMarket> MarketSummary(string symbol)
         {
-            var sum = await _bittrex.GetMarketSummary(GetMarketNameFromSymbol(symbol));
+            if (!symbol.Contains("-"))
+                symbol = GetMarketNameFromSymbol(symbol);
+            var sum = await _bittrex.GetMarketSummary(symbol);
             return new BMMarket(sum.FirstOrDefault());
         }
 
@@ -62,16 +64,14 @@ namespace BittrexSharp
             var ob = new BMCore.Models.OrderBook(symbol);
             var books = await _bittrex.GetOrderBook(GetMarketNameFromSymbol(symbol), "both", 1);
 
-            if (ob.symbol != Helper.GetSymbolFromMarketName(books.MarketName))
+            if (books.Sell != null && books.Buy != null)
             {
-                throw new Exception();
+                ob.asks = books.Sell.Select(s => new BMCore.Models.OrderBookEntry() { price = s.Rate, quantity = s.Quantity }).Take(25).ToList();
+                ob.bids = books.Buy.Select(s => new BMCore.Models.OrderBookEntry() { price = s.Rate, quantity = s.Quantity }).Take(25).ToList();
+
+                ob.asks = BMCore.Helper.SumOrderEntries(ob.asks);
+                ob.bids = BMCore.Helper.SumOrderEntries(ob.bids);
             }
-
-            ob.asks = books.Sell.Select(s => new BMCore.Models.OrderBookEntry() { price = s.Rate, quantity = s.Quantity }).Take(25).ToList();
-            ob.bids = books.Buy.Select(s => new BMCore.Models.OrderBookEntry() { price = s.Rate, quantity = s.Quantity }).Take(25).ToList();
-
-            ob.asks = BMCore.Helper.SumOrderEntries(ob.asks);
-            ob.bids = BMCore.Helper.SumOrderEntries(ob.bids);
 
             return ob;
         }

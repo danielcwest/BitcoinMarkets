@@ -277,6 +277,78 @@ namespace BMCore.DbService
                         new SqlParameter { ParameterName = "@ids", Value = ids.ToDataTable(), TypeName = "dbo.LongCollection" }
                 });
         }
+
+        public void InsertArbitragePair(string baseExchange, string arbExchange, string symbol, string baseSymbol, string counterSymbol, string baseCurrency, string marketCurrency)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertArbitragePair", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@baseExchange", Value = baseExchange },
+                    new SqlParameter { ParameterName = "@arbExchange", Value = arbExchange },
+                    new SqlParameter { ParameterName = "@symbol", Value = symbol },
+                    new SqlParameter { ParameterName = "@baseSymbol", Value = baseSymbol },
+                    new SqlParameter { ParameterName = "@counterSymbol", Value = counterSymbol },
+                    new SqlParameter { ParameterName = "@baseCurrency", Value = baseCurrency },
+                    new SqlParameter { ParameterName = "@marketCurrency", Value = marketCurrency }
+                });
+        }
+
+        public IEnumerable<DbArbitragePair> GetArbitragePairs(string status, string baseExchange = "", string arbExchange = "")
+        {
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetArbitragePairs", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@status", Value = status },
+                        new SqlParameter { ParameterName = "@baseExchange", Value = baseExchange },
+                        new SqlParameter { ParameterName = "@arbExchange", Value = arbExchange }
+                }))
+            {
+                return reader.ToList<DbArbitragePair>();
+            }
+        }
+
+        public void UpdateArbitragePair(string baseExchange, string arbExchange, string symbol, bool isTrade = false, bool isError = false, bool isOpportunity = false, object payload = null)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateArbitragePair", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@baseExchange", Value = baseExchange },
+                    new SqlParameter { ParameterName = "@arbExchange", Value = arbExchange },
+                    new SqlParameter { ParameterName = "@symbol", Value = symbol },
+                    new SqlParameter { ParameterName = "@isTrade", Value = isTrade },
+                    new SqlParameter { ParameterName = "@isError", Value = isError },
+                    new SqlParameter { ParameterName = "@isOpportunity", Value = isOpportunity },
+                    new SqlParameter { ParameterName = "@meta", Value = (payload == null) ? "" : JsonConvert.SerializeObject(payload)}
+                });
+        }
+
+        public void UpdateArbitragePairById(int id, bool isTrade = false, bool isError = false, bool isOpportunity = false, bool isFunded = false, object payload = null)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateArbitragePairById", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@Id", Value = id },
+                    new SqlParameter { ParameterName = "@isTrade", Value = isTrade },
+                    new SqlParameter { ParameterName = "@isError", Value = isError },
+                    new SqlParameter { ParameterName = "@isOpportunity", Value = isOpportunity },
+                    new SqlParameter { ParameterName = "@isFunded", Value = isFunded },
+                    new SqlParameter { ParameterName = "@meta", Value = (payload == null) ? "" : JsonConvert.SerializeObject(payload)}
+                });
+
+        }
+
+        public void InsertArbitrageOpportunity(int pairId, decimal basePrice, decimal arbPrice, decimal spread, decimal threshold)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertOpportunity", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@pairId", Value = pairId },
+                    new SqlParameter { ParameterName = "@basePrice", Value = basePrice },
+                    new SqlParameter { ParameterName = "@arbPrice", Value = arbPrice},
+                    new SqlParameter { ParameterName = "@spread", Value = spread},
+                    new SqlParameter { ParameterName = "@threshold", Value = threshold}
+                });
+        }
     }
 
 }

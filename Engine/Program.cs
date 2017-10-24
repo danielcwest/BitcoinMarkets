@@ -56,24 +56,7 @@ namespace Engine
                 switch (args[0])
                 {
                     case "log":
-                        if (args.Length == 2)
-                        {
-                            EngineHelper.ExecuteAllExchanges(exchanges.Values.ToArray(), dbService, baseCurrencies[args[1]], arbitrageConfig.Gmail, "log");
-                        }
-                        else if (args.Length == 4)
-                        {
-                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, baseCurrencies[args[3]], arbitrageConfig.Gmail, "log");
-                        }
-                        break;
-                    case "trade":
-                        if (args.Length == 4)
-                        {
-                            if (dbService.GetInvalidOrderCount() > 0)
-                                throw new Exception("Fix Invalid orders");
 
-                            EngineHelper.ExecuteExchangePair(exchanges[args[1]], exchanges[args[2]], dbService, baseCurrencies[args[3]], arbitrageConfig.Gmail, "trade");
-
-                        }
                         break;
                     case "withdraw":
                         EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
@@ -85,6 +68,12 @@ namespace Engine
                         EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
                         break;
                     default:
+                        while (true)
+                        {
+                            EngineHelper.ExecuteArbitragePairs(exchanges, dbService);
+                            Console.WriteLine("Complete, Sleeping ...");
+                            Thread.Sleep(1000 * 60);
+                        }
                         break;
                 }
 

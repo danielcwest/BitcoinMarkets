@@ -63,4 +63,20 @@ namespace BMCore.DbService
         public string TxId;
         public DateTime CreatedUtc;
     }
+
+    public class DbArbitragePair
+    {
+        public int Id;
+        public string BaseExchange;
+        public string CounterExchange;
+        public string Symbol;
+        public string BaseSymbol;
+        public string CounterSymbol;
+        public string BaseCurrency;
+        public string MarketCurrency;
+        public DateTime LastRunUtc;
+        public decimal TradeThreshold;
+        public decimal SpreadThreshold;
+        public decimal ExchangeFees;
+    }
 }

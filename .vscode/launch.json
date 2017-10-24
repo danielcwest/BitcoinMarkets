@@ -15,29 +15,11 @@
             "console": "internalConsole"
         },
         {
-            "name": "Engine Log ETH",
+            "name": "Engine",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
-            "args": [
-                "log",
-                "ETH"
-            ],
-            "cwd": "${workspaceRoot}/Engine",
-            "stopAtEntry": false,
-            "console": "internalConsole"
-        },
-        {
-            "name": "Engine Log Bittrex Hitbtc ETH",
-            "type": "coreclr",
-            "request": "launch",
-            "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
-            "args": [
-                "log",
-                "Bittrex",
-                "Hitbtc",
-                "ETH"
-            ],
+            "args": [],
             "cwd": "${workspaceRoot}/Engine",
             "stopAtEntry": false,
             "console": "internalConsole"
