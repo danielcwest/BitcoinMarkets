@@ -12,7 +12,7 @@ namespace BMCore.Engine
 {
     public class EngineHelper
     {
-        public static void AnalyzeArbitragePairs(Dictionary<string, IExchange> exchanges, BMDbService dbService)
+        public static void LogOpportunities(Dictionary<string, IExchange> exchanges, BMDbService dbService)
         {
             int pId = -1;
 
@@ -31,18 +31,6 @@ namespace BMCore.Engine
                 {
                     pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "opportunities", new CurrencyConfig());
                     engine.LogOpportunities(group.Markets).Wait();
-                    dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
-                }
-                catch (Exception e)
-                {
-                    dbService.LogError(group.BaseExchange, group.CounterExchange, "", "Main", e, pId);
-                    if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
-                }
-
-                try
-                {
-                    pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "balances", new CurrencyConfig());
-                    engine.CheckBalances(group.Markets).Wait();
                     dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
                 }
                 catch (Exception e)
@@ -72,6 +60,35 @@ namespace BMCore.Engine
                 {
                     pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "trade", new CurrencyConfig());
                     engine.ExecuteTrades(group.Markets).Wait();
+                    dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
+                }
+                catch (Exception e)
+                {
+                    dbService.LogError(group.BaseExchange, group.CounterExchange, "", "Main", e, pId);
+                    if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
+                }
+            }
+        }
+
+        public static void CheckExchangeBalances(Dictionary<string, IExchange> exchanges, BMDbService dbService)
+        {
+            int pId = -1;
+
+            var groups = dbService.GetArbitragePairs("").GroupBy(g => new { g.BaseExchange, g.CounterExchange }).Select(g => new ArbitrageGroup()
+            {
+                BaseExchange = g.Key.BaseExchange,
+                CounterExchange = g.Key.CounterExchange,
+                Markets = g.Select(m => new ArbitragePair(m))
+            });
+
+            foreach (var group in groups)
+            {
+                var engine = new ArbitrageEngine(exchanges[group.BaseExchange], exchanges[group.CounterExchange], dbService);
+
+                try
+                {
+                    pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "balances", new CurrencyConfig());
+                    engine.CheckBalances(group.Markets).Wait();
                     dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
                 }
                 catch (Exception e)

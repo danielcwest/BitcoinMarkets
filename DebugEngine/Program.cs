@@ -40,7 +40,7 @@ namespace DebugEngine
 
             try
             {
-                EngineHelper.ExecuteTradePairs(exchanges, dbService);
+                EngineHelper.CheckExchangeBalances(exchanges, dbService);
 
                 Console.WriteLine("Complete");
             }
