@@ -78,14 +78,12 @@ namespace Engine
                             Thread.Sleep(1000 * 60);
                         }
                     case "withdraw":
-                        EngineHelper.UpdateOrderStatus(dbService, exchanges).Wait();
-
-                        EngineHelper.ProcessWithdrawals(dbService, exchanges.Values.ToArray(), baseCurrencies[args[1]]).Wait();
-
-                        Thread.Sleep(1000 * 60); //Wait 1 minute for withdrawals to go through on exchange
-
-                        EngineHelper.UpdateWithdrawalStatus(dbService, exchanges).Wait();
-                        break;
+                        while (true)
+                        {
+                            EngineHelper.ProcessTransactionOrders(dbService, exchanges).Wait();
+                            Console.WriteLine("Complete, Sleeping ...");
+                            Thread.Sleep(1000 * 60);
+                        }
                     default:
                         break;
                 }

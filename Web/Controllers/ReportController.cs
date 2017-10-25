@@ -29,23 +29,5 @@ namespace Web.Controllers
             dbService = new BMDbService(_iconfiguration.GetValue<string>("SqlConnectionString"));
 
         }
-
-        [HttpGet]
-        public IEnumerable<DbOrder> Orders()
-        {
-            return dbService.GetOrders();
-        }
-
-        [HttpGet]
-        public IEnumerable<DbTradeLog> Trades()
-        {
-            return dbService.GetTrades();
-        }
-
-        [HttpGet]
-        public IEnumerable<DbWithdrawal> Withdrawals()
-        {
-            return dbService.GetWithdrawals();
-        }
     }
 }

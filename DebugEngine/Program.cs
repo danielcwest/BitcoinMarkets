@@ -42,9 +42,11 @@ namespace DebugEngine
             try
             {
                 //EngineHelper.ExecuteTradePairs(exchanges, dbService);
-                var engine = new ArbitrageEngine(exchanges["Bittrex"], exchanges["Hitbtc"], dbService);
-                var pairs = dbService.GetArbitragePairs("trade").Where(p => p.CounterExchange == "Hitbtc" && p.Symbol == "ADXETH").Select(p => new ArbitragePair(p));
-                engine.ExecuteTrades(pairs).Wait();
+                //var engine = new ArbitrageEngine(exchanges["Bittrex"], exchanges["Hitbtc"], dbService);
+                //var pairs = dbService.GetArbitragePairs("trade").Where(p => p.CounterExchange == "Hitbtc" && p.Symbol == "ADXETH").Select(p => new ArbitragePair(p));
+                //engine.ExecuteTrades(pairs).Wait();
+
+                EngineHelper.ProcessTransactionOrders(dbService, exchanges).Wait();
 
                 Console.WriteLine("Complete");
             }

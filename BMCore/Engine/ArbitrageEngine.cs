@@ -28,7 +28,7 @@ namespace BMCore.Engine
             this.dbService = dbService;
         }
 
-        public async Task LogOpportunities(IEnumerable<ArbitragePair> pairs)
+        public async Task LogOpportunities(IEnumerable<ArbitragePair> pairs, int pId)
         {
             foreach (var p in pairs)
             {
@@ -49,7 +49,7 @@ namespace BMCore.Engine
                 }
                 catch (Exception e)
                 {
-                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "LogOpportunities", e, pair.Id);
+                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "LogOpportunities", e, pId);
                     isError = true;
                 }
                 finally
@@ -59,7 +59,7 @@ namespace BMCore.Engine
             }
         }
 
-        public async Task CheckBalances(IEnumerable<ArbitragePair> pairs)
+        public async Task CheckBalances(IEnumerable<ArbitragePair> pairs, int pId)
         {
             await this.RefreshBalances();
 
@@ -76,7 +76,7 @@ namespace BMCore.Engine
                 }
                 catch (Exception e)
                 {
-                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "CheckBalances", e, pair.Id);
+                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "CheckBalances", e, pId);
                     isError = true;
                 }
                 finally
@@ -86,7 +86,7 @@ namespace BMCore.Engine
             }
         }
 
-        public async Task ExecuteTrades(IEnumerable<ArbitragePair> pairs)
+        public async Task ExecuteTrades(IEnumerable<ArbitragePair> pairs, int pId)
         {
             foreach (var p in pairs)
             {
@@ -98,28 +98,28 @@ namespace BMCore.Engine
                 try
                 {
                     pair = await AppendMarketData(p);
-                    var opp = EngineHelper.FindOpportunity(pair);
+                    var opportunity = EngineHelper.FindOpportunity(pair);
 
-                    if (opp != null && opp.Type == "basebuy")
+                    if (opportunity != null && opportunity.Type == "basebuy")
                     {
                         txId = dbService.InsertTransaction(pair.Id, "basebuy");
-                        var buyId = await EngineHelper.Buy(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opp.BasePrice, opp.BasePrice, txId);
-                        var sellId = await EngineHelper.Sell(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opp.CounterPrice, opp.CounterPrice, txId);
-                        dbService.UpdateTransactionOrderUuid(pair.Id, buyId.Uuid, sellId.Uuid);
+                        var buyId = await EngineHelper.Buy(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opportunity.BasePrice, opportunity.BasePrice, txId);
+                        var sellId = await EngineHelper.Sell(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opportunity.CounterPrice, opportunity.CounterPrice, txId);
+                        dbService.UpdateTransactionOrderUuid(txId, buyId.Uuid, sellId.Uuid);
                         isTrade = true;
                     }
-                    else if (opp != null && opp.Type == "basesell")
+                    else if (opportunity != null && opportunity.Type == "basesell")
                     {
                         txId = dbService.InsertTransaction(pair.Id, "basesell");
-                        var buyId = await EngineHelper.Buy(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opp.CounterPrice, opp.CounterPrice, txId);
-                        var sellId = await EngineHelper.Sell(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opp.BasePrice, opp.BasePrice, txId);
-                        dbService.UpdateTransactionOrderUuid(pair.Id, sellId.Uuid, buyId.Uuid);
+                        var buyId = await EngineHelper.Buy(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opportunity.CounterPrice, opportunity.CounterPrice, txId);
+                        var sellId = await EngineHelper.Sell(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, pair.TradeThreshold / opportunity.BasePrice, opportunity.BasePrice, txId);
+                        dbService.UpdateTransactionOrderUuid(txId, sellId.Uuid, buyId.Uuid);
                         isTrade = true;
                     }
                 }
                 catch (Exception e)
                 {
-                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "ExecuteTrades", e, txId);
+                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "ExecuteTrades", e, pId);
                     isError = true;
                 }
                 finally
@@ -128,6 +128,7 @@ namespace BMCore.Engine
                 }
             }
         }
+
         private async Task<ArbitragePair> AppendMarketData(ArbitragePair pair)
         {
             //Always get the freshest data
