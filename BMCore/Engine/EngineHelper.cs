@@ -41,7 +41,7 @@ namespace BMCore.Engine
             }
         }
 
-        public static void ExecuteTradePairs(Dictionary<string, IExchange> exchanges, BMDbService dbService)
+        public static async Task ExecuteTradePairs(Dictionary<string, IExchange> exchanges, BMDbService dbService)
         {
             int pId = -1;
 
@@ -59,8 +59,9 @@ namespace BMCore.Engine
                 try
                 {
                     pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "trade", new CurrencyConfig());
-                    engine.ExecuteTrades(group.Markets).Wait();
+                    await engine.ExecuteTrades(group.Markets);
                     dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
+
                 }
                 catch (Exception e)
                 {
@@ -99,30 +100,108 @@ namespace BMCore.Engine
             }
         }
 
-        public static async Task<long> Sell(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, int pId)
+        public static async Task<IAcceptedAction> Sell(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, int txId)
         {
-            return await Trade(exchange, market, dbService, symbol, quantity, price, "sell", pId);
+            return await Trade(exchange, market, dbService, symbol, quantity, price, "sell", txId);
         }
 
-        public static async Task<long> Buy(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, int pId)
+        public static async Task<IAcceptedAction> Buy(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, int txId)
         {
-            return await Trade(exchange, market, dbService, symbol, quantity, price, "buy", pId);
+            return await Trade(exchange, market, dbService, symbol, quantity, price, "buy", txId);
         }
 
-        public static async Task<long> Trade(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, string side, int pId)
+        public static async Task<IAcceptedAction> Trade(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, string side, int txId)
         {
-            long orderId = dbService.InsertOrder(exchange.Name, symbol, market.BaseCurrency, market.MarketCurrency, side, pId, price);
             IAcceptedAction tradeResult;
             if (side == "buy")
             {
-                tradeResult = await exchange.Buy(orderId.ToString(), market.ExchangeSymbol, quantity, price);
+                tradeResult = await exchange.Buy(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
             }
             else
             {
-                tradeResult = await exchange.Sell(orderId.ToString(), market.ExchangeSymbol, quantity, price);
+                tradeResult = await exchange.Sell(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
             }
-            dbService.UpdateOrderUuid(orderId, tradeResult.Uuid);
-            return orderId;
+            return tradeResult;
+        }
+
+        public static async Task ProcessTransactionOrders(IDbService dbService, Dictionary<string, IExchange> exchanges)
+        {
+            foreach (var transaction in dbService.GetTransactions(status: "orderpending"))
+            {
+                try
+                {
+                    var baseExchange = exchanges[transaction.BaseExchange];
+                    var counterExchange = exchanges[transaction.CounterExchange];
+
+                    var baseOrder = await baseExchange.CheckOrder(transaction.BaseOrderUuid);
+                    var counterOrder = await counterExchange.CheckOrder(transaction.CounterOrderUuid);
+
+                    if (baseOrder != null && baseOrder.IsFilled && counterOrder != null && counterOrder.IsFilled)
+                    {
+                        dbService.UpdateTransactionStatus(transaction.Id, "ordercomplete", new { bOrder = baseOrder, cOrder = counterOrder });
+                        await WithdrawTransactions(dbService, exchanges, transaction, baseOrder, counterOrder);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //dbService.UpdateWithdrawalStatus(withdrawal.Id, "error", ex);
+                    dbService.LogError(transaction.BaseExchange, transaction.CounterExchange, transaction.Id.ToString(), "ProcessTransactionOrders", ex);
+                }
+            }
+        }
+
+        private static async Task WithdrawTransactions(IDbService dbService, Dictionary<string, IExchange> exchanges, DbTransaction transaction, IOrder baseOrder, IOrder counterOrder)
+        {
+            IExchange baseExchange = exchanges[transaction.BaseExchange];
+            IExchange counterExchange = exchanges[transaction.CounterExchange];
+
+            if (transaction.Type == "basebuy")
+            {//Withdraw Market Currency from Base
+                var depAddress = await counterExchange.GetDepositAddress(transaction.MarketCurrency);
+                var tx = await baseExchange.Withdraw(transaction.MarketCurrency, baseOrder.Quantity, depAddress.Address);
+
+                //Withdraw Base Currency from Counter
+                var depAddress2 = await baseExchange.GetDepositAddress(transaction.BaseCurrency);
+                var tx2 = await counterExchange.Withdraw(transaction.BaseCurrency, transaction.TradeThreshold, depAddress.Address);
+                dbService.UpdateTransactionWithdrawalUuid(transaction.Id, tx.Uuid, tx2.Uuid);
+            }
+            else
+            {//Withdraw Base Currency from Base
+                var depAddress = await counterExchange.GetDepositAddress(transaction.BaseCurrency);
+                var tx = await baseExchange.Withdraw(transaction.BaseCurrency, transaction.TradeThreshold, depAddress.Address);
+
+                //Withdraw Market Currency from Counter
+                var depAddress2 = await baseExchange.GetDepositAddress(transaction.MarketCurrency);
+                var tx2 = await counterExchange.Withdraw(transaction.MarketCurrency, counterOrder.Quantity, depAddress.Address);
+                dbService.UpdateTransactionWithdrawalUuid(transaction.Id, tx.Uuid, tx2.Uuid);
+            }
+
+            Thread.Sleep(1000 * 60);
+
+            await UpdateTransactionWithdrawalStatus(dbService, exchanges);
+        }
+
+        private static async Task UpdateTransactionWithdrawalStatus(IDbService dbService, Dictionary<string, IExchange> exchanges)
+        {
+            foreach (var transaction in dbService.GetTransactions(status: "withdrawalpending"))
+            {
+                try
+                {
+                    var baseExchange = exchanges[transaction.BaseExchange];
+                    var counterExchange = exchanges[transaction.CounterExchange];
+
+                    var baseW = await baseExchange.GetWithdrawal(transaction.BaseWithdrawalUuid);
+                    var counterW = await counterExchange.GetWithdrawal(transaction.CounterWithdrawalUuid);
+
+                    if (baseW != null && !string.IsNullOrWhiteSpace(baseW.TxId) && counterW != null && !string.IsNullOrWhiteSpace(counterW.TxId))
+                        dbService.CloseTransaction(transaction.Id, baseW.TxId, counterW.TxId);
+                }
+                catch (Exception ex)
+                {
+                    //dbService.UpdateWithdrawalStatus(withdrawal.Id, "error", ex);
+                    dbService.LogError(transaction.BaseExchange, transaction.CounterExchange, transaction.Id.ToString(), "UpdateTransactionWithdrawalStatus", ex);
+                }
+            }
         }
 
         public static async Task UpdateWithdrawalStatus(IDbService dbService, Dictionary<string, IExchange> exchanges)

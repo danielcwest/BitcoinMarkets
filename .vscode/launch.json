@@ -39,6 +39,18 @@
             "console": "internalConsole"
         },
         {
+            "name": "Engine Balance",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
+            "args": [
+                "balance"
+            ],
+            "cwd": "${workspaceRoot}/Engine",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
             "name": "Engine Withdraw ETH",
             "type": "coreclr",
             "request": "launch",

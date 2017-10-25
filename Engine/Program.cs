@@ -65,7 +65,8 @@ namespace Engine
                     case "trade":
                         while (true)
                         {
-                            EngineHelper.ExecuteTradePairs(exchanges, dbService);
+                            EngineHelper.ExecuteTradePairs(exchanges, dbService).Wait();
+                            EngineHelper.ProcessTransactionOrders(dbService, exchanges).Wait();
                             Console.WriteLine("Complete, Sleeping ...");
                             Thread.Sleep(1000 * 60);
                         }

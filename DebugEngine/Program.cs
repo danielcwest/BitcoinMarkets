@@ -37,10 +37,14 @@ namespace DebugEngine
 
             var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"), arbitrageConfig.Gmail);
             var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
+            var baseCurrencies = arbitrageConfig.BaseCurrencies.Where(c => c.Enabled).ToDictionary(e => e.Name);
 
             try
             {
-                EngineHelper.CheckExchangeBalances(exchanges, dbService);
+                //EngineHelper.ExecuteTradePairs(exchanges, dbService);
+                var engine = new ArbitrageEngine(exchanges["Bittrex"], exchanges["Hitbtc"], dbService);
+                var pairs = dbService.GetArbitragePairs("trade").Where(p => p.CounterExchange == "Hitbtc" && p.Symbol == "ADXETH").Select(p => new ArbitragePair(p));
+                engine.ExecuteTrades(pairs).Wait();
 
                 Console.WriteLine("Complete");
             }

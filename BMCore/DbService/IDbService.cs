@@ -44,5 +44,11 @@ namespace BMCore.DbService
         void UpdateArbitragePairById(int id, bool isTrade = false, bool isError = false, bool isOpportunity = false, bool isFunded = false, object payload = null);
         void InsertArbitrageOpportunity(int pairId, decimal basePrice, decimal arbPrice, decimal spread, decimal threshold);
 
+        int InsertTransaction(int pairId, string type);
+        void UpdateTransactionStatus(int id, string status, object payload = null);
+        void UpdateTransactionOrderUuid(int id, string baseUuid, string counterUuid);
+        void UpdateTransactionWithdrawalUuid(int id, string baseUuid, string counterUuid);
+        void CloseTransaction(int id, string baseTxId, string counterTxId);
+        IEnumerable<DbTransaction> GetTransactions(string status);
     }
 }

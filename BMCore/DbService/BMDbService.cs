@@ -349,6 +349,72 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@threshold", Value = threshold}
                 });
         }
+
+        public int InsertTransaction(int pairId, string type)
+        {
+            return (int)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertTransaction", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@pairId", Value = pairId },
+                    new SqlParameter { ParameterName = "@type", Value = type }
+                });
+        }
+
+        public void UpdateTransactionOrderUuid(int id, string baseUuid, string counterUuid)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateTransactionOrderUuid", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@baseUuid", Value = baseUuid },
+                    new SqlParameter { ParameterName = "@counterUuid", Value = counterUuid}
+                });
+        }
+
+        public void UpdateTransactionWithdrawalUuid(int id, string baseUuid, string counterUuid)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateTransactionWithdrawalUuid", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@baseUuid", Value = baseUuid },
+                    new SqlParameter { ParameterName = "@counterUuid", Value = counterUuid}
+                });
+        }
+
+        public void CloseTransaction(int id, string baseTxId, string counterTxId)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.CloseTransaction", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@baseTxId", Value = baseTxId },
+                    new SqlParameter { ParameterName = "@counterTxId", Value = counterTxId}
+                });
+        }
+
+        public void UpdateTransactionStatus(int id, string status, object payload = null)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.CloseTransaction", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@status", Value = status },
+                    new SqlParameter { ParameterName = "@meta", Value = (payload == null) ? "" : JsonConvert.SerializeObject(payload)}
+                });
+        }
+
+        public IEnumerable<DbTransaction> GetTransactions(string status)
+        {
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetTransactions", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@status", Value = status }
+                }))
+            {
+                return reader.ToList<DbTransaction>();
+            }
+        }
     }
 
 }
