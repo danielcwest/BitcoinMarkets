@@ -165,20 +165,24 @@ namespace BMCore.Engine
 
                 //Withdraw Base Currency from Counter
                 var baseAddress = await baseExchange.GetDepositAddress(transaction.BaseCurrency);
-                var tx2 = await counterExchange.Withdraw(transaction.BaseCurrency, transaction.TradeThreshold, baseAddress.Address);
-                dbService.UpdateTransactionWithdrawalUuid(transaction.Id, tx.Uuid, tx2.Uuid);
+                var tx2 = await counterExchange.Withdraw(transaction.BaseCurrency, transaction.TradeThreshold + transaction.BaseWithdrawalFee, baseAddress.Address);
+
+                decimal commission = transaction.TradeThreshold - baseOrder.Price;
+                dbService.UpdateTransactionWithdrawalUuid(transaction.Id, tx.Uuid, tx2.Uuid, commission);
             }
             else
             {//Withdraw Base Currency from Base
                 var counterAddress = await counterExchange.GetDepositAddress(transaction.BaseCurrency);
-                var tx = await baseExchange.Withdraw(transaction.BaseCurrency, transaction.TradeThreshold, counterAddress.Address);
+                var tx = await baseExchange.Withdraw(transaction.BaseCurrency, transaction.TradeThreshold + transaction.BaseWithdrawalFee, counterAddress.Address);
 
                 //Withdraw Market Currency from Counter
                 //We want to transfer the amount of Market Currency we SOLD on the base exchange, 
                 //something like baseOrder.Quantity + withdrwawal fee
                 var baseAddress = await baseExchange.GetDepositAddress(transaction.MarketCurrency);
                 var tx2 = await counterExchange.Withdraw(transaction.MarketCurrency, counterOrder.Quantity, baseAddress.Address);
-                dbService.UpdateTransactionWithdrawalUuid(transaction.Id, tx.Uuid, tx2.Uuid);
+
+                decimal commission = transaction.TradeThreshold - counterOrder.Price;
+                dbService.UpdateTransactionWithdrawalUuid(transaction.Id, tx.Uuid, tx2.Uuid, commission);
             }
 
             Thread.Sleep(1000 * 60);
@@ -239,8 +243,8 @@ namespace BMCore.Engine
 
             if (baseBuy > 0 && baseSell > 0 && arbBuy > 0 && arbSell > 0)
             {
-                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (pair.exchangeFees);
-                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (pair.exchangeFees);
+                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (pair.ExchangeFees);
+                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (pair.ExchangeFees);
 
                 if (baseBuy < arbSell && baseBuySpread >= pair.SpreadThreshold)
                 {
@@ -284,8 +288,8 @@ namespace BMCore.Engine
 
             if (baseBuy > 0 && baseSell > 0 && arbBuy > 0 && arbSell > 0)
             {
-                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (pair.exchangeFees);
-                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (pair.exchangeFees);
+                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (pair.ExchangeFees);
+                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (pair.ExchangeFees);
 
                 return new ArbitrageOpportunity()
                 {

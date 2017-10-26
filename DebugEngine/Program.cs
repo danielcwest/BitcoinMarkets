@@ -19,6 +19,7 @@ using BMCore.Config;
 using BMCore;
 using PoloniexSharp;
 using LiquiSharp;
+using Newtonsoft.Json;
 
 namespace DebugEngine
 {
@@ -41,12 +42,14 @@ namespace DebugEngine
 
             try
             {
-                //EngineHelper.ExecuteTradePairs(exchanges, dbService);
-                //var engine = new ArbitrageEngine(exchanges["Bittrex"], exchanges["Hitbtc"], dbService);
-                //var pairs = dbService.GetArbitragePairs("trade").Where(p => p.CounterExchange == "Hitbtc" && p.Symbol == "ADXETH").Select(p => new ArbitragePair(p));
-                //engine.ExecuteTrades(pairs).Wait();
+                var bittrex = exchanges["Bittrex"];
+                var hitbtc = exchanges["Hitbtc"];
 
-                EngineHelper.ProcessTransactionOrders(dbService, exchanges).Wait();
+                var bOrder = bittrex.CheckOrder("759382c3-579a-4384-b83c-9d86c5a10180").Result;
+                var hOrder = hitbtc.CheckOrder("4616377485").Result;
+
+                var bWithdrawal = bittrex.GetWithdrawal("cc5b08ce-d735-4afa-b4d6-a7fcd3abc863").Result;
+                var hWithdrawal = hitbtc.GetWithdrawal("b7ba911e-4f7c-4b1c-be4f-ce4503b06659").Result;
 
                 Console.WriteLine("Complete");
             }

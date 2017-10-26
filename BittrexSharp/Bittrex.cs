@@ -7,6 +7,8 @@ using BMCore.Models;
 using BMCore.Contracts;
 using System.Threading.Tasks;
 using BMCore.Config;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace BittrexSharp
 {
@@ -98,6 +100,8 @@ namespace BittrexSharp
         public async Task<IOrder> CheckOrder(string uuid)
         {
             var bOrder = await _bittrex.GetOrder(uuid);
+            File.WriteAllText("bittrex_order.json", JsonConvert.SerializeObject(bOrder));
+
             return new Order(bOrder);
         }
 
@@ -119,7 +123,10 @@ namespace BittrexSharp
         public async Task<IWithdrawal> GetWithdrawal(string uuid)
         {
             var history = await _bittrex.GetWithdrawalHistory();
-            return history.Where(h => h.Uuid == uuid).FirstOrDefault();
+            var tx = history.Where(h => h.Uuid == uuid).FirstOrDefault();
+            File.WriteAllText("bittrex_withdrawal.json", JsonConvert.SerializeObject(tx));
+
+            return tx;
         }
 
         //return Bittrex market name in the form of BTC-XMR or ETH-XRP

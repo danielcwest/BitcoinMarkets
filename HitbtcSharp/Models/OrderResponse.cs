@@ -58,6 +58,8 @@ namespace HitbtcSharp.Models
         /// </summary>
         public string side { get; set; }
 
+        public decimal price { get; set; }
+
     }
 
     public class CancelOrderRequest

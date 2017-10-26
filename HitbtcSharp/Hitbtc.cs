@@ -11,6 +11,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Net.Http.Headers;
 using BMCore.Config;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace HitbtcSharp
 {
@@ -140,6 +142,9 @@ namespace HitbtcSharp
         {
             var orders = await _hitbtc.GetOrders();
             var order = orders.Where(o => o.Uuid == orderId).FirstOrDefault();
+
+            File.WriteAllText("hitbtc_order.json", JsonConvert.SerializeObject(order));
+
             if (order == null) return null;
             return new Order(order);
         }
@@ -174,6 +179,9 @@ namespace HitbtcSharp
         public async Task<IWithdrawal> GetWithdrawal(string uuid)
         {
             var tx = await _hitbtc.GetWithdrawal(uuid);
+
+            File.WriteAllText("hitbtc_withdrawal.json", JsonConvert.SerializeObject(tx));
+
             return new Withdrawal(tx);
         }
 

@@ -169,14 +169,15 @@ namespace BMCore.DbService
                 });
         }
 
-        public void UpdateTransactionWithdrawalUuid(int id, string baseUuid, string counterUuid)
+        public void UpdateTransactionWithdrawalUuid(int id, string baseUuid, string counterUuid, decimal commission)
         {
             DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateTransactionWithdrawalUuid", 15,
                 new SqlParameter[]
                 {
                     new SqlParameter { ParameterName = "@id", Value = id },
                     new SqlParameter { ParameterName = "@baseUuid", Value = baseUuid },
-                    new SqlParameter { ParameterName = "@counterUuid", Value = counterUuid}
+                    new SqlParameter { ParameterName = "@counterUuid", Value = counterUuid},
+                    new SqlParameter { ParameterName = "@commission", Value = commission}
                 });
         }
 
