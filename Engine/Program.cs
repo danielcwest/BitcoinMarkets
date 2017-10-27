@@ -51,7 +51,7 @@ namespace Engine
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
                 var baseCurrencies = arbitrageConfig.BaseCurrencies.Where(c => c.Enabled).ToDictionary(e => e.Name);
 
-
+                int timeout = string.IsNullOrWhiteSpace(args[1]) ? 15 : int.Parse(args[1]);
 
                 switch (args[0])
                 {
@@ -62,7 +62,7 @@ namespace Engine
                             {
                                 EngineHelper.LogOpportunities(dbService, exchanges).Wait();
                                 Console.WriteLine("Complete, Sleeping ...");
-                                Thread.Sleep(1000 * 5);
+                                Thread.Sleep(1000 * timeout);
                             }
                             catch (Exception ex)
                             {
@@ -78,7 +78,7 @@ namespace Engine
                                 EngineHelper.ExecuteTradePairs(dbService, exchanges).Wait();
                                 EngineHelper.ProcessTransactions(dbService, exchanges).Wait();
                                 Console.WriteLine("Complete, Sleeping ...");
-                                Thread.Sleep(1000 * 5);
+                                Thread.Sleep(1000 * timeout);
                             }
                             catch (Exception ex)
                             {
@@ -93,7 +93,7 @@ namespace Engine
                             {
                                 EngineHelper.CheckExchangeBalances(dbService, exchanges).Wait();
                                 Console.WriteLine("Complete, Sleeping ...");
-                                Thread.Sleep(1000 * 60);
+                                Thread.Sleep(1000 * timeout);
                             }
                             catch (Exception ex)
                             {
