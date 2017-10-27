@@ -68,7 +68,7 @@ namespace Engine
                             EngineHelper.ExecuteTradePairs(dbService, exchanges).Wait();
                             EngineHelper.ProcessTransactions(dbService, exchanges).Wait();
                             Console.WriteLine("Complete, Sleeping ...");
-                            Thread.Sleep(1000 * 60);
+                            Thread.Sleep(1000 * 5);
                         }
                     case "balance":
                         while (true)
