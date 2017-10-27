@@ -215,6 +215,30 @@ namespace BMCore.DbService
                 return reader.ToList<DbTransaction>();
             }
         }
+
+        public IEnumerable<DbReportTransaction> GetRecentTransactions(int hours = 1)
+        {
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetRecentTransactions", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@hours", Value = hours }
+                }))
+            {
+                return reader.ToList<DbReportTransaction>();
+            }
+        }
+
+        public IEnumerable<DbOpportunity> GetRecentOpportunities(int hours = 1)
+        {
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetRecentOpportunities", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@hours", Value = hours }
+                }))
+            {
+                return reader.ToList<DbOpportunity>();
+            }
+        }
     }
 
 }

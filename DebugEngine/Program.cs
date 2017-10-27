@@ -45,16 +45,7 @@ namespace DebugEngine
                 var bittrex = (Bittrex)exchanges["Bittrex"];
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
 
-                EngineHelper.ProcessTransactions(dbService, exchanges).Wait();
-
-                //var deposits = bittrex.GetDeposits().Result;
-
-                //  var bOrder = bittrex.CheckOrder("181f9c8b-4a40-449e-9d06-b2db7530ec0a").Result;
-                //  var withd = bittrex.GetWithdrawals().Result;
-
-
-                //var hOrder = hitbtc.CheckOrder("4688283773").Result;
-                //  var hWith = hitbtc.GetWithdrawal("20f7e751-a8fd-4acc-8931-3396dfc919ed").Result;
+                EngineReporter.GenerateEmailReport(dbService, exchanges, arbitrageConfig.Gmail);
 
                 Console.WriteLine("Complete");
             }

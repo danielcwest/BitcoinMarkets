@@ -51,13 +51,12 @@
             "console": "internalConsole"
         },
         {
-            "name": "Engine Withdraw ETH",
+            "name": "Engine Report",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Engine/bin/Debug/netcoreapp2.0/Engine.dll",
             "args": [
-                "withdraw",
-                "ETH"
+                "report"
             ],
             "cwd": "${workspaceRoot}/Engine",
             "stopAtEntry": false,

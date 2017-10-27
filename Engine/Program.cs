@@ -89,16 +89,27 @@ namespace Engine
                     case "balance":
                         while (true)
                         {
-                            EngineHelper.CheckExchangeBalances(dbService, exchanges).Wait();
-                            Console.WriteLine("Complete, Sleeping ...");
-                            Thread.Sleep(1000 * 60);
+                            try
+                            {
+                                EngineHelper.CheckExchangeBalances(dbService, exchanges).Wait();
+                                Console.WriteLine("Complete, Sleeping ...");
+                                Thread.Sleep(1000 * 60);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex);
+                            }
                         }
-                    case "withdraw":
-                        while (true)
+                    case "report":
+                        try
                         {
-                            Console.WriteLine("Complete, Sleeping ...");
-                            Thread.Sleep(1000 * 60);
+                            EngineReporter.GenerateEmailReport(dbService, exchanges, arbitrageConfig.Gmail).Wait();
                         }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex);
+                        }
+                        break;
                     default:
                         break;
                 }

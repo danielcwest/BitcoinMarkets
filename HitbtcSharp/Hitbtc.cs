@@ -46,27 +46,6 @@ namespace HitbtcSharp
 
             string auth = string.Format("Basic {0}", Convert.ToBase64String(Encoding.ASCII.GetBytes(string.Format("{0}:{1}", _config.ApiKey, _config.Secret))));
             _hitbtc.Authorization = auth;
-
-            try
-            {
-                foreach (var b in GetBalances("main").Result)
-                {
-                    try
-                    {
-                        var result = TransferToTrading(b.Available, b.Currency).Result;
-                    }
-                    catch (Exception)
-                    {
-                        //Fail silently for now
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                //Fail silently for now
-            }
-
-
         }
 
         public async Task<IEnumerable<ISymbol>> Symbols()
@@ -269,7 +248,34 @@ namespace HitbtcSharp
 
         public async Task<IEnumerable<ICurrencyBalance>> GetBalances()
         {
+            await MoveBalancesToTrading();
             return await _hitbtc.GetTradingBalances();
+        }
+
+        private async Task MoveBalancesToTrading()
+        {
+            try
+            {
+                foreach (var b in GetBalances("main").Result)
+                {
+                    try
+                    {
+                        if (b.Available < 0.09m) continue;
+
+                        var result = await TransferToTrading(b.Available, b.Currency);
+                    }
+                    catch (Exception e)
+                    {
+                        //Fail silently for now
+                        Console.WriteLine(e);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                //Fail silently for now
+                Console.WriteLine(e);
+            }
         }
 
         public async Task<HitbtcOrderV1> GetOrderV1(string orderId)
