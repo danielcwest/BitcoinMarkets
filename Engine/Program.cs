@@ -58,9 +58,17 @@ namespace Engine
                     case "log":
                         while (true)
                         {
-                            EngineHelper.LogOpportunities(dbService, exchanges).Wait();
-                            Console.WriteLine("Complete, Sleeping ...");
-                            Thread.Sleep(1000 * 60);
+                            try
+                            {
+                                EngineHelper.LogOpportunities(dbService, exchanges).Wait();
+                                Console.WriteLine("Complete, Sleeping ...");
+                                Thread.Sleep(1000 * 5);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex);
+                            }
+
                         }
                     case "trade":
                         while (true)
@@ -75,7 +83,6 @@ namespace Engine
                             catch (Exception ex)
                             {
                                 Console.WriteLine(ex);
-
                             }
 
                         }
