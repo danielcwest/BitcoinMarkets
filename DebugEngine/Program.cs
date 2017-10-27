@@ -42,14 +42,19 @@ namespace DebugEngine
 
             try
             {
-                var bittrex = exchanges["Bittrex"];
-                var hitbtc = exchanges["Hitbtc"];
+                var bittrex = (Bittrex)exchanges["Bittrex"];
+                var hitbtc = (Hitbtc)exchanges["Hitbtc"];
 
-                var bOrder = bittrex.CheckOrder("759382c3-579a-4384-b83c-9d86c5a10180").Result;
-                var hOrder = hitbtc.CheckOrder("4616377485").Result;
+                EngineHelper.ProcessTransactions(dbService, exchanges).Wait();
 
-                var bWithdrawal = bittrex.GetWithdrawal("cc5b08ce-d735-4afa-b4d6-a7fcd3abc863").Result;
-                var hWithdrawal = hitbtc.GetWithdrawal("b7ba911e-4f7c-4b1c-be4f-ce4503b06659").Result;
+                //var deposits = bittrex.GetDeposits().Result;
+
+                //  var bOrder = bittrex.CheckOrder("181f9c8b-4a40-449e-9d06-b2db7530ec0a").Result;
+                //  var withd = bittrex.GetWithdrawals().Result;
+
+
+                //var hOrder = hitbtc.CheckOrder("4688283773").Result;
+                //  var hWith = hitbtc.GetWithdrawal("20f7e751-a8fd-4acc-8931-3396dfc919ed").Result;
 
                 Console.WriteLine("Complete");
             }

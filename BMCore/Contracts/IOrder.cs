@@ -7,12 +7,8 @@ namespace BMCore.Contracts
         string OrderUuid { get; set; }
         string Exchange { get; set; }
         string Symbol { get; set; }
-        string Type { get; set; }
         decimal Quantity { get; set; }
-        decimal QuantityRemaining { get; set; }
-        decimal Price { get; set; }
-        decimal Rate { get; set; }
-        bool IsOpen { get; set; }
+        decimal Cost { get; set; }
         bool IsFilled { get; set; }
     }
 }

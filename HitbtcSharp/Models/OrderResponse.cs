@@ -8,6 +8,23 @@ using Newtonsoft.Json;
 
 namespace HitbtcSharp.Models
 {
+    public class HitbtcOrderV1
+    {
+        public string orderId { get; set; }
+        public string orderStatus { get; set; }
+        public long lastTimestamp { get; set; }
+        public decimal orderPrice { get; set; }
+        public decimal orderQuantity { get; set; }
+        public decimal avgPrice { get; set; }
+        public decimal quantityLeaves { get; set; }
+        public string type { get; set; }
+        public string timeInForce { get; set; }
+        public string clientOrderId { get; set; }
+        public string symbol { get; set; }
+        public string side { get; set; }
+        public decimal execQuantity { get; set; }
+    }
+
     public class HitbtcOrder : IAcceptedAction
     {
         /// <summary>
@@ -72,6 +89,6 @@ namespace HitbtcSharp.Models
 
     public class OrderResponse
     {
-        public List<HitbtcOrder> orders { get; set; }
+        public List<HitbtcOrderV1> orders { get; set; }
     }
 }

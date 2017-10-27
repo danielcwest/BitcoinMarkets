@@ -22,7 +22,7 @@ namespace BMCore.DbService
 
         int InsertTransaction(int pairId, string type);
         void UpdateTransactionStatus(int id, string status, object payload = null);
-        void UpdateTransactionOrderUuid(int id, string baseUuid, string counterUuid);
+        void UpdateTransactionOrderUuid(int id, string baseUuid, string counterUuid, object payload = null);
         void UpdateTransactionWithdrawalUuid(int id, string baseUuid, string counterUuid, decimal commission);
         void CloseTransaction(int id, string baseTxId, string counterTxId);
         IEnumerable<DbTransaction> GetTransactions(string status);

@@ -12,7 +12,7 @@ namespace BMCore.Engine
 {
     public class EngineHelper
     {
-        public static void LogOpportunities(Dictionary<string, IExchange> exchanges, BMDbService dbService)
+        public static void LogOpportunities(BMDbService dbService, Dictionary<string, IExchange> exchanges)
         {
             int pId = -1;
 
@@ -41,7 +41,7 @@ namespace BMCore.Engine
             }
         }
 
-        public static async Task ExecuteTradePairs(Dictionary<string, IExchange> exchanges, BMDbService dbService)
+        public static async Task ExecuteTradePairs(BMDbService dbService, Dictionary<string, IExchange> exchanges)
         {
             int pId = -1;
 
@@ -71,7 +71,7 @@ namespace BMCore.Engine
             }
         }
 
-        public static void CheckExchangeBalances(Dictionary<string, IExchange> exchanges, BMDbService dbService)
+        public static void CheckExchangeBalances(BMDbService dbService, Dictionary<string, IExchange> exchanges)
         {
             int pId = -1;
 
@@ -124,10 +124,19 @@ namespace BMCore.Engine
             return tradeResult;
         }
 
-        public static async Task ProcessTransactionOrders(IDbService dbService, Dictionary<string, IExchange> exchanges)
+        public static async Task ProcessTransactions(IDbService dbService, Dictionary<string, IExchange> exchanges)
         {
             int pId = dbService.StartEngineProcess("All Exchanges", "AllExchanges", "withdraw", new CurrencyConfig());
 
+            await ProcessTransactionOrders(dbService, exchanges, pId);
+
+            await UpdateTransactionWithdrawalStatus(dbService, exchanges, pId);
+
+            dbService.EndEngineProcess(pId, "success");
+        }
+
+        public static async Task ProcessTransactionOrders(IDbService dbService, Dictionary<string, IExchange> exchanges, int pId)
+        {
             foreach (var transaction in dbService.GetTransactions(status: "orderpending"))
             {
                 try
@@ -140,7 +149,7 @@ namespace BMCore.Engine
 
                     if (baseOrder != null && baseOrder.IsFilled && counterOrder != null && counterOrder.IsFilled)
                     {
-                        dbService.UpdateTransactionStatus(transaction.Id, "ordercomplete", new { bOrder = baseOrder, cOrder = counterOrder });
+                        dbService.UpdateTransactionStatus(transaction.Id, "ordercomplete");
                         await WithdrawTransactions(dbService, exchanges, transaction, baseOrder, counterOrder, pId);
                     }
                 }
@@ -150,7 +159,6 @@ namespace BMCore.Engine
                     dbService.LogError(transaction.BaseExchange, transaction.CounterExchange, transaction.Id.ToString(), "ProcessTransactionOrders", ex, pId);
                 }
             }
-            dbService.EndEngineProcess(pId, "success");
         }
 
         private static async Task WithdrawTransactions(IDbService dbService, Dictionary<string, IExchange> exchanges, DbTransaction transaction, IOrder baseOrder, IOrder counterOrder, int pId)
@@ -165,32 +173,26 @@ namespace BMCore.Engine
 
                 //Withdraw Base Currency from Counter
                 var baseAddress = await baseExchange.GetDepositAddress(transaction.BaseCurrency);
-                var tx2 = await counterExchange.Withdraw(transaction.BaseCurrency, transaction.TradeThreshold + transaction.BaseWithdrawalFee, baseAddress.Address);
+                var tx2 = await counterExchange.Withdraw(transaction.BaseCurrency, baseOrder.Cost + transaction.CounterBaseWithdrawalFee, baseAddress.Address);
 
-                decimal commission = transaction.TradeThreshold - baseOrder.Price;
+                decimal commission = counterOrder.Cost - (baseOrder.Cost + transaction.CounterBaseWithdrawalFee);
                 dbService.UpdateTransactionWithdrawalUuid(transaction.Id, tx.Uuid, tx2.Uuid, commission);
             }
             else
-            {//Withdraw Base Currency from Base
-                var counterAddress = await counterExchange.GetDepositAddress(transaction.BaseCurrency);
-                var tx = await baseExchange.Withdraw(transaction.BaseCurrency, transaction.TradeThreshold + transaction.BaseWithdrawalFee, counterAddress.Address);
-
-                //Withdraw Market Currency from Counter
-                //We want to transfer the amount of Market Currency we SOLD on the base exchange, 
-                //something like baseOrder.Quantity + withdrwawal fee
+            {//Withdraw Market Currency from Counter
                 var baseAddress = await baseExchange.GetDepositAddress(transaction.MarketCurrency);
                 var tx2 = await counterExchange.Withdraw(transaction.MarketCurrency, counterOrder.Quantity, baseAddress.Address);
 
-                decimal commission = transaction.TradeThreshold - counterOrder.Price;
+                //Withdraw Base Currency from Base
+                var counterAddress = await counterExchange.GetDepositAddress(transaction.BaseCurrency);
+                var tx = await baseExchange.Withdraw(transaction.BaseCurrency, counterOrder.Cost + transaction.BaseBaseWithdrawalFee, counterAddress.Address);
+
+                decimal commission = baseOrder.Cost - (counterOrder.Cost + transaction.BaseBaseWithdrawalFee);
                 dbService.UpdateTransactionWithdrawalUuid(transaction.Id, tx.Uuid, tx2.Uuid, commission);
             }
-
-            Thread.Sleep(1000 * 60);
-
-            await UpdateTransactionWithdrawalStatus(dbService, exchanges, pId);
         }
 
-        private static async Task UpdateTransactionWithdrawalStatus(IDbService dbService, Dictionary<string, IExchange> exchanges, int pId)
+        public static async Task UpdateTransactionWithdrawalStatus(IDbService dbService, Dictionary<string, IExchange> exchanges, int pId)
         {
             foreach (var transaction in dbService.GetTransactions(status: "withdrawalpending"))
             {
@@ -213,20 +215,6 @@ namespace BMCore.Engine
             }
         }
 
-        public static decimal GetPriceAtVolumeThreshold(decimal threshold, List<OrderBookEntry> entries)
-        {
-            decimal result = -1M;
-            foreach (var entry in entries)
-            {
-                if (entry.sumBase >= threshold)
-                {
-                    result = entry.price;
-                    break;
-                }
-            }
-            return result;
-        }
-
         public static ArbitrageOpportunity FindOpportunity(ArbitragePair pair)
         {
             decimal baseBuy = 0M;
@@ -243,8 +231,8 @@ namespace BMCore.Engine
 
             if (baseBuy > 0 && baseSell > 0 && arbBuy > 0 && arbSell > 0)
             {
-                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (pair.ExchangeFees);
-                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (pair.ExchangeFees);
+                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (pair.BaseExchangeFee + pair.CounterExchangeFee);
+                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (pair.BaseExchangeFee + pair.CounterExchangeFee);
 
                 if (baseBuy < arbSell && baseBuySpread >= pair.SpreadThreshold)
                 {
@@ -279,8 +267,6 @@ namespace BMCore.Engine
             decimal baseBuySpread = 0M;
             decimal baseSellSpread = 0M;
 
-            pair.TradeThreshold = 0.25m;
-
             baseBuy = GetPriceAtVolumeThreshold(pair.TradeThreshold, pair.baseBook.asks);
             baseSell = GetPriceAtVolumeThreshold(pair.TradeThreshold, pair.baseBook.bids);
             arbBuy = GetPriceAtVolumeThreshold(pair.TradeThreshold, pair.counterBook.asks);
@@ -288,8 +274,8 @@ namespace BMCore.Engine
 
             if (baseBuy > 0 && baseSell > 0 && arbBuy > 0 && arbSell > 0)
             {
-                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (pair.ExchangeFees);
-                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (pair.ExchangeFees);
+                baseBuySpread = Math.Abs((baseBuy - arbSell) / baseBuy) - (pair.BaseExchangeFee + pair.CounterExchangeFee);
+                baseSellSpread = Math.Abs((baseSell - arbBuy) / baseSell) - (pair.BaseExchangeFee + pair.CounterExchangeFee);
 
                 return new ArbitrageOpportunity()
                 {
@@ -300,6 +286,20 @@ namespace BMCore.Engine
                 };
             }
             return null;
+        }
+
+        public static decimal GetPriceAtVolumeThreshold(decimal threshold, List<OrderBookEntry> entries)
+        {
+            decimal result = -1M;
+            foreach (var entry in entries)
+            {
+                if (entry.sumBase >= threshold)
+                {
+                    result = entry.price;
+                    break;
+                }
+            }
+            return result;
         }
     }
 }

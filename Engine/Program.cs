@@ -58,29 +58,28 @@ namespace Engine
                     case "log":
                         while (true)
                         {
-                            EngineHelper.LogOpportunities(exchanges, dbService);
+                            EngineHelper.LogOpportunities(dbService, exchanges);
                             Console.WriteLine("Complete, Sleeping ...");
                             Thread.Sleep(1000 * 60);
                         }
                     case "trade":
                         while (true)
                         {
-                            EngineHelper.ExecuteTradePairs(exchanges, dbService).Wait();
-                            EngineHelper.ProcessTransactionOrders(dbService, exchanges).Wait();
+                            EngineHelper.ExecuteTradePairs(dbService, exchanges).Wait();
+                            EngineHelper.ProcessTransactions(dbService, exchanges).Wait();
                             Console.WriteLine("Complete, Sleeping ...");
                             Thread.Sleep(1000 * 60);
                         }
                     case "balance":
                         while (true)
                         {
-                            EngineHelper.CheckExchangeBalances(exchanges, dbService);
+                            EngineHelper.CheckExchangeBalances(dbService, exchanges);
                             Console.WriteLine("Complete, Sleeping ...");
                             Thread.Sleep(1000 * 60);
                         }
                     case "withdraw":
                         while (true)
                         {
-                            EngineHelper.ProcessTransactionOrders(dbService, exchanges).Wait();
                             Console.WriteLine("Complete, Sleeping ...");
                             Thread.Sleep(1000 * 60);
                         }

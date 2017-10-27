@@ -100,7 +100,7 @@ namespace BittrexSharp
         public async Task<IOrder> CheckOrder(string uuid)
         {
             var bOrder = await _bittrex.GetOrder(uuid);
-            File.WriteAllText("bittrex_order.json", JsonConvert.SerializeObject(bOrder));
+            //File.WriteAllText("bittrex_order.json", JsonConvert.SerializeObject(bOrder));
 
             return new Order(bOrder);
         }
@@ -124,9 +124,19 @@ namespace BittrexSharp
         {
             var history = await _bittrex.GetWithdrawalHistory();
             var tx = history.Where(h => h.Uuid == uuid).FirstOrDefault();
-            File.WriteAllText("bittrex_withdrawal.json", JsonConvert.SerializeObject(tx));
+            //File.WriteAllText("bittrex_withdrawal.json", JsonConvert.SerializeObject(tx));
 
             return tx;
+        }
+
+        public async Task<IEnumerable<HistoricWithdrawal>> GetWithdrawals()
+        {
+            return await _bittrex.GetWithdrawalHistory();
+        }
+
+        public async Task<IEnumerable<HistoricDeposit>> GetDeposits()
+        {
+            return await _bittrex.GetDepositHistory();
         }
 
         //return Bittrex market name in the form of BTC-XMR or ETH-XRP

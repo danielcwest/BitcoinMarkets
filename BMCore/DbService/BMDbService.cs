@@ -158,14 +158,15 @@ namespace BMCore.DbService
                 });
         }
 
-        public void UpdateTransactionOrderUuid(int id, string baseUuid, string counterUuid)
+        public void UpdateTransactionOrderUuid(int id, string baseUuid, string counterUuid, object payload = null)
         {
             DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateTransactionOrderUuid", 15,
                 new SqlParameter[]
                 {
                     new SqlParameter { ParameterName = "@id", Value = id },
                     new SqlParameter { ParameterName = "@baseUuid", Value = baseUuid },
-                    new SqlParameter { ParameterName = "@counterUuid", Value = counterUuid}
+                    new SqlParameter { ParameterName = "@counterUuid", Value = counterUuid},
+                    new SqlParameter { ParameterName = "@meta", Value = (payload == null) ? "" : JsonConvert.SerializeObject(payload)}
                 });
         }
 

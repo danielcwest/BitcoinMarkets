@@ -42,6 +42,9 @@ namespace HitbtcSharp
         [Get("/api/2/history/order")]
         Task<IEnumerable<HitbtcOrder>> GetOrders();
 
+        [Get("/api/2/history/trades?symbol={symbol}")]
+        Task<IEnumerable<Trade>> GetTrades([Path] string symbol);
+
         [Get("/api/2/order/{clientOrderId}")]
         Task<HitbtcOrder> GetOrder([Path] string clientOrderId);
 
@@ -62,6 +65,10 @@ namespace HitbtcSharp
 
         [Post("/api/1/payment/transfer_to_main")]
         Task<PayoutTransaction> TransferToMain([Header("X-Signature")] string sig, [Query("nonce")] long nonce, [Query("apikey")] string apikey, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
+
+        [Get("/api/1/trading/orders/recent?nonce={nonce}&apikey={apiKey}&max_results={limit}")]
+        Task<OrderResponse> GetOrdersV1([Header("X-Signature")] string sig, [Path] long nonce, [Path] string apiKey, [Path] int limit);
+
 
     }
 }

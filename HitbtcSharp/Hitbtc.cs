@@ -143,10 +143,12 @@ namespace HitbtcSharp
             var orders = await _hitbtc.GetOrders();
             var order = orders.Where(o => o.Uuid == orderId).FirstOrDefault();
 
-            File.WriteAllText("hitbtc_order.json", JsonConvert.SerializeObject(order));
-
             if (order == null) return null;
-            return new Order(order);
+
+            var allTrades = await _hitbtc.GetTrades(order.symbol);
+            var trades = allTrades.Where(t => t.orderId == orderId);
+
+            return new Order(order, trades);
         }
 
         //Hitbtc requires a transfer from trading to main before we can withdrawal
@@ -180,7 +182,7 @@ namespace HitbtcSharp
         {
             var tx = await _hitbtc.GetWithdrawal(uuid);
 
-            File.WriteAllText("hitbtc_withdrawal.json", JsonConvert.SerializeObject(tx));
+            //File.WriteAllText("hitbtc_withdrawal.json", JsonConvert.SerializeObject(tx));
 
             return new Withdrawal(tx);
         }
@@ -269,5 +271,23 @@ namespace HitbtcSharp
         {
             return await _hitbtc.GetTradingBalances();
         }
+
+        public async Task<HitbtcOrderV1> GetOrderV1(string orderId)
+        {
+            int limit = 25;
+            long nonce = GetNonce();
+            string pathAndQuery = string.Format("/api/1/trading/orders/recent?nonce={0}&apikey={1}&max_results={2}", nonce, _config.ApiKey, limit);
+            string sign = CalculateSignature(pathAndQuery, _config.Secret);
+
+            var orderRes = await _hitbtc.GetOrdersV1(sign, nonce, _config.ApiKey, limit);
+            return orderRes.orders.Find(o => o.orderId == orderId);
+        }
+
+        public async Task<IEnumerable<Trade>> GetTradesForOrder(string symbol, string orderId)
+        {
+            var trades = await _hitbtc.GetTrades(symbol);
+            return trades.Where(t => t.orderId == orderId);
+        }
+
     }
 }

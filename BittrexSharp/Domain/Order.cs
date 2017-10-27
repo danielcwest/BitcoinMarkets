@@ -13,7 +13,7 @@ namespace BittrexSharp.Domain
         public string Type { get; set; }
         public decimal Quantity { get; set; }
         public decimal QuantityRemaining { get; set; }
-        public decimal Price { get; set; }
+        public decimal Cost { get; set; }
         public bool IsOpen { get; set; }
         public bool IsFilled { get; set; }
         public decimal Rate { get; set; }
@@ -26,7 +26,7 @@ namespace BittrexSharp.Domain
             this.Type = order.Type;
             this.Quantity = order.Quantity;
             this.QuantityRemaining = order.QuantityRemaining;
-            this.Price = order.Price;
+            this.Cost = order.Price;
             this.Rate = order.PricePerUnit.HasValue ? order.PricePerUnit.Value : 0m;
             this.IsOpen = order.IsOpen;
             this.IsFilled = !order.IsOpen && order.QuantityRemaining == 0m;

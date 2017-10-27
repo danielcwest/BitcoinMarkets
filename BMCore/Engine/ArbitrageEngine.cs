@@ -95,7 +95,6 @@ namespace BMCore.Engine
                 bool isTrade = false;
                 bool isError = false;
                 int txId = -1;
-                object orderMetadata = new { };
 
                 try
                 {
@@ -108,29 +107,26 @@ namespace BMCore.Engine
                         decimal sellQuantity = pair.TradeThreshold / opportunity.CounterPrice;
                         var sellId = await EngineHelper.Sell(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, sellQuantity, opportunity.CounterPrice, txId);
 
-                        //Amount to buy so when withdrawn will deposit the same amount on the outher exchange as was sold
-                        decimal buyQuantity = sellQuantity + pair.MarketWithdrawalFee + pair.TradeThreshold * pair.ExchangeFees / 2;
+                        //Amount to buy so when withdrawn will deposit the same amount on the other exchange as was sold
+                        decimal buyQuantity = sellQuantity + pair.BaseMarketWithdrawalFee;
                         var buyId = await EngineHelper.Buy(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, buyQuantity, opportunity.BasePrice, txId);
 
-                        dbService.UpdateTransactionOrderUuid(txId, buyId.Uuid, sellId.Uuid);
+                        dbService.UpdateTransactionOrderUuid(txId, buyId.Uuid, sellId.Uuid, new { Type = "basebuy", BuyPrice = opportunity.BasePrice, SellPrice = opportunity.CounterPrice, Spread = opportunity.Spread });
                         isTrade = true;
 
-                        orderMetadata = new { Type = "basebuy", SellQuantity = sellQuantity, BuyQuantity = buyQuantity, MarketWithdrawalFee = pair.MarketWithdrawalFee, TradeCommission = pair.TradeThreshold * pair.ExchangeFees };
                     }
                     else if (opportunity != null && opportunity.Type == "basesell")
                     {
                         txId = dbService.InsertTransaction(pair.Id, "basesell");
 
-                        decimal sellQuantity = pair.TradeThreshold / opportunity.CounterPrice;
+                        decimal sellQuantity = pair.TradeThreshold / opportunity.BasePrice;
                         var sellId = await EngineHelper.Sell(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, sellQuantity, opportunity.BasePrice, txId);
 
-                        decimal buyQuantity = sellQuantity + pair.MarketWithdrawalFee + pair.TradeThreshold * pair.ExchangeFees / 2;
+                        decimal buyQuantity = sellQuantity + pair.CounterMarketWithdrawalFee;
                         var buyId = await EngineHelper.Buy(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, buyQuantity, opportunity.CounterPrice, txId);
 
-                        dbService.UpdateTransactionOrderUuid(txId, sellId.Uuid, buyId.Uuid);
+                        dbService.UpdateTransactionOrderUuid(txId, sellId.Uuid, buyId.Uuid, new { Type = "basesell", BuyPrice = opportunity.CounterPrice, SellPrice = opportunity.BasePrice, Spread = opportunity.Spread });
                         isTrade = true;
-
-                        orderMetadata = new { Type = "basesell", SellQuantity = sellQuantity, BuyQuantity = buyQuantity, MarketWithdrawalFee = pair.MarketWithdrawalFee, TradeCommission = pair.TradeThreshold * pair.ExchangeFees };
                     }
                 }
                 catch (Exception e)
@@ -140,7 +136,7 @@ namespace BMCore.Engine
                 }
                 finally
                 {
-                    dbService.UpdateArbitragePairById(pair.Id, isTrade: isTrade, isError: isError, isFunded: true, payload: orderMetadata);
+                    dbService.UpdateArbitragePairById(pair.Id, isTrade: isTrade, isError: isError, isFunded: true);
                 }
             }
         }
