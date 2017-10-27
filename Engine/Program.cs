@@ -65,10 +65,19 @@ namespace Engine
                     case "trade":
                         while (true)
                         {
-                            EngineHelper.ExecuteTradePairs(dbService, exchanges).Wait();
-                            EngineHelper.ProcessTransactions(dbService, exchanges).Wait();
-                            Console.WriteLine("Complete, Sleeping ...");
-                            Thread.Sleep(1000 * 5);
+                            try
+                            {
+                                EngineHelper.ExecuteTradePairs(dbService, exchanges).Wait();
+                                EngineHelper.ProcessTransactions(dbService, exchanges).Wait();
+                                Console.WriteLine("Complete, Sleeping ...");
+                                Thread.Sleep(1000 * 5);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex);
+
+                            }
+
                         }
                     case "balance":
                         while (true)
