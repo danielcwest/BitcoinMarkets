@@ -58,7 +58,7 @@ namespace Engine
                     case "log":
                         while (true)
                         {
-                            EngineHelper.LogOpportunities(dbService, exchanges);
+                            EngineHelper.LogOpportunities(dbService, exchanges).Wait();
                             Console.WriteLine("Complete, Sleeping ...");
                             Thread.Sleep(1000 * 60);
                         }
@@ -82,7 +82,7 @@ namespace Engine
                     case "balance":
                         while (true)
                         {
-                            EngineHelper.CheckExchangeBalances(dbService, exchanges);
+                            EngineHelper.CheckExchangeBalances(dbService, exchanges).Wait();
                             Console.WriteLine("Complete, Sleeping ...");
                             Thread.Sleep(1000 * 60);
                         }

@@ -30,32 +30,35 @@ namespace BMCore.Engine
 
         public async Task LogOpportunities(IEnumerable<ArbitragePair> pairs, int pId)
         {
-            foreach (var p in pairs)
-            {
-                Console.WriteLine("Logging {0}", p.Symbol);
-                ArbitragePair pair = p;
-                bool isOpportunity = false;
-                bool isError = false;
-                try
-                {
-                    pair = await AppendMarketData(p);
-                    var opp = EngineHelper.FindOpportunity(pair);
+            var tasks = pairs.AsParallel().WithDegreeOfParallelism(4).Select(async p => await LogOpportunity(p, pId));
 
-                    if (opp != null)
-                    {
-                        dbService.InsertArbitrageOpportunity(pair.Id, opp.BasePrice, opp.CounterPrice, opp.Spread, pair.TradeThreshold);
-                        isOpportunity = true;
-                    }
-                }
-                catch (Exception e)
+            await Task.WhenAll(tasks);
+        }
+
+        private async Task LogOpportunity(ArbitragePair pair, int pId)
+        {
+            Console.WriteLine("Logging {0}", pair.Symbol);
+            bool isOpportunity = false;
+            bool isError = false;
+            try
+            {
+                pair = await AppendMarketData(pair);
+                var opp = EngineHelper.FindOpportunity(pair);
+
+                if (opp != null)
                 {
-                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "LogOpportunities", e, pId);
-                    isError = true;
+                    dbService.InsertArbitrageOpportunity(pair.Id, opp.BasePrice, opp.CounterPrice, opp.Spread, pair.TradeThreshold);
+                    isOpportunity = true;
                 }
-                finally
-                {
-                    dbService.UpdateArbitragePairById(pair.Id, isOpportunity: isOpportunity, isError: isError);
-                }
+            }
+            catch (Exception e)
+            {
+                dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "LogOpportunities", e, pId);
+                isError = true;
+            }
+            finally
+            {
+                dbService.UpdateArbitragePairById(pair.Id, isOpportunity: isOpportunity, isError: isError);
             }
         }
 
@@ -63,81 +66,90 @@ namespace BMCore.Engine
         {
             await this.RefreshBalances();
 
-            foreach (var p in pairs)
+            var tasks = pairs.AsParallel().WithDegreeOfParallelism(4).Select(async p => await CheckBalance(p, pId));
+
+            await Task.WhenAll(tasks);
+        }
+
+        private async Task CheckBalance(ArbitragePair pair, int pId)
+        {
+            Console.WriteLine("Check Balances {0}", pair.Symbol);
+            bool IsFunded = false;
+            bool isError = false;
+            try
             {
-                Console.WriteLine("Check Balances {0}", p.Symbol);
-                ArbitragePair pair = p;
-                bool IsFunded = false;
-                bool isError = false;
-                try
-                {
-                    pair = await AppendMarketData(p);
-                    IsFunded = HasAvailableBalance(pair);
-                }
-                catch (Exception e)
-                {
-                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "CheckBalances", e, pId);
-                    isError = true;
-                }
-                finally
-                {
-                    dbService.UpdateArbitragePairById(pair.Id, isError: isError, isFunded: IsFunded);
-                }
+                pair = await AppendMarketData(pair);
+                IsFunded = HasAvailableBalance(pair);
+            }
+            catch (Exception e)
+            {
+                dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "CheckBalances", e, pId);
+                isError = true;
+            }
+            finally
+            {
+                dbService.UpdateArbitragePairById(pair.Id, isError: isError, isFunded: IsFunded);
             }
         }
 
         public async Task ExecuteTrades(IEnumerable<ArbitragePair> pairs, int pId)
         {
-            foreach (var p in pairs)
+            var tasks = pairs.AsParallel().WithDegreeOfParallelism(4).Select(async p => await ExecutePair(p, pId));
+
+            await Task.WhenAll(tasks);
+        }
+
+        private async Task ExecutePair(ArbitragePair pair, int pId)
+        {
+
+            bool isTrade = false;
+            bool isError = false;
+            int txId = -1;
+
+            try
             {
-                Console.WriteLine("Trading {0}", p.Symbol);
-                ArbitragePair pair = p;
-                bool isTrade = false;
-                bool isError = false;
-                int txId = -1;
+                Console.WriteLine("Trade {0}", pair.Symbol);
 
-                try
+                pair = await AppendMarketData(pair);
+
+                var opportunity = EngineHelper.FindOpportunity(pair);
+                if (opportunity != null && opportunity.Type == "basebuy")
                 {
-                    pair = await AppendMarketData(p);
-                    var opportunity = EngineHelper.FindOpportunity(pair);
-                    if (opportunity != null && opportunity.Type == "basebuy")
-                    {
-                        txId = dbService.InsertTransaction(pair.Id, "basebuy");
+                    txId = dbService.InsertTransaction(pair.Id, "basebuy");
 
-                        decimal sellQuantity = pair.TradeThreshold / opportunity.CounterPrice;
-                        var sellId = await EngineHelper.Sell(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, sellQuantity, opportunity.CounterPrice, txId);
+                    decimal sellQuantity = pair.TradeThreshold / opportunity.CounterPrice;
+                    var sellId = await EngineHelper.Sell(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, sellQuantity, opportunity.CounterPrice, txId);
 
-                        //Amount to buy so when withdrawn will deposit the same amount on the other exchange as was sold
-                        decimal buyQuantity = sellQuantity + pair.BaseMarketWithdrawalFee;
-                        var buyId = await EngineHelper.Buy(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, buyQuantity, opportunity.BasePrice, txId);
+                    //Amount to buy so when withdrawn will deposit the same amount on the other exchange as was sold
+                    decimal buyQuantity = sellQuantity + pair.BaseMarketWithdrawalFee;
+                    var buyId = await EngineHelper.Buy(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, buyQuantity, opportunity.BasePrice, txId);
 
-                        dbService.UpdateTransactionOrderUuid(txId, buyId.Uuid, sellId.Uuid, new { Type = "basebuy", BuyPrice = opportunity.BasePrice, SellPrice = opportunity.CounterPrice, Spread = opportunity.Spread });
-                        isTrade = true;
+                    dbService.UpdateTransactionOrderUuid(txId, buyId.Uuid, sellId.Uuid, new { Type = "basebuy", BuyPrice = opportunity.BasePrice, SellPrice = opportunity.CounterPrice, Spread = opportunity.Spread });
+                    isTrade = true;
 
-                    }
-                    else if (opportunity != null && opportunity.Type == "basesell")
-                    {
-                        txId = dbService.InsertTransaction(pair.Id, "basesell");
-
-                        decimal sellQuantity = pair.TradeThreshold / opportunity.BasePrice;
-                        var sellId = await EngineHelper.Sell(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, sellQuantity, opportunity.BasePrice, txId);
-
-                        decimal buyQuantity = sellQuantity + pair.CounterMarketWithdrawalFee;
-                        var buyId = await EngineHelper.Buy(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, buyQuantity, opportunity.CounterPrice, txId);
-
-                        dbService.UpdateTransactionOrderUuid(txId, sellId.Uuid, buyId.Uuid, new { Type = "basesell", BuyPrice = opportunity.CounterPrice, SellPrice = opportunity.BasePrice, Spread = opportunity.Spread });
-                        isTrade = true;
-                    }
                 }
-                catch (Exception e)
+                else if (opportunity != null && opportunity.Type == "basesell")
                 {
-                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "ExecuteTrades", e, pId);
-                    isError = true;
+                    txId = dbService.InsertTransaction(pair.Id, "basesell");
+
+                    decimal sellQuantity = pair.TradeThreshold / opportunity.BasePrice;
+                    var sellId = await EngineHelper.Sell(baseExchange, pair.GetBaseSymbol(), dbService, pair.Symbol, sellQuantity, opportunity.BasePrice, txId);
+
+                    decimal buyQuantity = sellQuantity + pair.CounterMarketWithdrawalFee;
+                    var buyId = await EngineHelper.Buy(counterExchange, pair.GetCounterSymbol(), dbService, pair.Symbol, buyQuantity, opportunity.CounterPrice, txId);
+
+                    dbService.UpdateTransactionOrderUuid(txId, sellId.Uuid, buyId.Uuid, new { Type = "basesell", BuyPrice = opportunity.CounterPrice, SellPrice = opportunity.BasePrice, Spread = opportunity.Spread });
+                    isTrade = true;
                 }
-                finally
-                {
-                    dbService.UpdateArbitragePairById(pair.Id, isTrade: isTrade, isError: isError, isFunded: true);
-                }
+            }
+            catch (Exception e)
+            {
+                dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "ExecuteTrades", e, pId);
+                isError = true;
+            }
+            finally
+            {
+                dbService.UpdateArbitragePairById(pair.Id, isTrade: isTrade, isError: isError, isFunded: true);
             }
         }
 

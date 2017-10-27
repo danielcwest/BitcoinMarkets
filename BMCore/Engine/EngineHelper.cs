@@ -12,7 +12,7 @@ namespace BMCore.Engine
 {
     public class EngineHelper
     {
-        public static void LogOpportunities(BMDbService dbService, Dictionary<string, IExchange> exchanges)
+        public static async Task LogOpportunities(BMDbService dbService, Dictionary<string, IExchange> exchanges)
         {
             int pId = -1;
 
@@ -26,11 +26,10 @@ namespace BMCore.Engine
             foreach (var group in groups)
             {
                 var engine = new ArbitrageEngine(exchanges[group.BaseExchange], exchanges[group.CounterExchange], dbService);
-
                 try
                 {
                     pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "opportunities", new CurrencyConfig());
-                    engine.LogOpportunities(group.Markets, pId).Wait();
+                    await engine.LogOpportunities(group.Markets, pId);
                     dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
                 }
                 catch (Exception e)
@@ -71,7 +70,7 @@ namespace BMCore.Engine
             }
         }
 
-        public static void CheckExchangeBalances(BMDbService dbService, Dictionary<string, IExchange> exchanges)
+        public static async Task CheckExchangeBalances(BMDbService dbService, Dictionary<string, IExchange> exchanges)
         {
             int pId = -1;
 
@@ -89,7 +88,7 @@ namespace BMCore.Engine
                 try
                 {
                     pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "balances", new CurrencyConfig());
-                    engine.CheckBalances(group.Markets, pId).Wait();
+                    await engine.CheckBalances(group.Markets, pId);
                     dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
                 }
                 catch (Exception e)
