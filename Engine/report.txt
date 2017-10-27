@@ -1,0 +1,17 @@
+********** Arbitrage Report **********
+
+
+Opportunities
+Bittrex Hitbtc QTUMETH Spread: 5.79 % TradeThreshold: 1.25000000 SpreadThreshold: 0.00350000
+
+
+Trades
+
+
+Exchanges
+
+Bittrex Hitbtc
+Trading Pairs: 15
+Log Pairs: 30
+Error Pairs: 0
+
