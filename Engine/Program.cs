@@ -69,7 +69,7 @@ namespace Engine
                 switch (args[0])
                 {
                     case "log":
-                        while (runCount <= loopCount)
+                        while (runCount < loopCount)
                         {
                             try
                             {
@@ -93,7 +93,7 @@ namespace Engine
                         }
                         break;
                     case "trade":
-                        while (runCount <= loopCount)
+                        while (runCount < loopCount)
                         {
                             try
                             {
