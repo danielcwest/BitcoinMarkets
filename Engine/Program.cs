@@ -52,14 +52,17 @@ namespace Engine
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
                 var baseCurrencies = arbitrageConfig.BaseCurrencies.Where(c => c.Enabled).ToDictionary(e => e.Name);
 
-                int timeout;
-                int loopCount;
+                int timeout = 30;
+                int loopCount = 3;
 
-                if (!int.TryParse(args[1], out timeout))
-                    timeout = 30;
+                if (args.Length > 2)
+                {
+                    if (!int.TryParse(args[1], out timeout))
+                        timeout = 30;
 
-                if (!int.TryParse(args[2], out loopCount))
-                    loopCount = 3;
+                    if (!int.TryParse(args[2], out loopCount))
+                        loopCount = 3;
+                }
 
                 int runCount = 0;
 
