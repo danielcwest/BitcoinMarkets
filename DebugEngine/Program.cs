@@ -20,6 +20,8 @@ using BMCore;
 using PoloniexSharp;
 using LiquiSharp;
 using Newtonsoft.Json;
+using System.Net;
+using RestEase;
 
 namespace DebugEngine
 {
@@ -45,12 +47,15 @@ namespace DebugEngine
                 var bittrex = (Bittrex)exchanges["Bittrex"];
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
 
-                EngineReporter.GenerateEmailReport(dbService, exchanges, arbitrageConfig.Gmail);
-
                 Console.WriteLine("Complete");
             }
             catch (Exception e)
             {
+                if (e.InnerException != null && e.InnerException.GetType() == typeof(ApiException))
+                {
+                    var apiE = (ApiException)e.InnerException;
+                    Console.WriteLine(apiE.Content);
+                }
                 Console.WriteLine(e);
             }
         }

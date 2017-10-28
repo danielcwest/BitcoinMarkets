@@ -20,6 +20,7 @@ using BMCore.Models;
 using BMCore.DbService;
 using BMCore.Engine;
 using BMCore.Config;
+using RestEase;
 
 namespace Engine
 {
@@ -51,7 +52,7 @@ namespace Engine
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
                 var baseCurrencies = arbitrageConfig.BaseCurrencies.Where(c => c.Enabled).ToDictionary(e => e.Name);
 
-                int timeout = string.IsNullOrWhiteSpace(args[1]) ? 15 : int.Parse(args[1]);
+                int timeout = args.Length <= 1 ? 15 : int.Parse(args[1]);
 
                 switch (args[0])
                 {
@@ -66,6 +67,11 @@ namespace Engine
                             }
                             catch (Exception ex)
                             {
+                                if (ex.InnerException != null && ex.InnerException.GetType() == typeof(ApiException))
+                                {
+                                    var apiE = (ApiException)ex.InnerException;
+                                    dbService.LogError("Main", "Main", "Main", "log", apiE, -1);
+                                }
                                 Console.WriteLine(ex);
                             }
 
@@ -83,6 +89,11 @@ namespace Engine
                             catch (Exception ex)
                             {
                                 Console.WriteLine(ex);
+                                if (ex.InnerException != null && ex.InnerException.GetType() == typeof(ApiException))
+                                {
+                                    var apiE = (ApiException)ex.InnerException;
+                                    dbService.LogError("Main", "Main", "Main", "trade", apiE, -1);
+                                }
                             }
 
                         }
@@ -98,6 +109,11 @@ namespace Engine
                             catch (Exception ex)
                             {
                                 Console.WriteLine(ex);
+                                if (ex.InnerException != null && ex.InnerException.GetType() == typeof(ApiException))
+                                {
+                                    var apiE = (ApiException)ex.InnerException;
+                                    dbService.LogError("Main", "Main", "Main", "balance", apiE, -1);
+                                }
                             }
                         }
                     case "report":
@@ -108,6 +124,8 @@ namespace Engine
                         catch (Exception ex)
                         {
                             Console.WriteLine(ex);
+                            dbService.LogError("Main", "Main", "Main", "report", ex, -1);
+
                         }
                         break;
                     default:
