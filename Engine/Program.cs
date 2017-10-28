@@ -52,18 +52,25 @@ namespace Engine
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
                 var baseCurrencies = arbitrageConfig.BaseCurrencies.Where(c => c.Enabled).ToDictionary(e => e.Name);
 
-                int timeout = args.Length <= 1 ? 15 : int.Parse(args[1]);
+                int timeout;
+                int loopCount;
+
+                if (!int.TryParse(args[1], out timeout))
+                    timeout = 30;
+
+                if (!int.TryParse(args[2], out loopCount))
+                    loopCount = 3;
+
+                int runCount = 0;
 
                 switch (args[0])
                 {
                     case "log":
-                        while (true)
+                        while (runCount <= loopCount)
                         {
                             try
                             {
                                 EngineHelper.LogOpportunities(dbService, exchanges).Wait();
-                                Console.WriteLine("Complete, Sleeping ...");
-                                Thread.Sleep(1000 * timeout);
                             }
                             catch (Exception ex)
                             {
@@ -74,17 +81,21 @@ namespace Engine
                                 }
                                 Console.WriteLine(ex);
                             }
-
+                            finally
+                            {
+                                runCount++;
+                                Console.WriteLine("Complete, Sleeping {0} ...", runCount);
+                                Thread.Sleep(1000 * timeout);
+                            }
                         }
+                        break;
                     case "trade":
-                        while (true)
+                        while (runCount <= loopCount)
                         {
                             try
                             {
                                 EngineHelper.ExecuteTradePairs(dbService, exchanges).Wait();
                                 EngineHelper.ProcessTransactions(dbService, exchanges).Wait();
-                                Console.WriteLine("Complete, Sleeping ...");
-                                Thread.Sleep(1000 * timeout);
                             }
                             catch (Exception ex)
                             {
@@ -95,27 +106,31 @@ namespace Engine
                                     dbService.LogError("Main", "Main", "Main", "trade", apiE, -1);
                                 }
                             }
-
-                        }
-                    case "balance":
-                        while (true)
-                        {
-                            try
+                            finally
                             {
-                                EngineHelper.CheckExchangeBalances(dbService, exchanges).Wait();
-                                Console.WriteLine("Complete, Sleeping ...");
+                                runCount++;
+                                Console.WriteLine("Complete, Sleeping {0} ...", runCount);
                                 Thread.Sleep(1000 * timeout);
                             }
-                            catch (Exception ex)
+                        }
+                        break;
+                    case "balance":
+                        try
+                        {
+                            EngineHelper.CheckExchangeBalances(dbService, exchanges).Wait();
+                            Console.WriteLine("Complete, Sleeping ...");
+                            Thread.Sleep(1000 * timeout);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex);
+                            if (ex.InnerException != null && ex.InnerException.GetType() == typeof(ApiException))
                             {
-                                Console.WriteLine(ex);
-                                if (ex.InnerException != null && ex.InnerException.GetType() == typeof(ApiException))
-                                {
-                                    var apiE = (ApiException)ex.InnerException;
-                                    dbService.LogError("Main", "Main", "Main", "balance", apiE, -1);
-                                }
+                                var apiE = (ApiException)ex.InnerException;
+                                dbService.LogError("Main", "Main", "Main", "balance", apiE, -1);
                             }
                         }
+                        break;
                     case "report":
                         try
                         {
@@ -125,13 +140,11 @@ namespace Engine
                         {
                             Console.WriteLine(ex);
                             dbService.LogError("Main", "Main", "Main", "report", ex, -1);
-
                         }
                         break;
                     default:
                         break;
                 }
-
                 Console.WriteLine("Engine Complete...");
             }
             catch (Exception e)

@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using BMCore.Config;
+using RestEase;
 
 namespace BMCore.DbService
 {
@@ -50,8 +51,37 @@ namespace BMCore.DbService
             {
                 //fail silently
             }
-
         }
+
+        public void LogError(string baseX, string arbX, string symbol, string method, ApiException ex, int processId = -1)
+        {
+            string message = ex.Message;
+            string stackTrace = ex.StackTrace;
+
+            try
+            {
+                DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertError", 15,
+                                new SqlParameter[]
+                                {
+                    new SqlParameter { ParameterName = "@baseExchange", Value = baseX },
+                    new SqlParameter { ParameterName = "@arbExchange", Value = arbX },
+                    new SqlParameter { ParameterName = "@symbol", Value = symbol },
+                    new SqlParameter { ParameterName = "@method", Value = method },
+                    new SqlParameter { ParameterName = "@message", Value = message},
+                    new SqlParameter { ParameterName = "@exception", Value = stackTrace},
+                    new SqlParameter { ParameterName = "@processId", Value = processId}
+                                });
+
+                if (gmail != null)
+                    EmailHelper.SendSimpleMailAsync(gmail, string.Format("Error: {0}", ex.Message), string.Format("{0} - {1} {2} {3} {2} {4}", baseX, arbX, Environment.NewLine, ex.Content, stackTrace));
+            }
+            catch (Exception)
+            {
+                //fail silently
+            }
+        }
+
+
 
         public int StartEngineProcess(string baseExchange, string arbExchange, string runType, CurrencyConfig baseCurrency)
         {
