@@ -42,7 +42,7 @@ namespace BMCore.Engine
             bool isError = false;
             try
             {
-                pair = await AppendMarketData(pair);
+                pair = await EngineHelper.AppendMarketData(dbService, this.baseExchange, this.counterExchange, pair);
                 var opp = EngineHelper.FindOpportunity(pair);
 
                 if (opp != null)
@@ -78,7 +78,7 @@ namespace BMCore.Engine
             bool isError = false;
             try
             {
-                pair = await AppendMarketData(pair);
+                pair = await EngineHelper.AppendMarketData(dbService, this.baseExchange, this.counterExchange, pair);
                 IsFunded = HasAvailableBalance(pair);
             }
             catch (Exception e)
@@ -110,7 +110,7 @@ namespace BMCore.Engine
             {
                 Console.WriteLine("Trade {0}", pair.Symbol);
 
-                pair = await AppendMarketData(pair);
+                pair = await EngineHelper.AppendMarketData(dbService, this.baseExchange, this.counterExchange, pair);
 
                 var opportunity = EngineHelper.FindOpportunity(pair);
                 if (opportunity != null && opportunity.Type == "basebuy")
@@ -151,25 +151,6 @@ namespace BMCore.Engine
             {
                 dbService.UpdateArbitragePairById(pair.Id, isTrade: isTrade, isError: isError, isFunded: true);
             }
-        }
-
-        private async Task<ArbitragePair> AppendMarketData(ArbitragePair pair)
-        {
-            //Always get the freshest data
-            pair.baseMarket = await this.baseExchange.MarketSummary(pair.Symbol);
-            pair.baseBook = await this.baseExchange.OrderBook(pair.Symbol);
-            pair.counterMarket = await this.counterExchange.MarketSummary(pair.Symbol);
-            pair.counterBook = await this.counterExchange.OrderBook(pair.Symbol);
-
-            if (pair.baseMarket == null || pair.baseBook == null || pair.counterMarket == null || pair.counterBook == null)
-            {
-                var ex = new Exception("No Market Data");
-                dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "AnalyzeMarket", ex, pair.Id);
-                Console.WriteLine("{0}: Null Market Data", pair.Symbol);
-                throw ex;
-            }
-
-            return pair;
         }
 
         private bool HasAvailableBalance(ArbitragePair market)

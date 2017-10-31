@@ -160,5 +160,10 @@ namespace BittrexSharp
         {
             return await _bittrex.GetBalances();
         }
+
+        Task<IEnumerable<IOrder>> IExchange.CancelOrders(string symbol)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

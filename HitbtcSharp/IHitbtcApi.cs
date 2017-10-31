@@ -39,7 +39,10 @@ namespace HitbtcSharp
         [Delete("/api/2/order/{clientOrderId}")]
         Task<HitbtcOrder> CancelOrder([Path] string clientOrderId);
 
-        [Get("/api/2/history/order")]
+        [Delete("/api/2/order?symbol={symbol}")]
+        Task<IEnumerable<HitbtcOrder>> CancelOrders([Path] string symbol);
+
+        [Get("/api/2/history/order?limit=1000")]
         Task<IEnumerable<HitbtcOrder>> GetOrders();
 
         [Get("/api/2/history/trades?symbol={symbol}")]

@@ -8,7 +8,9 @@ namespace BMCore.Contracts
         string Exchange { get; set; }
         string Symbol { get; set; }
         decimal Quantity { get; set; }
+        decimal QuantityFilled { get; set; }
         decimal Cost { get; set; }
         bool IsFilled { get; set; }
+        bool IsClosed { get; set; }
     }
 }

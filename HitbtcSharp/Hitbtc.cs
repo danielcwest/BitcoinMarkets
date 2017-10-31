@@ -117,17 +117,13 @@ namespace HitbtcSharp
         {
             await _hitbtc.CancelOrder(orderId);
         }
+
         public async Task<IOrder> CheckOrder(string orderId)
         {
             var orders = await _hitbtc.GetOrders();
             var order = orders.Where(o => o.Uuid == orderId).FirstOrDefault();
 
-            if (order == null) return null;
-
-            var allTrades = await _hitbtc.GetTrades(order.symbol);
-            var trades = allTrades.Where(t => t.orderId == orderId);
-
-            return new Order(order, trades);
+            return new Order(order);
         }
 
         //Hitbtc requires a transfer from trading to main before we can withdrawal
@@ -278,22 +274,16 @@ namespace HitbtcSharp
             }
         }
 
-        public async Task<HitbtcOrderV1> GetOrderV1(string orderId)
-        {
-            int limit = 25;
-            long nonce = GetNonce();
-            string pathAndQuery = string.Format("/api/1/trading/orders/recent?nonce={0}&apikey={1}&max_results={2}", nonce, _config.ApiKey, limit);
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
-
-            var orderRes = await _hitbtc.GetOrdersV1(sign, nonce, _config.ApiKey, limit);
-            return orderRes.orders.Find(o => o.orderId == orderId);
-        }
-
         public async Task<IEnumerable<Trade>> GetTradesForOrder(string symbol, string orderId)
         {
             var trades = await _hitbtc.GetTrades(symbol);
             return trades.Where(t => t.orderId == orderId);
         }
 
+        public async Task<IEnumerable<IOrder>> CancelOrders(string symbol)
+        {
+           var orders = await _hitbtc.CancelOrders(symbol);
+            return orders.Select(o => new Order(o));
+        }
     }
 }

@@ -12,11 +12,11 @@ namespace BittrexSharp.Domain
         public string Symbol { get; set; }
         public string Type { get; set; }
         public decimal Quantity { get; set; }
-        public decimal QuantityRemaining { get; set; }
         public decimal Cost { get; set; }
-        public bool IsOpen { get; set; }
+        public bool IsClosed { get; set; }
         public bool IsFilled { get; set; }
         public decimal Rate { get; set; }
+        public decimal QuantityFilled { get; set; }
 
         public Order(BittrexOrder order)
         {
@@ -25,10 +25,10 @@ namespace BittrexSharp.Domain
             this.Symbol = order.Symbol;
             this.Type = order.Type;
             this.Quantity = order.Quantity;
-            this.QuantityRemaining = order.QuantityRemaining;
+            this.QuantityFilled = order.Quantity - order.QuantityRemaining;
             this.Cost = order.Price;
             this.Rate = order.PricePerUnit.HasValue ? order.PricePerUnit.Value : 0m;
-            this.IsOpen = order.IsOpen;
+            this.IsClosed = order.IsOpen;
             this.IsFilled = !order.IsOpen && order.QuantityRemaining == 0m;
         }
     }

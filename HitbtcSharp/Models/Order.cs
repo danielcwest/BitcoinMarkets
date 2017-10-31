@@ -20,6 +20,8 @@ namespace HitbtcSharp.Models
         public bool IsFilled { get; set; }
         public string Side { get; set; }
         public string ClientOrderId { get; set; }
+        public decimal QuantityFilled { get; set; }
+        public bool IsClosed { get; set; }
 
         public Order(HitbtcSharp.Models.HitbtcOrder order)
         {
@@ -27,13 +29,14 @@ namespace HitbtcSharp.Models
             this.Exchange = "Hitbtc";
             this.Symbol = order.symbol;
             this.Type = order.type;
-            this.Quantity = order.quantity.HasValue ? Convert.ToDecimal(order.quantity.Value) : 0m;
-            this.QuantityRemaining = 0m;
+            this.Quantity = order.quantity.HasValue ? order.quantity.Value : 0m;
+            this.QuantityFilled = order.cumQuantity.HasValue ? order.cumQuantity.Value : 0m;
             this.Cost = 0m;
             this.Side = order.side;
             this.ClientOrderId = order.clientOrderId;
             this.IsOpen = order.status == "new" || order.status == "partiallyFilled";
             this.IsFilled = order.status == "filled";
+            this.IsClosed = order.status == "filled" || order.status == "canceled" || order.status == "expired";
         }
 
         public Order(HitbtcSharp.Models.HitbtcOrder order, IEnumerable<Trade> trades)

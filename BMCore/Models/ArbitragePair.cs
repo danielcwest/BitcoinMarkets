@@ -26,6 +26,8 @@ namespace BMCore.Models
         public DateTime LastRunUtc { get; set; }
         public decimal TradeThreshold { get; set; }
         public decimal SpreadThreshold { get; set; }
+        public decimal MarketThreshold { get; set; }
+        public decimal MarketSpread { get; set; }
         public decimal BaseBaseWithdrawalFee { get; set; }
         public decimal BaseMarketWithdrawalFee { get; set; }
         public decimal CounterBaseWithdrawalFee { get; set; }
@@ -56,6 +58,8 @@ namespace BMCore.Models
             this.BaseMarketWithdrawalFee = dbPair.BaseMarketWithdrawalFee;
             this.CounterBaseWithdrawalFee = dbPair.CounterBaseWithdrawalFee;
             this.CounterMarketWithdrawalFee = dbPair.CounterMarketWithdrawalFee;
+            this.MarketThreshold = dbPair.MarketThreshold;
+            this.MarketSpread = dbPair.MarketSpread;
         }
 
         public ISymbol GetBaseSymbol()

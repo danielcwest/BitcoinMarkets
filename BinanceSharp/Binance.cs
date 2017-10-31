@@ -124,6 +124,11 @@ namespace BinanceSharp
             var res = new List<BiBalance>();
             return await Task.FromResult(res);
         }
+
+        Task<IEnumerable<IOrder>> IExchange.CancelOrders(string symbol)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

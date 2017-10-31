@@ -234,12 +234,13 @@ namespace BMCore.DbService
                 });
         }
 
-        public IEnumerable<DbTransaction> GetTransactions(string status)
+        public IEnumerable<DbTransaction> GetTransactions(string status, int pairId = 0)
         {
             using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetTransactions", 15,
                 new SqlParameter[]
                 {
-                        new SqlParameter { ParameterName = "@status", Value = status }
+                        new SqlParameter { ParameterName = "@status", Value = status },
+                        new SqlParameter { ParameterName = "@pairId", Value = pairId }
                 }))
             {
                 return reader.ToList<DbTransaction>();
@@ -267,6 +268,55 @@ namespace BMCore.DbService
                 }))
             {
                 return reader.ToList<DbOpportunity>();
+            }
+        }
+
+        public int InsertMakerOrder(int pairId, string type, decimal rate)
+        {
+            return (int)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertMakerOrder", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@pairId", Value = pairId },
+                    new SqlParameter { ParameterName = "@type", Value = type },
+                    new SqlParameter { ParameterName = "@rate", Value = rate }
+                });
+        }
+
+        public void UpdateOrderUuid(int id, string baseUuid, string counterUuid = "", decimal counterRate = 0, string status = "")
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateOrderUuid", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@baseUuid", Value = baseUuid },
+                    new SqlParameter { ParameterName = "@counterUuid", Value = counterUuid},
+                    new SqlParameter { ParameterName = "@counterRate", Value = counterRate},
+                    new SqlParameter { ParameterName = "@status", Value = status}
+                });
+        }
+
+        public void UpdateOrderStatus(int id, string status, decimal baseQuantityFilled = 0, decimal counterQuantityFilled = 0)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateOrderStatus", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@status", Value = status },
+                    new SqlParameter { ParameterName = "@baseQuantityFilled", Value = baseQuantityFilled},
+                    new SqlParameter { ParameterName = "@counterQuantityFilled", Value = counterQuantityFilled}
+                });
+        }
+
+        public IEnumerable<DbMakerOrder> GetMakerOrdersByStatus(string status, int pairId = 0)
+        {
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetMakerOrdersByStatus", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@status", Value = status },
+                        new SqlParameter { ParameterName = "@pairId", Value = pairId }
+                }))
+                {
+                return reader.ToList<DbMakerOrder>();
             }
         }
     }

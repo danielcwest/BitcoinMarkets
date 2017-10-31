@@ -33,6 +33,7 @@ namespace BMCore.Contracts
         Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal price);
 
         Task CancelOrder(string orderId);
+        Task<IEnumerable<IOrder>> CancelOrders(string symbol);
         Task<IOrder> CheckOrder(string uuid);
 
         Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null);

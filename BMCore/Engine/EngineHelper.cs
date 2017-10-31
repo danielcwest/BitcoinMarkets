@@ -12,6 +12,8 @@ namespace BMCore.Engine
 {
     public class EngineHelper
     {
+
+        #region Basic Arbitrage
         public static async Task LogOpportunities(BMDbService dbService, Dictionary<string, IExchange> exchanges)
         {
             int pId = -1;
@@ -99,30 +101,6 @@ namespace BMCore.Engine
             }
         }
 
-        public static async Task<IAcceptedAction> Sell(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, int txId)
-        {
-            return await Trade(exchange, market, dbService, symbol, quantity, price, "sell", txId);
-        }
-
-        public static async Task<IAcceptedAction> Buy(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, int txId)
-        {
-            return await Trade(exchange, market, dbService, symbol, quantity, price, "buy", txId);
-        }
-
-        public static async Task<IAcceptedAction> Trade(IExchange exchange, ISymbol market, BMDbService dbService, string symbol, decimal quantity, decimal price, string side, int txId)
-        {
-            IAcceptedAction tradeResult;
-            if (side == "buy")
-            {
-                tradeResult = await exchange.Buy(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
-            }
-            else
-            {
-                tradeResult = await exchange.Sell(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
-            }
-            return tradeResult;
-        }
-
         public static async Task ProcessTransactions(IDbService dbService, Dictionary<string, IExchange> exchanges)
         {
             int pId = dbService.StartEngineProcess("All Exchanges", "AllExchanges", "withdraw", new CurrencyConfig());
@@ -159,6 +137,7 @@ namespace BMCore.Engine
                 }
             }
         }
+
 
         private static async Task WithdrawTransactions(IDbService dbService, Dictionary<string, IExchange> exchanges, DbTransaction transaction, IOrder baseOrder, IOrder counterOrder, int pId)
         {
@@ -257,6 +236,7 @@ namespace BMCore.Engine
             return null;
         }
 
+
         public static ArbitrageOpportunity FakeOpportunity(ArbitragePair pair)
         {
             decimal baseBuy = 0M;
@@ -287,6 +267,96 @@ namespace BMCore.Engine
             return null;
         }
 
+        #endregion
+
+        #region Market Making
+
+        public static async Task LogMarketMakingPairs(BMDbService dbService, Dictionary<string, IExchange> exchanges)
+        {
+            int pId = -1;
+
+            var groups = dbService.GetArbitragePairs("log").GroupBy(g => new { g.BaseExchange, g.CounterExchange }).Select(g => new ArbitrageGroup()
+            {
+                BaseExchange = g.Key.BaseExchange,
+                CounterExchange = g.Key.CounterExchange,
+                Markets = g.Select(m => new ArbitragePair(m))
+            });
+
+            foreach (var group in groups)
+            {
+                var engine = new MarketMaker(exchanges[group.BaseExchange], exchanges[group.CounterExchange], dbService);
+                try
+                {
+                    pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "markets", new CurrencyConfig());
+                    await engine.LogMarketMakingPairs(group.Markets, pId);
+                    dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
+                }
+                catch (Exception e)
+                {
+                    dbService.LogError(group.BaseExchange, group.CounterExchange, "", "Main", e, pId);
+                    if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
+                }
+            }
+        }
+
+        public static async Task ExecuteMarketMakingPairs(BMDbService dbService, Dictionary<string, IExchange> exchanges)
+        {
+            int pId = -1;
+
+            var groups = dbService.GetArbitragePairs("trade").GroupBy(g => new { g.BaseExchange, g.CounterExchange }).Select(g => new ArbitrageGroup()
+            {
+                BaseExchange = g.Key.BaseExchange,
+                CounterExchange = g.Key.CounterExchange,
+                Markets = g.Select(m => new ArbitragePair(m))
+            });
+
+            foreach (var group in groups)
+            {
+                var engine = new MarketMaker(exchanges[group.BaseExchange], exchanges[group.CounterExchange], dbService);
+
+                try
+                {
+                    pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "trade", new CurrencyConfig());
+                    await engine.ResetLimitOrders(group.Markets, pId);
+                    dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
+
+                }
+                catch (Exception e)
+                {
+                    dbService.LogError(group.BaseExchange, group.CounterExchange, "", "Main", e, pId);
+                    if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Trading Helpers
+
+        public static async Task<IAcceptedAction> Sell(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, int txId)
+        {
+            return await Trade(exchange, market, dbService, symbol, quantity, price, "sell", txId);
+        }
+
+        public static async Task<IAcceptedAction> Buy(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, int txId)
+        {
+            return await Trade(exchange, market, dbService, symbol, quantity, price, "buy", txId);
+        }
+
+        public static async Task<IAcceptedAction> Trade(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, string side, int txId)
+        {
+            IAcceptedAction tradeResult;
+            if (side == "buy")
+            {
+                tradeResult = await exchange.Buy(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
+            }
+            else
+            {
+                tradeResult = await exchange.Sell(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
+            }
+            return tradeResult;
+        }
+
         public static decimal GetPriceAtVolumeThreshold(decimal threshold, List<OrderBookEntry> entries)
         {
             decimal result = -1M;
@@ -300,5 +370,43 @@ namespace BMCore.Engine
             }
             return result;
         }
+
+        public static async Task<ArbitragePair> AppendMarketData(IDbService dbService, IExchange baseExchange, IExchange counterExchange, ArbitragePair pair)
+        {
+            //Always get the freshest data
+            pair.baseMarket = await baseExchange.MarketSummary(pair.Symbol);
+            pair.baseBook = await baseExchange.OrderBook(pair.Symbol);
+            pair.counterMarket = await counterExchange.MarketSummary(pair.Symbol);
+            pair.counterBook = await counterExchange.OrderBook(pair.Symbol);
+
+            if (pair.baseMarket == null || pair.baseBook == null || pair.counterMarket == null || pair.counterBook == null)
+            {
+                var ex = new Exception("No Market Data");
+                dbService.LogError(baseExchange.Name, counterExchange.Name, pair.Symbol, "AnalyzeMarket", ex, pair.Id);
+                Console.WriteLine("{0}: Null Market Data", pair.Symbol);
+                throw ex;
+            }
+
+            return pair;
+        }
+
+        public static async Task<ArbitragePair> AppendCounterMarketData(IDbService dbService, IExchange counterExchange, ArbitragePair pair)
+        {
+            pair.counterMarket = await counterExchange.MarketSummary(pair.Symbol);
+            pair.counterBook = await counterExchange.OrderBook(pair.Symbol);
+
+            if (pair.counterMarket == null || pair.counterBook == null)
+            {
+                var ex = new Exception("No Market Data");
+                dbService.LogError("", counterExchange.Name, pair.Symbol, "AppendCounterMarketData", ex, pair.Id);
+                Console.WriteLine("{0}: Null Market Data", pair.Symbol);
+                throw ex;
+            }
+
+            return pair;
+        }
+
+        #endregion
+
     }
 }

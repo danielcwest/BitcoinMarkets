@@ -17,14 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\BittrexSharp\BittrexSharp.csproj" />
     <ProjectReference Include="..\HitbtcSharp\HitbtcSharp.csproj" />
-    <ProjectReference Include="..\PoloniexSharp\PoloniexSharp.csproj" />
-    <ProjectReference Include="..\LiquiSharp\LiquiSharp.csproj" />
-    <ProjectReference Include="..\LivecoinSharp\LivecoinSharp.csproj" />
-    <ProjectReference Include="..\CoinExchangeSharp\CoinExchangeSharp.csproj" />
-    <ProjectReference Include="..\NovaExchangeSharp\NovaExchangeSharp.csproj" />
-    <ProjectReference Include="..\TidexSharp\TidexSharp.csproj" />
-    <ProjectReference Include="..\BitzSharp\BitzSharp.csproj" />
-    <ProjectReference Include="..\EtherdeltaSharp\EtherdeltaSharp.csproj" />
     <ProjectReference Include="..\BinanceSharp\BinanceSharp.csproj" />
     <ProjectReference Include="..\BMCore\BMCore.csproj" />
     <ProjectReference Include="..\Engine\Engine.csproj" />

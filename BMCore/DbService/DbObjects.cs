@@ -15,6 +15,8 @@ namespace BMCore.DbService
         public DateTime LastRunUtc;
         public decimal TradeThreshold;
         public decimal SpreadThreshold;
+        public decimal MarketThreshold;
+        public decimal MarketSpread;
         public decimal BaseExchangeFee;
         public decimal CounterExchangeFee;
         public decimal BaseBaseWithdrawalFee;
@@ -78,4 +80,27 @@ namespace BMCore.DbService
         public decimal TradeThreshold;
         public decimal SpreadThreshold;
     }
+
+    public class DbMakerOrder
+    {
+        public int Id;
+        public string BaseExchange;
+        public string CounterExchange;
+        public string BaseSymbol;
+        public string CounterSymbol;
+        public string BaseCurrency;
+        public string MarketCurrency;
+        public string BaseOrderUuid;
+        public string CounterOrderUuid;
+        public string Type;
+        public decimal TradeThreshold;
+        public decimal MarketThreshold;
+        public decimal MarketSpread;
+        public decimal CounterExchangeFee;
+        public decimal CounterBaseWithdrawalFee;
+        public decimal CounterMarketWithdrawalFee;
+        public decimal BaseQuantityFilled;
+        public decimal CounterQuantityFilled;
+    }
+
 }

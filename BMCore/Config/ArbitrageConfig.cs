@@ -30,7 +30,6 @@ namespace BMCore.Config
 
     public class ArbitrageConfig
     {
-        public List<CurrencyConfig> BaseCurrencies { get; set; }
         public GmailConfig Gmail { get; set; }
         public List<ExchangeConfig> Exchanges { get; set; }
     }
