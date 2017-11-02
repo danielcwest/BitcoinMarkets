@@ -5,6 +5,7 @@ using BittrexSharp;
 using HitbtcSharp;
 using BMCore.Models;
 using BMCore.Config;
+using GdaxSharp;
 
 namespace Engine
 {
@@ -17,6 +18,7 @@ namespace Engine
                 case "Bittrex": return new Bittrex(ExchangeConfig);
                 case "Binance": return new Binance(ExchangeConfig);
                 case "Hitbtc": return new Hitbtc(ExchangeConfig);
+                case "Gdax": return new Gdax(ExchangeConfig);
                 default: return null;
             }
         }

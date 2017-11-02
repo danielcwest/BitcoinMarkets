@@ -29,29 +29,5 @@ namespace Web.Controllers
             _hitbtc = new Hitbtc(config);
         }
 
-        [HttpGet]
-        public async Task<IEnumerable<IMarket>> MarketSummaries()
-        {
-            return await _hitbtc.MarketSummaries();
-        }
-
-        [HttpGet]
-        public async Task<IMarket> MarketSummary(string symbol)
-        {
-            return await _hitbtc.MarketSummary(symbol);
-        }
-
-        [HttpGet]
-        public async Task<BMCore.Models.OrderBook> OrderBook(string symbol)
-        {
-            return await _hitbtc.OrderBook(symbol);
-        }
-
-        [HttpGet]
-        public async Task<IEnumerable<string>> Symbols()
-        {
-            var summaries = await _hitbtc.MarketSummaries();
-            return summaries.Select(s => s.MarketName);
-        }
     }
 }

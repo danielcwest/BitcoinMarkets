@@ -14,7 +14,7 @@ namespace BittrexSharp.BittrexOrderSimulation
     {
         private List<OpenOrder> simulatedOpenOrders = new List<OpenOrder>();
         private List<BittrexOrder> simulatedFinishedOrders = new List<BittrexOrder>();
-        private List<CurrencyBalance> simulatedBalances = new List<CurrencyBalance>();
+        private List<BittrexBalance> simulatedBalances = new List<BittrexBalance>();
 
         public BittrexOrderSimulation(string apiKey, string apiSecret) : base(apiKey, apiSecret)
         {
@@ -26,7 +26,7 @@ namespace BittrexSharp.BittrexOrderSimulation
             if (existingBalance != null)
                 existingBalance.Available += quantity;
             else
-                simulatedBalances.Add(new CurrencyBalance
+                simulatedBalances.Add(new BittrexBalance
                 {
                     Available = quantity,
                     Currency = currency
@@ -145,14 +145,14 @@ namespace BittrexSharp.BittrexOrderSimulation
 
         }
 
-        public override async Task<IEnumerable<CurrencyBalance>> GetBalances()
+        public override async Task<IEnumerable<BittrexBalance>> GetBalances()
         {
             return await Task.FromResult(simulatedBalances);
         }
 
-        public override async Task<CurrencyBalance> GetBalance(string currency)
+        public override async Task<BittrexBalance> GetBalance(string currency)
         {
-            return await Task.FromResult(simulatedBalances.SingleOrDefault(b => b.Currency == currency) ?? new CurrencyBalance
+            return await Task.FromResult(simulatedBalances.SingleOrDefault(b => b.Currency == currency) ?? new BittrexBalance
             {
                 Available = 0,
                 Currency = currency

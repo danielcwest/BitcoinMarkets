@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BittrexSharp\BittrexSharp.csproj" />
+    <ProjectReference Include="..\GdaxSharp\GdaxSharp.csproj" />
     <ProjectReference Include="..\HitbtcSharp\HitbtcSharp.csproj" />
     <ProjectReference Include="..\BinanceSharp\BinanceSharp.csproj" />
     <ProjectReference Include="..\BMCore\BMCore.csproj" />

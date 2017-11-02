@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace BittrexSharp.Domain
 {
-    public class BMMarket : IMarket
+    public class BMMarket : ITicker
     {
         public string Exchange { get; set; }
         public string MarketName { get; set; }

@@ -28,21 +28,12 @@ namespace HitbtcSharp
                 return name;
             }
         }
-        private decimal fee;
-        public decimal Fee
-        {
-            get
-            {
-                return fee;
-            }
-        }
 
         public Hitbtc(ExchangeConfig config)
         {
             _hitbtc = RestClient.For<IHitbtcApi>("https://api.hitbtc.com");
             _config = config;
             name = config.Name;
-            fee = config.Fee;
 
             string auth = string.Format("Basic {0}", Convert.ToBase64String(Encoding.ASCII.GetBytes(string.Format("{0}:{1}", _config.ApiKey, _config.Secret))));
             _hitbtc.Authorization = auth;
@@ -54,13 +45,13 @@ namespace HitbtcSharp
             return symbols.Select(s => new Symbol(s));
         }
 
-        public async Task<IEnumerable<IMarket>> MarketSummaries()
+        public async Task<IEnumerable<ITicker>> MarketSummaries()
         {
             var summaries = await _hitbtc.GetTickers();
             return summaries.Where(s => s.symbol.EndsWith("BTC") || s.symbol.EndsWith("ETH")).Select(s => new Market(s.symbol, s));
         }
 
-        public async Task<IMarket> MarketSummary(string symbol)
+        public async Task<ITicker> Ticker(string symbol)
         {
             var summary = await _hitbtc.GetTicker(symbol);
             return new Market(symbol, summary);
@@ -80,6 +71,22 @@ namespace HitbtcSharp
             return book;
         }
 
+        public async Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity, decimal price)
+        {
+
+            var data = new Dictionary<string, object> {
+                {"clientOrderId", generatedId},
+                {"symbol", symbol },
+                {"side", "buy"},
+                {"quantity", quantity.ToString("#.####")},
+                {"type", "market" }
+            };
+
+            var order = await _hitbtc.PlaceOrder(data);
+
+            return order;
+        }
+
         public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal price)
         {
 
@@ -90,6 +97,22 @@ namespace HitbtcSharp
                 {"price", price},
                 {"quantity", quantity.ToString("#.####")},
                 {"type", "limit" }
+            };
+
+            var order = await _hitbtc.PlaceOrder(data);
+
+            return order;
+        }
+
+        public async Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity, decimal price)
+        {
+            var data = new Dictionary<string, object> {
+                {"clientOrderId", generatedId},
+                {"symbol", symbol },
+                {"side", "sell"},
+                {"price", price},
+                {"quantity", quantity.ToString("#.####")},
+                {"type", "market" }
             };
 
             var order = await _hitbtc.PlaceOrder(data);
@@ -120,10 +143,13 @@ namespace HitbtcSharp
 
         public async Task<IOrder> CheckOrder(string orderId)
         {
-            var orders = await _hitbtc.GetOrders();
+            string dateStr = DateTime.UtcNow.AddDays(-3).ToString("o");
+            var orders = await _hitbtc.GetOrdersByDate(dateStr);
             var order = orders.Where(o => o.Uuid == orderId).FirstOrDefault();
 
-            return new Order(order);
+            var trades = await GetTradesForOrder(order.symbol, order.Uuid);
+
+            return new Order(order, trades);
         }
 
         //Hitbtc requires a transfer from trading to main before we can withdrawal
@@ -166,13 +192,6 @@ namespace HitbtcSharp
         {
             var address = await _hitbtc.GetAddress(currency);
             return new DepositAddress() { Currency = currency, Address = address.address };
-        }
-
-        public async Task<ICurrencyBalance> GetBalance(string currency)
-        {
-            var balances = await GetBalances("trading", false);
-
-            return balances.Where(b => b.Currency == currency).FirstOrDefault();
         }
 
         public async Task<ICurrencyBalance> GetMainBalance(string currency)
@@ -280,10 +299,10 @@ namespace HitbtcSharp
             return trades.Where(t => t.orderId == orderId);
         }
 
-        public async Task<IEnumerable<IOrder>> CancelOrders(string symbol)
+        public async Task<IEnumerable<string>> CancelOrders(string symbol)
         {
            var orders = await _hitbtc.CancelOrders(symbol);
-            return orders.Select(o => new Order(o));
+            return orders.Select(o => o.Uuid);
         }
     }
 }

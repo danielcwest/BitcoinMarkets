@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace BinanceSharp.Models
 {
-    public class Market : IMarket
+    public class Market : ITicker
     {
         public string Exchange { get; set; }
         public string MarketName { get; set; }

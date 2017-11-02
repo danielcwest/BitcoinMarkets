@@ -3,10 +3,13 @@ using BMCore.Config;
 using BMCore.DbService;
 using BMCore.Engine;
 using Engine;
+using GdaxSharp;
 using HitbtcSharp;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using RestEase;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -32,17 +35,20 @@ namespace DebugEngine
                 var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"), arbitrageConfig.Gmail);
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
 
-                var bittrex = (Bittrex)exchanges["Bittrex"];
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
+                var gdax = (Gdax)exchanges["Gdax"];
 
-                var maker = new MarketMaker(hitbtc, bittrex, dbService);
+                var marketMaker = new MarketMaker(gdax, hitbtc, dbService);
 
-                while (true)
-                {
-                    maker.ResetLimitOrders(-1).Wait();
-                    Console.WriteLine("Complete Sleeping...");
-                    Thread.Sleep(1000 * 60);
-                }
+                marketMaker.AuditCompletedOrders(-1).Wait();
+
+                //var reporter = new EngineReporter(gdax, hitbtc, dbService);
+
+
+                //int pId = dbService.StartEngineProcess("Gdax", "Hitbtc", "marketmaking", new CurrencyConfig());
+                //marketMaker.ResetLimitOrders(-1).Wait();
+                //marketMaker.ProcessOrders().Wait();
+                //dbService.EndEngineProcess(pId, "success");
 
                 Console.WriteLine("Complete");
             }

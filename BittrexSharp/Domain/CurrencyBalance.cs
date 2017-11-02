@@ -5,7 +5,7 @@ using BMCore.Contracts;
 
 namespace BittrexSharp
 {
-    public class CurrencyBalance : ICurrencyBalance
+    public class BittrexBalance
     {
         public string Currency { get; set; }
         public decimal Amouunt { get; set; }
@@ -14,5 +14,20 @@ namespace BittrexSharp
         public string CryptoAddress { get; set; }
         public bool Requested { get; set; }
         public string Uuid { get; set; }
+    }
+
+    public class CurrencyBalance : ICurrencyBalance
+    {
+        public string Currency { get; set; }
+        public decimal Available { get; set; }
+        public decimal Held { get; set; }
+
+        public CurrencyBalance(BittrexBalance b)
+        {
+            Currency = b.Currency;
+            Available = b.Available;
+            Held = b.Pending;
+
+        }
     }
 }

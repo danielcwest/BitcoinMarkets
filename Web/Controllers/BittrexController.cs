@@ -29,29 +29,5 @@ namespace Web.Controllers
             _bittrex = new Bittrex(config);
         }
 
-        [HttpGet]
-        public async Task<IEnumerable<IMarket>> MarketSummaries()
-        {
-            return await _bittrex.MarketSummaries();
-        }
-
-        [HttpGet]
-        public async Task<IMarket> MarketSummary(string symbol)
-        {
-            return await _bittrex.MarketSummary(symbol);
-        }
-
-        [HttpGet]
-        public async Task<BMCore.Models.OrderBook> OrderBook(string symbol)
-        {
-            return await _bittrex.OrderBook(symbol);
-        }
-
-        [HttpGet]
-        public async Task<IEnumerable<string>> Symbols()
-        {
-            var summaries = await _bittrex.Symbols();
-            return summaries.Select(s => s.LocalSymbol);
-        }
     }
 }

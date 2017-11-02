@@ -22,6 +22,6 @@ namespace HitbtcSharp.Models
         [JsonProperty("available")]
         public decimal Available { get; set; }
         [JsonProperty("reserved")]
-        public decimal Reserved { get; set; }
+        public decimal Held { get; set; }
     }
 }

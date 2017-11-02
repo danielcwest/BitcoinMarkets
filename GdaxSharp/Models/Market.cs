@@ -5,7 +5,7 @@ using BMCore.Util;
 using BMCore.Contracts;
 using Newtonsoft.Json;
 
-namespace HitbtcSharp.Models
+namespace GdaxSharp.Models
 {
     public class Market : ITicker
     {
@@ -20,28 +20,25 @@ namespace HitbtcSharp.Models
         public string BaseCurrency { get; set; }
         public string Link { get; set; }
 
-        public Market(string name, HitbtcSharp.Models.Ticker ticker)
+        public Market(string symbol, Ticker ticker)
         {
-            this.Exchange = "Hitbtc";
-            this.MarketName = name;
-            this.Volume = ticker.volumeQuote.HasValue ? ticker.volumeQuote.Value : 0;
-            this.Last = ticker.last.HasValue ? ticker.last.Value : 0;
-            this.Timestamp = ticker.timestamp;
-            this.Bid = ticker.bid.HasValue ? ticker.bid.Value : 0;
-            this.Ask = ticker.ask.HasValue ? ticker.ask.Value : 0;
+            Exchange = "Gdax";
+            MarketName = symbol;
+            Volume = ticker.volume;
+            Last = ticker.price;
+            Timestamp = ticker.time;
+            Bid = ticker.bid;
+            Ask = ticker.ask;
 
             if (this.MarketName.EndsWith("BTC"))
             {
                 this.BaseCurrency = "BTC";
                 this.QuoteCurrency = this.MarketName.Replace("BTC", "");
-                this.Link = string.Format("https://hitbtc.com/exchange/{0}-to-BTC", this.QuoteCurrency);
-
             }
             else if (this.MarketName.EndsWith("ETH"))
             {
                 this.BaseCurrency = "ETH";
                 this.QuoteCurrency = this.MarketName.Replace("ETH", "");
-                this.Link = string.Format("https://hitbtc.com/exchange/{0}-to-ETH", this.QuoteCurrency);
             }
         }
     }

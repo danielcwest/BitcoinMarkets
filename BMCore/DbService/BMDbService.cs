@@ -121,12 +121,13 @@ namespace BMCore.DbService
                 });
         }
 
-        public IEnumerable<DbArbitragePair> GetArbitragePairs(string status, string baseExchange = "", string arbExchange = "")
+        public IEnumerable<DbArbitragePair> GetArbitragePairs(string type, string status = "", string baseExchange = "", string arbExchange = "")
         {
             using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetArbitragePairs", 15,
                 new SqlParameter[]
                 {
                         new SqlParameter { ParameterName = "@status", Value = status },
+                        new SqlParameter { ParameterName = "@type", Value = type },
                         new SqlParameter { ParameterName = "@baseExchange", Value = baseExchange },
                         new SqlParameter { ParameterName = "@arbExchange", Value = arbExchange }
                 }))
@@ -271,14 +272,15 @@ namespace BMCore.DbService
             }
         }
 
-        public int InsertMakerOrder(int pairId, string type, decimal rate)
+        public int InsertMakerOrder(int pairId, string type, decimal rate, int processId)
         {
             return (int)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.InsertMakerOrder", 15,
                 new SqlParameter[]
                 {
                     new SqlParameter { ParameterName = "@pairId", Value = pairId },
                     new SqlParameter { ParameterName = "@type", Value = type },
-                    new SqlParameter { ParameterName = "@rate", Value = rate }
+                    new SqlParameter { ParameterName = "@rate", Value = rate },
+                    new SqlParameter { ParameterName = "@processId", Value = processId }
                 });
         }
 
@@ -315,10 +317,59 @@ namespace BMCore.DbService
                         new SqlParameter { ParameterName = "@status", Value = status },
                         new SqlParameter { ParameterName = "@pairId", Value = pairId }
                 }))
-                {
+            {
                 return reader.ToList<DbMakerOrder>();
             }
         }
-    }
 
+        public void InsertBalanceSnapshot(string currency, string exchange, decimal available, decimal held, decimal price, int processId)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertBalanceSnapshot", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@currency", Value = currency },
+                    new SqlParameter { ParameterName = "@exchange", Value = exchange },
+                    new SqlParameter { ParameterName = "@available", Value = available},
+                    new SqlParameter { ParameterName = "@held", Value = held},
+                    new SqlParameter { ParameterName = "@price", Value = price},
+                    new SqlParameter { ParameterName = "@processId", Value = processId}
+                });
+        }
+
+        public IEnumerable<DbBalance> GetBalanceSnapshots(string exchange = "", string currency = "", DateTime? fromDate = null, int processId = 0)
+        {
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetBalances", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@exchange", Value = exchange },
+                        new SqlParameter { ParameterName = "@currency", Value = currency },
+                        new SqlParameter { ParameterName = "@fromDate", Value = fromDate },
+                        new SqlParameter { ParameterName = "@processId", Value = processId }
+                }))
+            {
+                return reader.ToList<DbBalance>();
+            }
+        }
+
+        public void UpdateOrder(int id, string baseUuid = "", string counterUuid = "", decimal baseRate = 0, decimal counterRate = 0, string status = "", decimal baseQuantityFilled = 0, decimal counterQuantityFilled = 0, decimal baseCost = 0m, decimal counterCost = 0m, decimal commission = 0m, object payload = null)
+        {
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateOrder", 15,
+                new SqlParameter[]
+                {
+                    new SqlParameter { ParameterName = "@id", Value = id },
+                    new SqlParameter { ParameterName = "@baseUuid", Value = baseUuid },
+                    new SqlParameter { ParameterName = "@counterUuid", Value = counterUuid },
+                    new SqlParameter { ParameterName = "@baseRate", Value = baseRate },
+                    new SqlParameter { ParameterName = "@counterRate", Value = counterRate },
+                    new SqlParameter { ParameterName = "@status", Value = status },
+                    new SqlParameter { ParameterName = "@baseQuantityFilled", Value = baseQuantityFilled },
+                    new SqlParameter { ParameterName = "@counterQuantityFilled", Value = counterQuantityFilled },
+                    new SqlParameter { ParameterName = "@baseCost", Value = baseCost },
+                    new SqlParameter { ParameterName = "@counterCost", Value = counterCost },
+                    new SqlParameter { ParameterName = "@commission", Value = commission },
+                    new SqlParameter { ParameterName = "@meta", Value = (payload == null) ? "" : JsonConvert.SerializeObject(payload) }
+                });
+        }
+    }
 }
+

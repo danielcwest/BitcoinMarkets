@@ -45,6 +45,9 @@ namespace HitbtcSharp
         [Get("/api/2/history/order?limit=1000")]
         Task<IEnumerable<HitbtcOrder>> GetOrders();
 
+        [Get("/api/2/history/order?from={dateStr}")]
+        Task<IEnumerable<HitbtcOrder>> GetOrdersByDate([Path] string dateStr);
+
         [Get("/api/2/history/trades?symbol={symbol}")]
         Task<IEnumerable<Trade>> GetTrades([Path] string symbol);
 

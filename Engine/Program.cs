@@ -14,6 +14,7 @@ using BMCore.DbService;
 using BMCore.Engine;
 using BMCore.Config;
 using RestEase;
+using GdaxSharp;
 
 namespace Engine
 {
@@ -23,15 +24,11 @@ namespace Engine
         {
             try
             {
-                if (args.Length < 1)
-                {
-                    PrintUsage();
-                    return;
-                }
+                //dotnet publish -c Release -r win10-x64
 
                 Console.WriteLine("Starting Engine ...");
 
-                string configFile = args[0] == "log" ? "appsettings.log.json" : "appsettings.json";
+                string configFile = "appsettings.json";
 
                 var builder = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
@@ -44,30 +41,24 @@ namespace Engine
                 var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"), arbitrageConfig.Gmail);
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
 
-                switch (args[0])
+                var hitbtc = (Hitbtc)exchanges["Hitbtc"];
+                var gdax = (Gdax)exchanges["Gdax"];
+
+
+                var marketMaker = new MarketMaker(gdax, hitbtc, dbService);
+                var reporter = new EngineReporter(gdax, hitbtc, dbService);
+
+                var finish = DateTime.UtcNow.AddDays(1);
+                var current = DateTime.UtcNow;
+
+                while (current < finish)
                 {
-                    case "log":
-                        
-                        break;
-                    case "make":
-                        var maker = new MarketMaker((Hitbtc)exchanges["Hitbtc"], (Bittrex)exchanges["Bittrex"], dbService);
-                        while (true)
-                        {
-                            int pId = dbService.StartEngineProcess("Hitbtc", "Bittrex", "marketmaking", new CurrencyConfig());
-                            maker.ResetLimitOrders(-1).Wait();
-                            maker.ProcessOrders(-1).Wait();
-                            Console.WriteLine("Complete Sleeping...");
-                            Thread.Sleep(1000 * 60);
-                        }
-                        break;
-                    case "balance":
-
-                        break;
-                    case "report":
-
-                        break;
-                    default:
-                        break;
+                    int pId = dbService.StartEngineProcess("Gdax", "Hitbtc", "marketmaking", new CurrencyConfig());
+                    marketMaker.ResetLimitOrders(pId).Wait();
+                    marketMaker.ProcessOrders().Wait();
+                    dbService.EndEngineProcess(pId, "success");
+                    Console.WriteLine("Complete Sleeping...");
+                    Thread.Sleep(1000 * 10);
                 }
                 Console.WriteLine("Engine Complete...");
             }

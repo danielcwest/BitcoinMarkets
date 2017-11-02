@@ -26,19 +26,21 @@ namespace BMCore.Models
         public DateTime LastRunUtc { get; set; }
         public decimal TradeThreshold { get; set; }
         public decimal SpreadThreshold { get; set; }
-        public decimal MarketThreshold { get; set; }
-        public decimal MarketSpread { get; set; }
+        public decimal WithdrawalThreshold { get; set; }
         public decimal BaseBaseWithdrawalFee { get; set; }
         public decimal BaseMarketWithdrawalFee { get; set; }
         public decimal CounterBaseWithdrawalFee { get; set; }
         public decimal CounterMarketWithdrawalFee { get; set; }
         public decimal BaseExchangeFee { get; set; }
         public decimal CounterExchangeFee { get; set; }
+        public decimal AskSpread { get; set; }
+        public decimal BidSpread { get; set; }
+        public decimal MarketSpread { get; set; }
 
         //Market Data
-        public IMarket baseMarket { get; set; }
+        public ITicker baseMarket { get; set; }
         public OrderBook baseBook { get; set; }
-        public IMarket counterMarket { get; set; }
+        public ITicker counterMarket { get; set; }
         public OrderBook counterBook { get; set; }
 
         public ArbitragePair(DbArbitragePair dbPair)
@@ -52,13 +54,15 @@ namespace BMCore.Models
             this.LastRunUtc = dbPair.LastRunUtc;
             this.TradeThreshold = dbPair.TradeThreshold;
             this.SpreadThreshold = dbPair.SpreadThreshold;
+            this.WithdrawalThreshold = dbPair.WithdrawalThreshold;
             this.BaseExchangeFee = dbPair.BaseExchangeFee;
             this.CounterExchangeFee = dbPair.CounterExchangeFee;
             this.BaseBaseWithdrawalFee = dbPair.BaseBaseWithdrawalFee;
             this.BaseMarketWithdrawalFee = dbPair.BaseMarketWithdrawalFee;
             this.CounterBaseWithdrawalFee = dbPair.CounterBaseWithdrawalFee;
             this.CounterMarketWithdrawalFee = dbPair.CounterMarketWithdrawalFee;
-            this.MarketThreshold = dbPair.MarketThreshold;
+            this.AskSpread = dbPair.AskSpread;
+            this.BidSpread = dbPair.BidSpread;
             this.MarketSpread = dbPair.MarketSpread;
         }
 

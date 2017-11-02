@@ -7,29 +7,32 @@ namespace BittrexSharp.Domain
 {
     public class Order : IOrder
     {
-        public string OrderUuid { get; set; }
+        public string Uuid { get; set; }
         public string Exchange { get; set; }
         public string Symbol { get; set; }
         public string Type { get; set; }
         public decimal Quantity { get; set; }
-        public decimal Cost { get; set; }
+        public decimal CostProceeds { get; set; }
+        public decimal Fees { get; set; }
         public bool IsClosed { get; set; }
         public bool IsFilled { get; set; }
-        public decimal Rate { get; set; }
+        public decimal AvgRate { get; set; }
         public decimal QuantityFilled { get; set; }
+        public string Side { get; set; }
 
         public Order(BittrexOrder order)
         {
-            this.OrderUuid = order.OrderUuid;
+            this.Uuid = order.OrderUuid;
             this.Exchange = order.Exchange;
             this.Symbol = order.Symbol;
             this.Type = order.Type;
             this.Quantity = order.Quantity;
             this.QuantityFilled = order.Quantity - order.QuantityRemaining;
-            this.Cost = order.Price;
-            this.Rate = order.PricePerUnit.HasValue ? order.PricePerUnit.Value : 0m;
+            this.CostProceeds = order.Price;
+            this.AvgRate = order.PricePerUnit.HasValue ? order.PricePerUnit.Value : 0m;
             this.IsClosed = order.IsOpen;
             this.IsFilled = !order.IsOpen && order.QuantityRemaining == 0m;
+            this.Fees = order.CommissionPaid;
         }
     }
     public class BittrexOrder

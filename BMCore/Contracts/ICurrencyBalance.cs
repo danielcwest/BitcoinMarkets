@@ -8,5 +8,6 @@ namespace BMCore.Contracts
     {
         string Currency { get; set; }
         decimal Available { get; set; }
+        decimal Held { get; set; }
     }
 }

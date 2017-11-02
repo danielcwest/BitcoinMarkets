@@ -24,20 +24,11 @@ namespace BinanceSharp
                 return name;
             }
         }
-        private decimal fee;
-        public decimal Fee
-        {
-            get
-            {
-                return fee;
-            }
-        }
 
         public Binance(ExchangeConfig config)
         {
             _binance = RestClient.For<IBinanceApi>("https://www.binance.com");
             name = config.Name;
-            fee = config.Fee;
         }
 
         public async Task<IEnumerable<ISymbol>> Symbols()
@@ -46,7 +37,7 @@ namespace BinanceSharp
             return prices.Select(p => new Symbol(p));
         }
 
-        public async Task<IEnumerable<IMarket>> MarketSummaries()
+        public async Task<IEnumerable<ITicker>> MarketSummaries()
         {
             var prices = await _binance.GetPrices();
 
@@ -73,7 +64,7 @@ namespace BinanceSharp
             return book;
         }
 
-        public async Task<IMarket> MarketSummary(string symbol)
+        public async Task<ITicker> Ticker(string symbol)
         {
             var ticker = await _binance.GetTicker(symbol);
             return new Market(symbol, ticker);
@@ -99,11 +90,6 @@ namespace BinanceSharp
             throw new NotImplementedException();
         }
 
-        public Task<ICurrencyBalance> GetBalance(string currency)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate)
         {
             throw new NotImplementedException();
@@ -125,7 +111,17 @@ namespace BinanceSharp
             return await Task.FromResult(res);
         }
 
-        Task<IEnumerable<IOrder>> IExchange.CancelOrders(string symbol)
+        Task<IEnumerable<string>> IExchange.CancelOrders(string symbol)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity, decimal price)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity, decimal price)
         {
             throw new NotImplementedException();
         }

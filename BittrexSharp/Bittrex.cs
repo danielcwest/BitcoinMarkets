@@ -25,20 +25,12 @@ namespace BittrexSharp
                 return name;
             }
         }
-        private decimal fee;
-        public decimal Fee
-        {
-            get
-            {
-                return fee;
-            }
-        }
+
 
         public Bittrex(ExchangeConfig config)
         {
             _bittrex = new BittrexApi(config.ApiKey, config.Secret);
             name = config.Name;
-            fee = config.Fee;
         }
 
         public async Task<IEnumerable<ISymbol>> Symbols()
@@ -47,13 +39,13 @@ namespace BittrexSharp
             return markets.Select(m => new Symbol(m));
         }
 
-        public async Task<IEnumerable<IMarket>> MarketSummaries()
+        public async Task<IEnumerable<ITicker>> MarketSummaries()
         {
             var summaries = await _bittrex.GetMarketSummaries();
             return summaries.Select(s => new BMMarket(s));
         }
 
-        public async Task<IMarket> MarketSummary(string symbol)
+        public async Task<ITicker> Ticker(string symbol)
         {
             if (!symbol.Contains("-"))
                 symbol = GetMarketNameFromSymbol(symbol);
@@ -115,11 +107,6 @@ namespace BittrexSharp
             return await _bittrex.GetDepositAddress(currency);
         }
 
-        public async Task<ICurrencyBalance> GetBalance(string currency)
-        {
-            return await _bittrex.GetBalance(currency);
-        }
-
         public async Task<IWithdrawal> GetWithdrawal(string uuid)
         {
             var history = await _bittrex.GetWithdrawalHistory();
@@ -158,10 +145,21 @@ namespace BittrexSharp
 
         public async Task<IEnumerable<ICurrencyBalance>> GetBalances()
         {
-            return await _bittrex.GetBalances();
+            var balances = await _bittrex.GetBalances();
+            return balances.Select(b => new CurrencyBalance(b));
         }
 
-        Task<IEnumerable<IOrder>> IExchange.CancelOrders(string symbol)
+        Task<IEnumerable<string>> IExchange.CancelOrders(string symbol)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity, decimal price)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity, decimal price)
         {
             throw new NotImplementedException();
         }

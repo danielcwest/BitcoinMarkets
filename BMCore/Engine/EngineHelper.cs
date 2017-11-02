@@ -151,9 +151,9 @@ namespace BMCore.Engine
 
                 //Withdraw Base Currency from Counter
                 var baseAddress = await baseExchange.GetDepositAddress(transaction.BaseCurrency);
-                var tx2 = await counterExchange.Withdraw(transaction.BaseCurrency, baseOrder.Cost + transaction.CounterBaseWithdrawalFee, baseAddress.Address);
+                var tx2 = await counterExchange.Withdraw(transaction.BaseCurrency, baseOrder.CostProceeds + transaction.CounterBaseWithdrawalFee, baseAddress.Address);
 
-                decimal commission = counterOrder.Cost - (baseOrder.Cost + transaction.CounterBaseWithdrawalFee);
+                decimal commission = counterOrder.CostProceeds - (baseOrder.CostProceeds + transaction.CounterBaseWithdrawalFee);
                 dbService.UpdateTransactionWithdrawalUuid(transaction.Id, tx.Uuid, tx2.Uuid, commission);
             }
             else
@@ -163,9 +163,9 @@ namespace BMCore.Engine
 
                 //Withdraw Base Currency from Base
                 var counterAddress = await counterExchange.GetDepositAddress(transaction.BaseCurrency);
-                var tx = await baseExchange.Withdraw(transaction.BaseCurrency, counterOrder.Cost + transaction.BaseBaseWithdrawalFee, counterAddress.Address);
+                var tx = await baseExchange.Withdraw(transaction.BaseCurrency, counterOrder.CostProceeds + transaction.BaseBaseWithdrawalFee, counterAddress.Address);
 
-                decimal commission = baseOrder.Cost - (counterOrder.Cost + transaction.BaseBaseWithdrawalFee);
+                decimal commission = baseOrder.CostProceeds - (counterOrder.CostProceeds + transaction.BaseBaseWithdrawalFee);
                 dbService.UpdateTransactionWithdrawalUuid(transaction.Id, tx.Uuid, tx2.Uuid, commission);
             }
         }
@@ -333,26 +333,26 @@ namespace BMCore.Engine
 
         #region Trading Helpers
 
-        public static async Task<IAcceptedAction> Sell(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, int txId)
+        public static async Task<IAcceptedAction> Sell(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, int txId, string type = "limit")
         {
             return await Trade(exchange, market, dbService, symbol, quantity, price, "sell", txId);
         }
 
-        public static async Task<IAcceptedAction> Buy(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, int txId)
+        public static async Task<IAcceptedAction> Buy(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, int txId, string type = "limit")
         {
             return await Trade(exchange, market, dbService, symbol, quantity, price, "buy", txId);
         }
 
-        public static async Task<IAcceptedAction> Trade(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, string side, int txId)
+        public static async Task<IAcceptedAction> Trade(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, string side, int txId, string type = "limit")
         {
             IAcceptedAction tradeResult;
             if (side == "buy")
             {
-                tradeResult = await exchange.Buy(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
+                tradeResult = type == "limit" ? await exchange.Buy(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price) : await exchange.MarketBuy(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
             }
             else
             {
-                tradeResult = await exchange.Sell(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
+                tradeResult = type == "limit" ? await exchange.Sell(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price) : await exchange.MarketSell(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
             }
             return tradeResult;
         }
@@ -371,15 +371,21 @@ namespace BMCore.Engine
             return result;
         }
 
-        public static async Task<ArbitragePair> AppendMarketData(IDbService dbService, IExchange baseExchange, IExchange counterExchange, ArbitragePair pair)
+        public static async Task<ArbitragePair> AppendMarketData(IDbService dbService, IExchange baseExchange, IExchange counterExchange, ArbitragePair pair, bool includeBaseMarket = true, bool includeBaseBook = true, bool includeCounterMarket = true, bool includeCounterBook = true)
         {
-            //Always get the freshest data
-            pair.baseMarket = await baseExchange.MarketSummary(pair.Symbol);
-            pair.baseBook = await baseExchange.OrderBook(pair.Symbol);
-            pair.counterMarket = await counterExchange.MarketSummary(pair.Symbol);
-            pair.counterBook = await counterExchange.OrderBook(pair.Symbol);
+            if (includeBaseMarket)
+                pair.baseMarket = await baseExchange.Ticker(pair.Symbol);
 
-            if (pair.baseMarket == null || pair.baseBook == null || pair.counterMarket == null || pair.counterBook == null)
+            if(includeBaseBook)
+                pair.baseBook = await baseExchange.OrderBook(pair.Symbol);
+
+            if (includeCounterMarket)
+                pair.counterMarket = await counterExchange.Ticker(pair.Symbol);
+
+            if (includeCounterBook)
+                pair.counterBook = await counterExchange.OrderBook(pair.Symbol);
+
+            if ((pair.baseMarket == null && includeBaseMarket) || (pair.baseBook == null && includeBaseBook) || (pair.counterMarket == null && includeCounterMarket) || (pair.counterBook == null && includeCounterBook))
             {
                 var ex = new Exception("No Market Data");
                 dbService.LogError(baseExchange.Name, counterExchange.Name, pair.Symbol, "AnalyzeMarket", ex, pair.Id);
@@ -392,7 +398,7 @@ namespace BMCore.Engine
 
         public static async Task<ArbitragePair> AppendCounterMarketData(IDbService dbService, IExchange counterExchange, ArbitragePair pair)
         {
-            pair.counterMarket = await counterExchange.MarketSummary(pair.Symbol);
+            pair.counterMarket = await counterExchange.Ticker(pair.Symbol);
             pair.counterBook = await counterExchange.OrderBook(pair.Symbol);
 
             if (pair.counterMarket == null || pair.counterBook == null)
@@ -407,6 +413,13 @@ namespace BMCore.Engine
         }
 
         #endregion
+
+        #region Reporting Helpers
+
+        
+
+        #endregion  
+
 
     }
 }

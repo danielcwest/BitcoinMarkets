@@ -321,11 +321,11 @@ namespace BittrexSharp
         /// Get the balance of all cryptocurrencies
         /// </summary>
         /// <returns></returns>
-        public virtual async Task<IEnumerable<CurrencyBalance>> GetBalances()
+        public virtual async Task<IEnumerable<BittrexBalance>> GetBalances()
         {
             var uri = BaseUrl + "account/getbalances";
             var jsonResponse = await request(HttpMethod.Get, uri);
-            var balances = jsonResponse.ToObject<IEnumerable<CurrencyBalance>>();
+            var balances = jsonResponse.ToObject<IEnumerable<BittrexBalance>>();
             return balances;
         }
 
@@ -334,7 +334,7 @@ namespace BittrexSharp
         /// </summary>
         /// <param name="currency">Currency symbol, e.g. BTC</param>
         /// <returns></returns>
-        public virtual async Task<CurrencyBalance> GetBalance(string currency)
+        public virtual async Task<BittrexBalance> GetBalance(string currency)
         {
             var uri = BaseUrl + "account/getbalance";
             var parameters = new Dictionary<string, string>
@@ -342,7 +342,7 @@ namespace BittrexSharp
                 { "currency", currency }
             };
             var jsonResponse = await request(HttpMethod.Get, uri, parameters);
-            var balance = jsonResponse.ToObject<CurrencyBalance>();
+            var balance = jsonResponse.ToObject<BittrexBalance>();
             return balance;
         }
 

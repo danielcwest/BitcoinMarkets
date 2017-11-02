@@ -24,7 +24,9 @@ namespace BMCore.Config
         public string Name { get; set; }
         public string ApiKey { get; set; }
         public string Secret { get; set; }
-        public decimal Fee { get; set; }
+        public string ApiKey2 { get; set; }
+        public string Secret2 { get; set; }
+        public string Passphrase { get; set; }
         public bool Enabled { get; set; }
     }
 

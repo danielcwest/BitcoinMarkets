@@ -29,30 +29,5 @@ namespace Web.Controllers
             _binance = new Binance(config);
         }
 
-        [HttpGet]
-        public async Task<IEnumerable<string>> Symbols()
-        {
-            var summaries = await _binance.MarketSummaries();
-            return summaries.Select(s => s.MarketName);
-        }
-
-        [HttpGet]
-        public async Task<IEnumerable<IMarket>> MarketSummaries()
-        {
-            return await _binance.MarketSummaries();
-        }
-
-        [HttpGet]
-        public async Task<IMarket> MarketSummary(string symbol)
-        {
-            return await _binance.MarketSummary(symbol);
-        }
-
-        [HttpGet]
-        public async Task<BMCore.Models.OrderBook> OrderBook(string symbol)
-        {
-            return await _binance.OrderBook(symbol);
-        }
-
     }
 }
