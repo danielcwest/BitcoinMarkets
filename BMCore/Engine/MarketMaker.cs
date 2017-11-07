@@ -1,4 +1,5 @@
-﻿using BMCore.Contracts;
+﻿using BMCore.Config;
+using BMCore.Contracts;
 using BMCore.DbService;
 using BMCore.Models;
 using Newtonsoft.Json;
@@ -6,7 +7,9 @@ using RestEase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BMCore.Engine
@@ -17,63 +20,37 @@ namespace BMCore.Engine
         IExchange baseExchange;
         IExchange counterExchange;
         IDbService dbService;
+
+        GmailConfig gmail;
         EngineReporter reporter;
 
-        public MarketMaker(IExchange baseExchange, IExchange counterExchange, IDbService dbService)
+        public MarketMaker(IExchange baseExchange, IExchange counterExchange, IDbService dbService,  GmailConfig gmail)
         {
             this.baseExchange = baseExchange;
             this.counterExchange = counterExchange;
             this.dbService = dbService;
+            this.gmail = gmail;
+
             this.reporter = new EngineReporter(baseExchange, counterExchange, dbService);
+            
         }
 
-        public async Task ResetLimitOrders(int pId)
+        public async Task ResetLimitOrders(IEnumerable<ArbitragePair> pairs, int pId = -1)
         {
-            var pairs = dbService.GetArbitragePairs("market").Select(p => new ArbitragePair(p));
-            await ResetLimitOrders(pairs, pId);
-        }
-
-        public async Task ResetLimitOrders(IEnumerable<ArbitragePair> pairs, int pId)
-        {
-            var tasks = pairs.Select(async p => await ResetLimitOrdersForPair(p, pId));
-            await Task.WhenAll(tasks);
-        }
-
-        public async Task LogMarketMakingPairs(int pId)
-        {
-            var pairs = dbService.GetArbitragePairs("market").Select(p => new ArbitragePair(p));
-            await LogMarketMakingPairs(pairs, pId);
-        }
-
-        public async Task LogMarketMakingPairs(IEnumerable<ArbitragePair> pairs, int pId)
-        {
-            var tasks = pairs.Select(async p => await LogMarketMakingPair(p, pId));
-
-            await Task.WhenAll(tasks);
-        }
-
-        public async Task ProcessOrders()
-        {
-            var pairs = dbService.GetArbitragePairs("market").Select(p => new ArbitragePair(p));
-            await ProcessOrders(pairs);
+            await Task.WhenAll(pairs.Select(async p => await ResetLimitOrdersForPair(p, pId)));
         }
 
         public async Task ProcessOrders(IEnumerable<ArbitragePair> pairs)
         {
-            var tasks = pairs.Select(async p => await ProcessOrdersForPair(p));
-
-            await Task.WhenAll(tasks);
+            foreach (var pair in pairs)
+            {
+                await ProcessOrdersForPair(pair);
+            }
         }
 
-        public async Task AuditCompletedOrders(int pId)
+        public async Task AuditCompletedOrders(IEnumerable<ArbitragePair> pairs)
         {
-            var pairs = dbService.GetArbitragePairs("market").Select(p => new ArbitragePair(p));
-            await AuditCompletedOrders(pairs, pId);
-        }
-
-        public async Task AuditCompletedOrders(IEnumerable<ArbitragePair> pairs, int pId)
-        {
-            var tasks = pairs.Select(async p => await AuditCompletedOrdersForPair(p, pId));
+            var tasks = pairs.Select(async p => await AuditCompletedOrdersForPair(p));
 
             await Task.WhenAll(tasks);
         }
@@ -128,7 +105,7 @@ namespace BMCore.Engine
             bool isError = false;
             try
             {
-                Console.WriteLine("Process Counter Orders {0}", pair.Symbol);
+                Console.WriteLine("Process Orders {0}", pair.Symbol);
                 await ProcessCounterOrdersForPair(pair);
             }
             catch (Exception e)
@@ -153,12 +130,24 @@ namespace BMCore.Engine
                 pair = await EngineHelper.AppendMarketData(dbService, this.baseExchange, this.counterExchange, pair, includeBaseMarket: false, includeBaseBook: false, includeCounterMarket: false, includeCounterBook: true);
 
                 //Cancel existing orders
-                var orders = await baseExchange.CancelOrders(pair.BaseSymbol);
+                try
+                {
+                    var orders = await baseExchange.CancelOrders(pair.BaseSymbol);
+                }
+                catch (ApiException ae) when (ae.RequestMethod == HttpMethod.Delete)
+                {
+                    //ignore, orders expire after a minute anyway!  
+                    Console.WriteLine("Ignoring Cancel Order Exception ... {0}", pair.Symbol);
+                }
 
                 await ProcessOpenOrdersForPair(pair);
 
                 //Place new orders
                 await PlaceLimitOrders(dbService, this.baseExchange, pair, pId);
+            }
+            catch (ApiException ae)
+            {
+                dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "ResetLimitOrdersForPair", ae, pId);
             }
             catch (Exception e)
             {
@@ -174,36 +163,45 @@ namespace BMCore.Engine
 
         private static async Task PlaceLimitOrders(IDbService dbService, IExchange exchange, ArbitragePair pair, int pId)
         {
+            decimal arbBuy = EngineHelper.GetPriceAtVolumeThreshold(pair.BidMultiplier * pair.TradeThreshold, pair.counterBook.asks);
+            decimal arbSell = EngineHelper.GetPriceAtVolumeThreshold(pair.AskMultiplier * pair.TradeThreshold, pair.counterBook.bids);
 
-            decimal arbBuy = EngineHelper.GetPriceAtVolumeThreshold(pair.TradeThreshold, pair.counterBook.asks);
-            decimal arbSell = EngineHelper.GetPriceAtVolumeThreshold(pair.TradeThreshold, pair.counterBook.bids);
-            decimal buyPrice = arbBuy - (arbBuy * pair.BidSpread);
-            decimal sellPrice = arbSell + (arbSell * pair.AskSpread);
+            //Set our BID at the price we can SELL on the counter exchange plus our commission
+            decimal buyPriceRaw = arbSell - (arbSell * pair.BidSpread);
+            decimal buyPriceRounded = Math.Round(buyPriceRaw, pair.DecimalPlaces);
 
-            decimal orderSpread = (sellPrice - buyPrice) / (sellPrice + buyPrice) - pair.CounterExchangeFee;
-
-            dbService.InsertArbitrageOpportunity(pair.Id, buyPrice, sellPrice, orderSpread, pair.TradeThreshold);
-
-            Console.WriteLine("Placing Limit Orders With Spread {0:P4}", pair.BidSpread + pair.AskSpread);
-
-            if (buyPrice > 0)
+            if(buyPriceRounded > buyPriceRaw)
             {
-                int buyTxId = dbService.InsertMakerOrder(pair.Id, "buy", buyPrice, pId);
-                decimal buyQuantity = pair.TradeThreshold / buyPrice;
-                var buyId = await EngineHelper.Buy(exchange, pair.GetBaseSymbol(), dbService, pair.Symbol, buyQuantity, buyPrice, buyTxId);
+                buyPriceRounded -= pair.Increment;
+            }
+
+            //Set or ASK at the price we can BUY on counter plus our commission
+            decimal sellPriceRaw = arbBuy + (arbBuy * pair.AskSpread);
+            decimal sellPriceRounded = Math.Round(sellPriceRaw, pair.DecimalPlaces);
+
+            if (sellPriceRounded < sellPriceRaw)
+            {
+                sellPriceRounded += pair.Increment;
+            }
+
+            decimal orderSpread = (sellPriceRounded - buyPriceRounded) / (sellPriceRounded + buyPriceRounded) - pair.CounterExchangeFee - pair.BaseExchangeFee;
+
+            if (buyPriceRounded > 0 && orderSpread > 0)
+            {
+                int buyTxId = dbService.InsertMakerOrder(pair.Id, "buy", buyPriceRounded, pId);
+                decimal buyQuantity = pair.BidMultiplier * pair.TradeThreshold / buyPriceRounded;
+                var buyId = await EngineHelper.Buy(exchange, pair.GetBaseSymbol(), dbService, pair.Symbol, buyQuantity, buyPriceRounded, buyTxId);
                 dbService.UpdateOrderUuid(buyTxId, buyId.Uuid);
 
             }
 
-            if (sellPrice > 0)
+            if (sellPriceRounded > 0 && orderSpread > 0)
             {
-                int sellTxId = dbService.InsertMakerOrder(pair.Id, "sell", sellPrice, pId);
-                decimal sellQuantity = pair.TradeThreshold / sellPrice;
-                var sellId = await EngineHelper.Sell(exchange, pair.GetBaseSymbol(), dbService, pair.Symbol, sellQuantity, sellPrice, sellTxId);
+                int sellTxId = dbService.InsertMakerOrder(pair.Id, "sell", sellPriceRounded, pId);
+                decimal sellQuantity = pair.AskMultiplier * pair.TradeThreshold / sellPriceRounded;
+                var sellId = await EngineHelper.Sell(exchange, pair.GetBaseSymbol(), dbService, pair.Symbol, sellQuantity, sellPriceRounded, sellTxId);
                 dbService.UpdateOrderUuid(sellTxId, sellId.Uuid);
-
             }
-
         }
 
         private async Task ProcessOpenOrdersForPair(ArbitragePair pair)
@@ -262,7 +260,18 @@ namespace BMCore.Engine
             foreach(var order in dbService.GetMakerOrdersByStatus("pending", pair.Id))
             {
                 await ProcessCounterOrder(pair, order, order.ProcessId);
-                await reporter.TakeBalanceSnapshot(order.ProcessId);
+
+                try
+                {
+                    await EmailHelper.SendSimpleMailAsync(gmail, string.Format("Order Processed: {0}", order.BaseSymbol), string.Format("{0} - {1} {2} {3}", order.BaseExchange, order.CounterExchange, Environment.NewLine, order.Id));
+
+                    await reporter.TakeBalanceSnapshot(order.ProcessId);
+                }
+                catch (Exception e)
+                {
+                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "ProcessCounterOrdersForPair", e, order.ProcessId);
+                }
+
             }
         }
 
@@ -276,7 +285,7 @@ namespace BMCore.Engine
                 {
                     Console.WriteLine("Place Counter Buy {0}", pair.Symbol);
 
-                    pair = await EngineHelper.AppendCounterMarketData(dbService, counterExchange, pair);
+                    pair = await EngineHelper.AppendCounterMarketData(dbService, counterExchange, pair, includeMarket: false);
 
                     decimal buyPrice = EngineHelper.GetPriceAtVolumeThreshold(exchangeOrder.QuantityFilled, pair.counterBook.asks);
                     decimal buyQuantity = exchangeOrder.QuantityFilled + (exchangeOrder.QuantityFilled * order.CounterExchangeFee);
@@ -290,10 +299,10 @@ namespace BMCore.Engine
                 {
                     Console.WriteLine("Place Counter Sell {0}", pair.Symbol);
 
-                    pair = await EngineHelper.AppendCounterMarketData(dbService, counterExchange, pair);
+                    pair = await EngineHelper.AppendCounterMarketData(dbService, counterExchange, pair, includeMarket: false);
 
                     decimal sellPrice = EngineHelper.GetPriceAtVolumeThreshold(exchangeOrder.QuantityFilled, pair.counterBook.bids);
-                    decimal sellQuantity = exchangeOrder.QuantityFilled + order.CounterBaseWithdrawalFee / sellPrice;
+                    decimal sellQuantity = exchangeOrder.QuantityFilled + (exchangeOrder.QuantityFilled * order.CounterExchangeFee);
 
                     var counterOrder = await EngineHelper.Sell(counterExchange, pair.GetCounterSymbol(), dbService, pair.CounterSymbol, sellQuantity, sellPrice, order.Id, "market");
 
@@ -301,7 +310,11 @@ namespace BMCore.Engine
                     dbService.UpdateOrderStatus(order.Id, "audit", counterQuantityFilled: sellQuantity);
                 }
             }
-            catch(Exception e)
+            catch (ApiException ae)
+            {
+                dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "ProcessCounterOrder", ae, pId);
+            }
+            catch (Exception e)
             {
                 dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "ProcessCounterOrder", e, pId);
             }
@@ -315,9 +328,9 @@ namespace BMCore.Engine
         }
 
 
-        private async Task AuditCompletedOrdersForPair(ArbitragePair pair, int pId)
+        private async Task AuditCompletedOrdersForPair(ArbitragePair pair)
         {
-            foreach(var order in dbService.GetMakerOrdersByStatus("audit", pair.Id))
+            foreach(var order in dbService.GetMakerOrdersByStatus("audit", pair.Id).Where(o => o.BaseExchange == baseExchange.Name && o.CounterExchange == counterExchange.Name))
             {
                 try
                 {
@@ -334,12 +347,13 @@ namespace BMCore.Engine
                         commission = baseOrder.CostProceeds - counterOrder.CostProceeds;
                     }
 
-                    dbService.UpdateOrder(order.Id, baseRate: baseOrder.AvgRate, counterRate: counterOrder.AvgRate, baseCost: baseOrder.CostProceeds, counterCost: counterOrder.CostProceeds, commission: commission, status: "complete");
+                    dbService.UpdateOrder(order.Id, baseRate: baseOrder.AvgRate, counterRate: counterOrder.AvgRate, baseCost: baseOrder.CostProceeds, counterCost: counterOrder.CostProceeds, commission: commission, status: "complete", baseQuantityFilled: baseOrder.QuantityFilled, counterQuantityFilled: counterOrder.QuantityFilled);
 
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
+                    dbService.LogError(this.baseExchange.Name, this.counterExchange.Name, pair.Symbol, "AuditCompletedOrdersForPair", e, -1);
                 }
             }
         }

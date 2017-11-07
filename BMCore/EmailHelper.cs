@@ -16,39 +16,39 @@ namespace BMCore
         //Simple emails do not have HTML content by definition
         public static void SendSimpleMail(string toAddresses, string subject, string body, string smtpAccountPassword, string fromAddress)
         {
-            try
-            {
-                // Validate required parameters
-                if (string.IsNullOrWhiteSpace(toAddresses) || string.IsNullOrWhiteSpace(fromAddress) || string.IsNullOrWhiteSpace(smtpAccountPassword))
-                    return;
+            //try
+            //{
+            //    // Validate required parameters
+            //    if (string.IsNullOrWhiteSpace(toAddresses) || string.IsNullOrWhiteSpace(fromAddress) || string.IsNullOrWhiteSpace(smtpAccountPassword))
+            //        return;
 
-                using (var smtp = new SmtpClient
-                {
-                    Host = gmailHost,
-                    Port = 587,
-                    EnableSsl = true,
-                    DeliveryMethod = SmtpDeliveryMethod.Network,
-                    UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(fromAddress, smtpAccountPassword),
-                    Timeout = 30000
-                })
-                using (MailMessage message = new MailMessage(new MailAddress(fromAddress), new MailAddress(toAddresses))
-                {
-                    Subject = subject,
-                    Body = body
-                })
-                {
-                    // Fixed multiple To addresses
-                    message.To.Clear();
-                    message.To.Add(toAddresses);
+            //    using (var smtp = new SmtpClient
+            //    {
+            //        Host = gmailHost,
+            //        Port = 587,
+            //        EnableSsl = true,
+            //        DeliveryMethod = SmtpDeliveryMethod.Network,
+            //        UseDefaultCredentials = false,
+            //        Credentials = new NetworkCredential(fromAddress, smtpAccountPassword),
+            //        Timeout = 30000
+            //    })
+            //    using (MailMessage message = new MailMessage(new MailAddress(fromAddress), new MailAddress(toAddresses))
+            //    {
+            //        Subject = subject,
+            //        Body = body
+            //    })
+            //    {
+            //        // Fixed multiple To addresses
+            //        message.To.Clear();
+            //        message.To.Add(toAddresses);
 
-                    smtp.Send(message);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
+            //        smtp.Send(message);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine(ex);
+            //}
         }
 
         public static Task SendSimpleMailAsync(string toAddress, string subject,

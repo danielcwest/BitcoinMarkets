@@ -15,6 +15,7 @@ using BMCore.Engine;
 using BMCore.Config;
 using RestEase;
 using GdaxSharp;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -44,23 +45,21 @@ namespace Engine
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
                 var gdax = (Gdax)exchanges["Gdax"];
 
-
-                var marketMaker = new MarketMaker(gdax, hitbtc, dbService);
+                var marketMaker = new MarketMaker(gdax, hitbtc, dbService, arbitrageConfig.Gmail);
                 var reporter = new EngineReporter(gdax, hitbtc, dbService);
 
-                var finish = DateTime.UtcNow.AddDays(1);
-                var current = DateTime.UtcNow;
+                int timeout = 3;
+                if (args.Length > 0)
+                    timeout = int.Parse(args[0]);
 
-                while (current < finish)
+                while (true)
                 {
-                    int pId = dbService.StartEngineProcess("Gdax", "Hitbtc", "marketmaking", new CurrencyConfig());
-                    marketMaker.ResetLimitOrders(pId).Wait();
-                    marketMaker.ProcessOrders().Wait();
-                    dbService.EndEngineProcess(pId, "success");
-                    Console.WriteLine("Complete Sleeping...");
-                    Thread.Sleep(1000 * 10);
+                    EngineHelper.ExecuteMarketPairs(dbService, exchanges, arbitrageConfig.Gmail).Wait();
+                    Console.WriteLine("Complete, sleeping");
+                    Thread.Sleep(1000 * timeout);
                 }
-                Console.WriteLine("Engine Complete...");
+
+               // Console.WriteLine("Engine Complete...");
             }
             catch (Exception e)
             {

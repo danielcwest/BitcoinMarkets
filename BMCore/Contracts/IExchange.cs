@@ -20,10 +20,10 @@ namespace BMCore.Contracts
         Task<ITicker> Ticker(string symbol);
 
         //Authenticated API Endpoints
-        Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal price);
-        Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal price);
-        Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity, decimal price);
-        Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity, decimal price);
+        Task<IAcceptedAction> LimitBuy(string generatedId, string symbol, decimal quantity, decimal price);
+        Task<IAcceptedAction> LimitSell(string generatedId, string symbol, decimal quantity, decimal price);
+        Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity);
+        Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity);
 
         Task CancelOrder(string orderId);
         Task<IEnumerable<string>> CancelOrders(string symbol);

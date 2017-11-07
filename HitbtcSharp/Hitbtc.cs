@@ -71,15 +71,16 @@ namespace HitbtcSharp
             return book;
         }
 
-        public async Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity, decimal price)
+        public async Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity)
         {
 
             var data = new Dictionary<string, object> {
                 {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "buy"},
-                {"quantity", quantity.ToString("#.####")},
-                {"type", "market" }
+                {"quantity", quantity.ToString("#.#")},
+                {"type", "market" },
+                {"timeInForce", "IOC" }
             };
 
             var order = await _hitbtc.PlaceOrder(data);
@@ -87,16 +88,33 @@ namespace HitbtcSharp
             return order;
         }
 
-        public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal price)
+        public async Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity)
         {
+            var data = new Dictionary<string, object> {
+                {"clientOrderId", generatedId},
+                {"symbol", symbol },
+                {"side", "sell"},
+                {"quantity", quantity.ToString("#.#")},
+                {"type", "market" },
+                {"timeInForce", "IOC" }
+            };
 
+            var order = await _hitbtc.PlaceOrder(data);
+
+            return order;
+        }
+
+        public async Task<IAcceptedAction> LimitBuy(string generatedId, string symbol, decimal quantity, decimal price)
+        {
             var data = new Dictionary<string, object> {
                 {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "buy"},
                 {"price", price},
-                {"quantity", quantity.ToString("#.####")},
-                {"type", "limit" }
+                {"quantity", quantity.ToString("#.#")},
+                {"type", "limit" },
+                {"timeInForce", "GTD" },
+                {"expireTime", DateTime.UtcNow.AddSeconds(30) }
             };
 
             var order = await _hitbtc.PlaceOrder(data);
@@ -104,31 +122,19 @@ namespace HitbtcSharp
             return order;
         }
 
-        public async Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity, decimal price)
+
+
+        public async Task<IAcceptedAction> LimitSell(string generatedId, string symbol, decimal quantity, decimal price)
         {
             var data = new Dictionary<string, object> {
                 {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "sell"},
                 {"price", price},
-                {"quantity", quantity.ToString("#.####")},
-                {"type", "market" }
-            };
-
-            var order = await _hitbtc.PlaceOrder(data);
-
-            return order;
-        }
-
-        public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal price)
-        {
-            var data = new Dictionary<string, object> {
-                {"clientOrderId", generatedId},
-                {"symbol", symbol },
-                {"side", "sell"},
-                {"price", price},
-                {"quantity", quantity.ToString("#.####")},
-                {"type", "limit" }
+                {"quantity", quantity.ToString("#.#")},
+                {"type", "limit" },
+                {"timeInForce", "GTD" },
+                {"expireTime", DateTime.UtcNow.AddSeconds(30) }
             };
 
             var order = await _hitbtc.PlaceOrder(data);

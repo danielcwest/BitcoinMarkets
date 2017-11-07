@@ -48,22 +48,26 @@ namespace HitbtcSharp.Models
             this.Uuid = order.Uuid.ToString();
             this.Exchange = "Hitbtc";
             this.Symbol = order.symbol;
-            this.Quantity = trades.Sum(t => t.quantity);
             this.QuantityFilled = order.cumQuantity.HasValue ? order.cumQuantity.Value : 0m;
 
-            this.AvgRate = trades.Average(t => t.price);
-            this.Fees = trades.Sum(t => t.fee);
-
-            //this.Cost = trades.Sum(t => (t.quantity * t.price) + t.fee);
-
-            if (order.side == "buy")
+            if (trades.Any())
             {
-                this.CostProceeds = trades.Sum(t => (t.quantity * t.price) + t.fee);
+                this.Quantity = trades.Sum(t => t.quantity);
+                this.AvgRate = trades.Average(t => t.price);
+                this.Fees = trades.Sum(t => t.fee);
+
+                //this.Cost = trades.Sum(t => (t.quantity * t.price) + t.fee);
+
+                if (order.side == "buy")
+                {
+                    this.CostProceeds = trades.Sum(t => (t.quantity * t.price) + t.fee);
+                }
+                else
+                {
+                    this.CostProceeds = trades.Sum(t => (t.quantity * t.price) - t.fee);
+                }
             }
-            else
-            {
-                this.CostProceeds = trades.Sum(t => (t.quantity * t.price) - t.fee);
-            }
+
 
             this.IsOpen = order.status == "new" || order.status == "partiallyFilled";
             this.IsFilled = order.status == "filled";

@@ -25,6 +25,10 @@ namespace BMCore.DbService
         public decimal AskSpread;
         public decimal BidSpread;
         public decimal MarketSpread;
+        public int DecimalPlaces;
+        public decimal AskMultiplier;
+        public decimal BidMultiplier;
+        public decimal Increment;
     }
 
     public class DbTransaction

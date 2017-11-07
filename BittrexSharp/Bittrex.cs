@@ -70,14 +70,14 @@ namespace BittrexSharp
             return ob;
         }
 
-        public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate)
+        public async Task<IAcceptedAction> LimitBuy(string generatedId, string symbol, decimal quantity, decimal rate)
         {
             if (!symbol.Contains("-"))
                 symbol = GetMarketNameFromSymbol(symbol);
             return await _bittrex.BuyLimit(symbol, quantity, rate);
         }
 
-        public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate)
+        public async Task<IAcceptedAction> LimitSell(string generatedId, string symbol, decimal quantity, decimal rate)
         {
             if (!symbol.Contains("-"))
                 symbol = GetMarketNameFromSymbol(symbol);
@@ -154,12 +154,12 @@ namespace BittrexSharp
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity, decimal price)
+        public Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity, decimal price)
+        public Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity)
         {
             throw new NotImplementedException();
         }

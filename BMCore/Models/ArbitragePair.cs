@@ -36,7 +36,10 @@ namespace BMCore.Models
         public decimal AskSpread { get; set; }
         public decimal BidSpread { get; set; }
         public decimal MarketSpread { get; set; }
-
+        public int DecimalPlaces { get; set; }
+        public decimal AskMultiplier { get; set; }
+        public decimal BidMultiplier { get; set; }
+        public decimal Increment { get; set; }
         //Market Data
         public ITicker baseMarket { get; set; }
         public OrderBook baseBook { get; set; }
@@ -64,6 +67,10 @@ namespace BMCore.Models
             this.AskSpread = dbPair.AskSpread;
             this.BidSpread = dbPair.BidSpread;
             this.MarketSpread = dbPair.MarketSpread;
+            this.DecimalPlaces = dbPair.DecimalPlaces;
+            this.AskMultiplier = dbPair.AskMultiplier;
+            this.BidMultiplier = dbPair.BidMultiplier;
+            this.Increment = dbPair.Increment;
         }
 
         public ISymbol GetBaseSymbol()

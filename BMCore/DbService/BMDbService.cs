@@ -32,17 +32,7 @@ namespace BMCore.DbService
 
             try
             {
-                DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertError", 15,
-                                new SqlParameter[]
-                                {
-                    new SqlParameter { ParameterName = "@baseExchange", Value = baseX },
-                    new SqlParameter { ParameterName = "@arbExchange", Value = arbX },
-                    new SqlParameter { ParameterName = "@symbol", Value = symbol },
-                    new SqlParameter { ParameterName = "@method", Value = method },
-                    new SqlParameter { ParameterName = "@message", Value = message},
-                    new SqlParameter { ParameterName = "@exception", Value = stackTrace},
-                    new SqlParameter { ParameterName = "@processId", Value = processId}
-                                });
+                LogError(baseX, arbX, symbol, method, message, stackTrace);
 
                 if (gmail != null)
                     EmailHelper.SendSimpleMailAsync(gmail, string.Format("Error: {0}", ex.Message), string.Format("{0} - {1} {2} {3}", baseX, arbX, Environment.NewLine, stackTrace));
@@ -53,13 +43,23 @@ namespace BMCore.DbService
             }
         }
 
-        public void LogError(string baseX, string arbX, string symbol, string method, ApiException ex, int processId = -1)
+        public void LogError(string baseX, string arbX, string symbol, string method, ApiException aex, int processId = -1)
         {
-            string message = ex.Message;
-            string stackTrace = ex.StackTrace;
-
+            string message = aex.Message;
+            string content = aex.Content;
+           
             try
             {
+                LogError(baseX, arbX, symbol, method, message, content);
+            }
+            catch (Exception)
+            {
+                //fail silently
+            }
+        }
+
+        public void LogError(string baseX, string arbX, string symbol, string method, string message, string content, int processId = -1)
+        {
                 DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertError", 15,
                                 new SqlParameter[]
                                 {
@@ -68,20 +68,10 @@ namespace BMCore.DbService
                     new SqlParameter { ParameterName = "@symbol", Value = symbol },
                     new SqlParameter { ParameterName = "@method", Value = method },
                     new SqlParameter { ParameterName = "@message", Value = message},
-                    new SqlParameter { ParameterName = "@exception", Value = stackTrace},
+                    new SqlParameter { ParameterName = "@exception", Value = content},
                     new SqlParameter { ParameterName = "@processId", Value = processId}
                                 });
-
-                if (gmail != null)
-                    EmailHelper.SendSimpleMailAsync(gmail, string.Format("Error: {0}", ex.Message), string.Format("{0} - {1} {2} {3} {2} {4}", baseX, arbX, Environment.NewLine, ex.Content, stackTrace));
-            }
-            catch (Exception)
-            {
-                //fail silently
-            }
         }
-
-
 
         public int StartEngineProcess(string baseExchange, string arbExchange, string runType, CurrencyConfig baseCurrency)
         {

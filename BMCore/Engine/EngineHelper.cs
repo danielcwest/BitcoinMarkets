@@ -14,62 +14,28 @@ namespace BMCore.Engine
     {
 
         #region Basic Arbitrage
-        public static async Task LogOpportunities(BMDbService dbService, Dictionary<string, IExchange> exchanges)
-        {
-            int pId = -1;
 
-            var groups = dbService.GetArbitragePairs("log").GroupBy(g => new { g.BaseExchange, g.CounterExchange }).Select(g => new ArbitrageGroup()
+
+        public static async Task ExecuteMarketPairs(BMDbService dbService, Dictionary<string, IExchange> exchanges, GmailConfig gmail)
+        {
+            var groups = dbService.GetArbitragePairs("market").GroupBy(g => new { g.BaseExchange, g.CounterExchange }).Select(g => new ArbitrageGroup()
             {
                 BaseExchange = g.Key.BaseExchange,
                 CounterExchange = g.Key.CounterExchange,
                 Markets = g.Select(m => new ArbitragePair(m))
             });
 
+            var tasks = new List<Task>();
             foreach (var group in groups)
             {
-                var engine = new ArbitrageEngine(exchanges[group.BaseExchange], exchanges[group.CounterExchange], dbService);
-                try
-                {
-                    pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "opportunities", new CurrencyConfig());
-                    await engine.LogOpportunities(group.Markets, pId);
-                    dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
-                }
-                catch (Exception e)
-                {
-                    dbService.LogError(group.BaseExchange, group.CounterExchange, "", "Main", e, pId);
-                    if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
-                }
+                var marketMaker = new MarketMaker(exchanges[group.BaseExchange], exchanges[group.CounterExchange], dbService, gmail);
+
+                tasks.Add(Task.Run(() => marketMaker.ResetLimitOrders(group.Markets)));
+                tasks.Add(Task.Run(() => marketMaker.ProcessOrders(group.Markets)));
+                tasks.Add(Task.Run(() => marketMaker.AuditCompletedOrders(group.Markets)));
             }
-        }
 
-        public static async Task ExecuteTradePairs(BMDbService dbService, Dictionary<string, IExchange> exchanges)
-        {
-            int pId = -1;
-
-            var groups = dbService.GetArbitragePairs("trade").GroupBy(g => new { g.BaseExchange, g.CounterExchange }).Select(g => new ArbitrageGroup()
-            {
-                BaseExchange = g.Key.BaseExchange,
-                CounterExchange = g.Key.CounterExchange,
-                Markets = g.Select(m => new ArbitragePair(m))
-            });
-
-            foreach (var group in groups)
-            {
-                var engine = new ArbitrageEngine(exchanges[group.BaseExchange], exchanges[group.CounterExchange], dbService);
-
-                try
-                {
-                    pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "trade", new CurrencyConfig());
-                    await engine.ExecuteTrades(group.Markets, pId);
-                    dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
-
-                }
-                catch (Exception e)
-                {
-                    dbService.LogError(group.BaseExchange, group.CounterExchange, "", "Main", e, pId);
-                    if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
-                }
-            }
+            await Task.WhenAll(tasks);
         }
 
         public static async Task CheckExchangeBalances(BMDbService dbService, Dictionary<string, IExchange> exchanges)
@@ -271,76 +237,18 @@ namespace BMCore.Engine
 
         #region Market Making
 
-        public static async Task LogMarketMakingPairs(BMDbService dbService, Dictionary<string, IExchange> exchanges)
-        {
-            int pId = -1;
-
-            var groups = dbService.GetArbitragePairs("log").GroupBy(g => new { g.BaseExchange, g.CounterExchange }).Select(g => new ArbitrageGroup()
-            {
-                BaseExchange = g.Key.BaseExchange,
-                CounterExchange = g.Key.CounterExchange,
-                Markets = g.Select(m => new ArbitragePair(m))
-            });
-
-            foreach (var group in groups)
-            {
-                var engine = new MarketMaker(exchanges[group.BaseExchange], exchanges[group.CounterExchange], dbService);
-                try
-                {
-                    pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "markets", new CurrencyConfig());
-                    await engine.LogMarketMakingPairs(group.Markets, pId);
-                    dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
-                }
-                catch (Exception e)
-                {
-                    dbService.LogError(group.BaseExchange, group.CounterExchange, "", "Main", e, pId);
-                    if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
-                }
-            }
-        }
-
-        public static async Task ExecuteMarketMakingPairs(BMDbService dbService, Dictionary<string, IExchange> exchanges)
-        {
-            int pId = -1;
-
-            var groups = dbService.GetArbitragePairs("trade").GroupBy(g => new { g.BaseExchange, g.CounterExchange }).Select(g => new ArbitrageGroup()
-            {
-                BaseExchange = g.Key.BaseExchange,
-                CounterExchange = g.Key.CounterExchange,
-                Markets = g.Select(m => new ArbitragePair(m))
-            });
-
-            foreach (var group in groups)
-            {
-                var engine = new MarketMaker(exchanges[group.BaseExchange], exchanges[group.CounterExchange], dbService);
-
-                try
-                {
-                    pId = dbService.StartEngineProcess(group.BaseExchange, group.CounterExchange, "trade", new CurrencyConfig());
-                    await engine.ResetLimitOrders(group.Markets, pId);
-                    dbService.EndEngineProcess(pId, "success", new { MarketCount = group.Markets.Count() });
-
-                }
-                catch (Exception e)
-                {
-                    dbService.LogError(group.BaseExchange, group.CounterExchange, "", "Main", e, pId);
-                    if (pId > 0) dbService.EndEngineProcess(pId, "error", e);
-                }
-            }
-        }
-
         #endregion
 
         #region Trading Helpers
 
         public static async Task<IAcceptedAction> Sell(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, int txId, string type = "limit")
         {
-            return await Trade(exchange, market, dbService, symbol, quantity, price, "sell", txId);
+            return await Trade(exchange, market, dbService, symbol, quantity, price, "sell", txId, type);
         }
 
         public static async Task<IAcceptedAction> Buy(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, int txId, string type = "limit")
         {
-            return await Trade(exchange, market, dbService, symbol, quantity, price, "buy", txId);
+            return await Trade(exchange, market, dbService, symbol, quantity, price, "buy", txId, type);
         }
 
         public static async Task<IAcceptedAction> Trade(IExchange exchange, ISymbol market, IDbService dbService, string symbol, decimal quantity, decimal price, string side, int txId, string type = "limit")
@@ -348,11 +256,11 @@ namespace BMCore.Engine
             IAcceptedAction tradeResult;
             if (side == "buy")
             {
-                tradeResult = type == "limit" ? await exchange.Buy(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price) : await exchange.MarketBuy(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
+                tradeResult = type == "limit" ? await exchange.LimitBuy(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price) : await exchange.MarketBuy(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity);
             }
             else
             {
-                tradeResult = type == "limit" ? await exchange.Sell(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price) : await exchange.MarketSell(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price);
+                tradeResult = type == "limit" ? await exchange.LimitSell(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity, price) : await exchange.MarketSell(txId.ToString().PadLeft(8, '0'), market.ExchangeSymbol, quantity);
             }
             return tradeResult;
         }
@@ -396,12 +304,15 @@ namespace BMCore.Engine
             return pair;
         }
 
-        public static async Task<ArbitragePair> AppendCounterMarketData(IDbService dbService, IExchange counterExchange, ArbitragePair pair)
+        public static async Task<ArbitragePair> AppendCounterMarketData(IDbService dbService, IExchange counterExchange, ArbitragePair pair, bool includeMarket = true, bool includeBook = true)
         {
-            pair.counterMarket = await counterExchange.Ticker(pair.Symbol);
-            pair.counterBook = await counterExchange.OrderBook(pair.Symbol);
+            if(includeMarket)
+                pair.counterMarket = await counterExchange.Ticker(pair.Symbol);
 
-            if (pair.counterMarket == null || pair.counterBook == null)
+            if(includeBook)
+                pair.counterBook = await counterExchange.OrderBook(pair.Symbol);
+
+            if ((pair.counterMarket == null && includeMarket) || (pair.counterBook == null && includeBook))
             {
                 var ex = new Exception("No Market Data");
                 dbService.LogError("", counterExchange.Name, pair.Symbol, "AppendCounterMarketData", ex, pair.Id);

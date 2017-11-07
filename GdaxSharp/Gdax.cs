@@ -119,12 +119,12 @@ namespace GdaxSharp
             return accounts.Select(a => new GdaxBalance(a));
         }
 
-        public async Task<IDepositAddress> GetDepositAddress(string currency)
+        public Task<IDepositAddress> GetDepositAddress(string currency)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IWithdrawal> GetWithdrawal(string uuid)
+        public Task<IWithdrawal> GetWithdrawal(string uuid)
         {
             throw new NotImplementedException();
         }
@@ -132,7 +132,59 @@ namespace GdaxSharp
 
         #region Trade
 
-        public async Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal price)
+
+        public async Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity)
+        {
+            var productId = symbol;
+            if (!symbol.Contains("-"))
+                productId = GetProductIdFromSymbol(symbol);
+
+            double ts = DateTime.UtcNow.ToUnixTimestamp();
+            string httpMethod = "POST";
+            string requestUrl = "/orders";
+
+            var data = new
+            {
+                type = "market",
+                side = "buy",
+                product_id = productId,
+                size = quantity.ToString("#.#")
+            };
+
+            string json = JsonConvert.SerializeObject(data);
+
+            string sig = ComputeSignature(ts, httpMethod, requestUrl, json);
+
+            var order = await _gdax.NewOrder(sig, ts, data);
+            return new Order(order);
+        }
+
+        public async Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity)
+        {
+            var productId = symbol;
+            if (!symbol.Contains("-"))
+                productId = GetProductIdFromSymbol(symbol);
+
+            double ts = DateTime.UtcNow.ToUnixTimestamp();
+            string httpMethod = "POST";
+            string requestUrl = "/orders";
+
+            var data = new
+            {
+                type = "market",
+                side = "sell",
+                product_id = productId,
+                size = quantity.ToString("#.#")
+            };
+
+            string json = JsonConvert.SerializeObject(data);
+            string sig = ComputeSignature(ts, httpMethod, requestUrl, json);
+
+            var order = await _gdax.NewOrder(sig, ts, data);
+            return new Order(order);
+        }
+
+        public async Task<IAcceptedAction> LimitBuy(string generatedId, string symbol, decimal quantity, decimal price)
         {
             var productId = symbol;
             if (!symbol.Contains("-"))
@@ -147,8 +199,8 @@ namespace GdaxSharp
                 type = "limit",
                 side = "buy",
                 product_id = productId,
-                price = price.ToString("#.####"),
-                size = quantity.ToString("#.####"),
+                price = price,
+                size = quantity.ToString("#.#"),
                 post_only = true,
                 time_in_force = "GTT",
                 cancel_after = "min"
@@ -162,7 +214,7 @@ namespace GdaxSharp
             return new Order(order);
         }
 
-        public async Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal price)
+        public async Task<IAcceptedAction> LimitSell(string generatedId, string symbol, decimal quantity, decimal price)
         {
             var productId = symbol;
             if (!symbol.Contains("-"))
@@ -177,8 +229,8 @@ namespace GdaxSharp
                 type = "limit",
                 side = "sell",
                 product_id = productId,
-                price = price.ToString("#.####"),
-                size = quantity.ToString("#.####"),
+                price = price,
+                size = quantity.ToString("#.#"),
                 post_only = true,
                 time_in_force = "GTT",
                 cancel_after = "min"
@@ -289,16 +341,6 @@ namespace GdaxSharp
             {
                 return null;
             }
-        }
-
-        public Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity, decimal price)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity, decimal price)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion

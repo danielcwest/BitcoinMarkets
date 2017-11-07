@@ -16,7 +16,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DebugEngine", "DebugEngine\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HitbtcSharp", "HitbtcSharp\HitbtcSharp.csproj", "{7B635ADC-1B9A-45DF-A05A-2170668DCDC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdaxSharp", "GdaxSharp\GdaxSharp.csproj", "{51F03469-DE68-4218-B7BE-13D8EA8ADE37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GdaxSharp", "GdaxSharp\GdaxSharp.csproj", "{51F03469-DE68-4218-B7BE-13D8EA8ADE37}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

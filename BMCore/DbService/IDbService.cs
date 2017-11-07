@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BMCore.Config;
+using RestEase;
 
 namespace BMCore.DbService
 {
@@ -8,6 +9,8 @@ namespace BMCore.DbService
     public interface IDbService
     {
         void LogError(string baseX, string arbX, string symbol, string method, Exception ex, int processId = -1);
+        void LogError(string baseX, string arbX, string symbol, string method, ApiException ex, int processId = -1);
+
         int StartEngineProcess(string baseExchange, string arbExchange, string runType, CurrencyConfig baseCurrency);
         void EndEngineProcess(int id, string resultStatus, object payload = null);
 

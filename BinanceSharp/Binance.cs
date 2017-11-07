@@ -90,12 +90,12 @@ namespace BinanceSharp
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> Buy(string generatedId, string symbol, decimal quantity, decimal rate)
+        public Task<IAcceptedAction> LimitBuy(string generatedId, string symbol, decimal quantity, decimal rate)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> Sell(string generatedId, string symbol, decimal quantity, decimal rate)
+        public Task<IAcceptedAction> LimitSell(string generatedId, string symbol, decimal quantity, decimal rate)
         {
             throw new NotImplementedException();
         }
@@ -116,12 +116,12 @@ namespace BinanceSharp
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity, decimal price)
+        public Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity, decimal price)
+        public Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity)
         {
             throw new NotImplementedException();
         }

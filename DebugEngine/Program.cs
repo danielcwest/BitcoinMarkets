@@ -2,6 +2,7 @@
 using BMCore.Config;
 using BMCore.DbService;
 using BMCore.Engine;
+using BMCore.Models;
 using Engine;
 using GdaxSharp;
 using HitbtcSharp;
@@ -12,7 +13,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace DebugEngine
 {
@@ -38,17 +42,9 @@ namespace DebugEngine
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
                 var gdax = (Gdax)exchanges["Gdax"];
 
-                var marketMaker = new MarketMaker(gdax, hitbtc, dbService);
+                var marketMaker = new MarketMaker(hitbtc, gdax, dbService, arbitrageConfig.Gmail);
 
-                marketMaker.AuditCompletedOrders(-1).Wait();
-
-                //var reporter = new EngineReporter(gdax, hitbtc, dbService);
-
-
-                //int pId = dbService.StartEngineProcess("Gdax", "Hitbtc", "marketmaking", new CurrencyConfig());
-                //marketMaker.ResetLimitOrders(-1).Wait();
-                //marketMaker.ProcessOrders().Wait();
-                //dbService.EndEngineProcess(pId, "success");
+                var result = hitbtc.LimitSell("123123123123", "ETHBTC", 1, 0.1m).Result;
 
                 Console.WriteLine("Complete");
             }
