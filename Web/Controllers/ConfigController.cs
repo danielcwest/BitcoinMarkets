@@ -5,8 +5,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using BMCore.Models;
-using BMCore.Config;
+using Core.Models;
+using Core.Config;
 
 namespace Web.Controllers
 {

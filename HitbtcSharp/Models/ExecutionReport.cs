@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using BMCore.Contracts;
+using Core.Contracts;
 using Newtonsoft.Json;
 
 namespace HitbtcSharp.Models

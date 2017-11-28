@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using BMCore.DbService;
-using BMCore.Models;
+using Core.DbService;
+using Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using BMCore.Config;
+using Core.Config;
 
 namespace Web.Controllers
 {

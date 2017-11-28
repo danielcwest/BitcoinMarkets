@@ -7,10 +7,10 @@ using HitbtcSharp;
 using HitbtcSharp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using BMCore.Models;
+using Core.Models;
 using RestEase;
-using BMCore.Contracts;
-using BMCore.Config;
+using Core.Contracts;
+using Core.Config;
 
 namespace Web.Controllers
 {

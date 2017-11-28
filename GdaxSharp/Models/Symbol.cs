@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using BMCore.Contracts;
+using Core.Contracts;
 
 namespace GdaxSharp.Models
 {

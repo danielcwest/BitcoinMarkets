@@ -16,14 +16,13 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="NLog" Version="4.4.12" />
     <PackageReference Include="RestEase" Version="1.4.4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BittrexSharp\BittrexSharp.csproj" />
     <ProjectReference Include="..\HitbtcSharp\HitbtcSharp.csproj" />
     <ProjectReference Include="..\BinanceSharp\BinanceSharp.csproj" />
-    <ProjectReference Include="..\BMCore\BMCore.csproj" />
+	<ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
   <ItemGroup>
  <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="2.0.0" />

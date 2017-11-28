@@ -1,4 +1,4 @@
-﻿using BMCore.Contracts;
+﻿using Core.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -55,6 +55,21 @@ namespace GdaxSharp.Models
             ExchangeStatus = o.status;
             Fees = o.fill_fees;
             AvgRate = o.price;
+        }
+
+        public Order(SocketOrder order)
+        {
+            this.Uuid = order.order_id;
+            this.Exchange = "Gdax";
+            this.Symbol = order.product_id;
+            this.Quantity = order.size;
+            this.QuantityFilled = 0m;
+            this.CostProceeds = 0m;
+            this.AvgRate = 0m;
+            this.Fees = 0m;
+            this.Side = order.side;
+            this.IsFilled = false;
+            this.IsClosed =true;
         }
     }
 }

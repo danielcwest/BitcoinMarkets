@@ -1,4 +1,4 @@
-﻿using BMCore.Contracts;
+﻿using Core.Contracts;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

@@ -16,4 +16,12 @@ namespace HitbtcSharp.Models
         public List<BookEntry> ask { get; set; }
         public List<BookEntry> bid { get; set; }
     }
+
+    public class RpcOrderbookResponse
+    {
+        public List<BookEntry> ask { get; set; }
+        public List<BookEntry> bid { get; set; }
+        public string symbol { get; set; }
+        public long sequence { get; set; }
+    }
 }

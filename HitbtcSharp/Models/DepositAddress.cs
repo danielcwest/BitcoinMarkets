@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using BMCore.Contracts;
+using Core.Contracts;
 
-namespace BMCore.Models
+namespace Core.Models
 {
     public class DepositAddress : IDepositAddress
     {

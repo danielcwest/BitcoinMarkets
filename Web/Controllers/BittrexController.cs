@@ -7,9 +7,9 @@ using BittrexSharp;
 using BittrexSharp.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using BMCore.Models;
-using BMCore.Contracts;
-using BMCore.Config;
+using Core.Models;
+using Core.Contracts;
+using Core.Config;
 
 namespace Web.Controllers
 {

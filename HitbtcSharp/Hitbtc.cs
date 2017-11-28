@@ -2,17 +2,20 @@
 using RestEase;
 using System.Collections.Generic;
 using System.Linq;
-using BMCore.Models;
+using Core.Models;
 using System.Threading.Tasks;
 using HitbtcSharp.Models;
-using BMCore.Contracts;
-using BMCore;
+using Core.Contracts;
+using Core;
 using System.Security.Cryptography;
 using System.Text;
 using System.Net.Http.Headers;
-using BMCore.Config;
+using Core.Config;
 using System.IO;
 using Newtonsoft.Json;
+using HitbtcSharp.RPC;
+using Core.Engine;
+using NLog;
 
 namespace HitbtcSharp
 {
@@ -20,6 +23,9 @@ namespace HitbtcSharp
     {
         IHitbtcApi _hitbtc;
         ExchangeConfig _config;
+        RpcClient client;
+        OrderBookCache cache;
+
         private string name;
         public string Name
         {
@@ -28,6 +34,8 @@ namespace HitbtcSharp
                 return name;
             }
         }
+
+        NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
         public Hitbtc(ExchangeConfig config)
         {
@@ -48,7 +56,7 @@ namespace HitbtcSharp
         public async Task<IEnumerable<ITicker>> MarketSummaries()
         {
             var summaries = await _hitbtc.GetTickers();
-            return summaries.Where(s => s.symbol.EndsWith("BTC") || s.symbol.EndsWith("ETH")).Select(s => new Market(s.symbol, s));
+            return summaries.Select(s => new Market(s.symbol, s));
         }
 
         public async Task<ITicker> Ticker(string symbol)
@@ -71,14 +79,13 @@ namespace HitbtcSharp
             return book;
         }
 
-        public async Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity)
+        public async Task<IAcceptedAction> MarketBuy(string symbol, decimal quantity)
         {
 
             var data = new Dictionary<string, object> {
-                {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "buy"},
-                {"quantity", quantity.ToString("#.#")},
+                {"quantity", quantity.ToString("#.#####")},
                 {"type", "market" },
                 {"timeInForce", "IOC" }
             };
@@ -88,13 +95,12 @@ namespace HitbtcSharp
             return order;
         }
 
-        public async Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity)
+        public async Task<IAcceptedAction> MarketSell(string symbol, decimal quantity)
         {
             var data = new Dictionary<string, object> {
-                {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "sell"},
-                {"quantity", quantity.ToString("#.#")},
+                {"quantity", quantity.ToString("#.#####")},
                 {"type", "market" },
                 {"timeInForce", "IOC" }
             };
@@ -104,10 +110,9 @@ namespace HitbtcSharp
             return order;
         }
 
-        public async Task<IAcceptedAction> LimitBuy(string generatedId, string symbol, decimal quantity, decimal price)
+        public async Task<IAcceptedAction> LimitBuy(string symbol, decimal quantity, decimal price)
         {
             var data = new Dictionary<string, object> {
-                {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "buy"},
                 {"price", price},
@@ -124,10 +129,9 @@ namespace HitbtcSharp
 
 
 
-        public async Task<IAcceptedAction> LimitSell(string generatedId, string symbol, decimal quantity, decimal price)
+        public async Task<IAcceptedAction> LimitSell(string symbol, decimal quantity, decimal price)
         {
             var data = new Dictionary<string, object> {
-                {"clientOrderId", generatedId},
                 {"symbol", symbol },
                 {"side", "sell"},
                 {"price", price},
@@ -147,15 +151,23 @@ namespace HitbtcSharp
             await _hitbtc.CancelOrder(orderId);
         }
 
-        public async Task<IOrder> CheckOrder(string orderId)
+        public async Task<IOrder> CheckOrder(string orderId, string symbol = "")
         {
-            string dateStr = DateTime.UtcNow.AddDays(-3).ToString("o");
+            string dateStr = DateTime.UtcNow.AddHours(-1).ToString("o");
             var orders = await _hitbtc.GetOrdersByDate(dateStr);
             var order = orders.Where(o => o.Uuid == orderId).FirstOrDefault();
 
-            var trades = await GetTradesForOrder(order.symbol, order.Uuid);
+            if(order != null)
+            {
+                var trades = await GetTradesForOrder(order.symbol, order.Uuid);
 
-            return new Order(order, trades);
+                return new Order(order, trades);
+            }
+            else
+            {
+                return null;
+            }
+
         }
 
         //Hitbtc requires a transfer from trading to main before we can withdrawal
@@ -309,6 +321,43 @@ namespace HitbtcSharp
         {
            var orders = await _hitbtc.CancelOrders(symbol);
             return orders.Select(o => o.Uuid);
+        }
+
+        public async Task<IAcceptedAction> FillOrKill(string side, string symbol, decimal quantity, decimal price)
+        {
+            var data = new Dictionary<string, object> {
+                {"symbol", symbol },
+                {"side", side},
+                {"price", price},
+                {"quantity", quantity.ToString("#.####")},
+                {"type", "limit" },
+                {"timeInForce", "FOK" }
+            };
+
+            var order = await _hitbtc.PlaceOrder(data);
+
+            return order;
+        }
+
+        public async Task<IAcceptedAction> ImmediateOrCancel(string side, string symbol, decimal quantity, decimal price)
+        {
+            var data = new Dictionary<string, object> {
+                {"symbol", symbol },
+                {"side", side},
+                {"price", price},
+                {"quantity", quantity.ToString("#.####")},
+                {"type", "limit" },
+                {"timeInForce", "IOC" }
+            };
+
+            var order = await _hitbtc.PlaceOrder(data);
+
+            return order;
+        }
+
+        public ISocketExchange GetSocket()
+        {
+            return new HitbtcSocket(_config);
         }
     }
 }

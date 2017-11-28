@@ -4,18 +4,19 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
-using BMCore.Contracts;
+using Core.Contracts;
 using BinanceSharp;
 using BittrexSharp;
 using HitbtcSharp;
 using System.Linq;
-using BMCore.Models;
-using BMCore.DbService;
-using BMCore.Engine;
-using BMCore.Config;
+using Core.Models;
+using Core.DbService;
+using Core.Engine;
+using Core.Config;
 using RestEase;
 using GdaxSharp;
 using System.Threading.Tasks;
+using NLog;
 
 namespace Engine
 {
@@ -23,11 +24,14 @@ namespace Engine
     {
         static void Main(string[] args)
         {
+            NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
+            // Create the token source.
+            var masterToken = new CancellationTokenSource();
+
             try
             {
                 //dotnet publish -c Release -r win10-x64
-
-                Console.WriteLine("Starting Engine ...");
 
                 string configFile = "appsettings.json";
 
@@ -39,31 +43,20 @@ namespace Engine
                 var arbitrageConfig = new ArbitrageConfig();
                 configuration.GetSection("ArbitrageConfig").Bind(arbitrageConfig);
 
-                var dbService = new BMDbService(configuration.GetValue<string>("SqlConnectionString"), arbitrageConfig.Gmail);
+                var dbService = new BMDbService(configuration.GetValue<string>("LocalSqlConnectionString"), arbitrageConfig.Gmail);
+
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
 
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
-                var gdax = (Gdax)exchanges["Gdax"];
+                var binance = (Binance)exchanges["Binance"];
 
-                var marketMaker = new MarketMaker(gdax, hitbtc, dbService, arbitrageConfig.Gmail);
-                var reporter = new EngineReporter(gdax, hitbtc, dbService);
+                var engine = new ArbitrageEngine(hitbtc, binance, dbService, arbitrageConfig.Gmail);
 
-                int timeout = 3;
-                if (args.Length > 0)
-                    timeout = int.Parse(args[0]);
-
-                while (true)
-                {
-                    EngineHelper.ExecuteMarketPairs(dbService, exchanges, arbitrageConfig.Gmail).Wait();
-                    Console.WriteLine("Complete, sleeping");
-                    Thread.Sleep(1000 * timeout);
-                }
-
-               // Console.WriteLine("Engine Complete...");
+                engine.StartEngine(masterToken.Token, 60);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                logger.Error(e);
             }
         }
 

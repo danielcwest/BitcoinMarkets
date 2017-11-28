@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BMCore.Util;
-using BMCore.Contracts;
+using Core.Util;
+using Core.Contracts;
 using Newtonsoft.Json;
 
 namespace GdaxSharp.Models

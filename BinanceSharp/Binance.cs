@@ -3,11 +3,13 @@ using System.Threading.Tasks;
 using BinanceSharp.Models;
 using System.Collections.Generic;
 using RestEase;
-using BMCore.Models;
+using Core.Models;
 using System.Linq;
-using BMCore.Contracts;
-using BMCore;
-using BMCore.Config;
+using Core.Contracts;
+using Core;
+using Core.Config;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace BinanceSharp
 {
@@ -15,8 +17,10 @@ namespace BinanceSharp
     public class Binance : IExchange
     {
         IBinanceApi _binance;
+        ExchangeConfig _config;
 
         private string name;
+
         public string Name
         {
             get
@@ -27,7 +31,8 @@ namespace BinanceSharp
 
         public Binance(ExchangeConfig config)
         {
-            _binance = RestClient.For<IBinanceApi>("https://www.binance.com");
+            _binance = RestClient.For<IBinanceApi>("https://api.binance.com");
+            _config = config;
             name = config.Name;
         }
 
@@ -70,14 +75,49 @@ namespace BinanceSharp
             return new Market(symbol, ticker);
         }
 
+        public async Task<ListenKey> GetUserDataStream()
+        {
+            return await _binance.UserDataStream(_config.ApiKey);
+        }
+
         public Task CancelOrder(string orderId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IOrder> CheckOrder(string uuid)
+        public async Task<IOrder> CheckOrder(string uuid, string symbol)
         {
-            throw new NotImplementedException();
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string totalParams = string.Format("symbol={0}&orderId={1}&timestamp={2}", symbol, uuid, timestamp);
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"symbol", symbol },
+                {"orderId", uuid },               
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+            var order = await _binance.GetOrder(_config.ApiKey, data);
+
+            var trades = await GetTrades(symbol);
+
+            return new Order(order, trades.Where(t => t.time == order.time));
+        }
+
+        public async Task<IEnumerable<BinanceTrade>> GetTrades(string symbol)
+        {
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string totalParams = string.Format("symbol={0}&timestamp={1}", symbol, timestamp);
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"symbol", symbol },
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+            return await _binance.GetTrades(_config.ApiKey, data);
         }
 
         public Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
@@ -90,14 +130,14 @@ namespace BinanceSharp
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> LimitBuy(string generatedId, string symbol, decimal quantity, decimal rate)
+        public async Task<IAcceptedAction> LimitBuy(string symbol, decimal quantity, decimal rate)
         {
-            throw new NotImplementedException();
+            return await NewLimitOrder("buy", symbol, quantity, rate, "GTC");
         }
 
-        public Task<IAcceptedAction> LimitSell(string generatedId, string symbol, decimal quantity, decimal rate)
+        public async Task<IAcceptedAction> LimitSell(string symbol, decimal quantity, decimal rate)
         {
-            throw new NotImplementedException();
+            return await NewLimitOrder("sell", symbol, quantity, rate, "GTC");
         }
 
         public Task<IWithdrawal> GetWithdrawal(string uuid)
@@ -107,8 +147,18 @@ namespace BinanceSharp
 
         public async Task<IEnumerable<ICurrencyBalance>> GetBalances()
         {
-            var res = new List<BiBalance>();
-            return await Task.FromResult(res);
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string totalParams = string.Format("timestamp={0}", timestamp);
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+            var account = await _binance.GetAccount(_config.ApiKey, data);
+
+            return account.balances;
         }
 
         Task<IEnumerable<string>> IExchange.CancelOrders(string symbol)
@@ -116,14 +166,78 @@ namespace BinanceSharp
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity)
+        public async Task<IAcceptedAction> MarketBuy(string symbol, decimal quantity)
+        {
+            return await NewMarketOrder("buy", symbol, quantity);
+        }
+
+        public async Task<IAcceptedAction> MarketSell(string symbol, decimal quantity)
+        {
+            return await NewMarketOrder("sell", symbol, quantity);
+        }
+
+        public Task<IAcceptedAction> FillOrKill(string side, string symbol, decimal quantity, decimal price)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity)
+        public async Task<IAcceptedAction> ImmediateOrCancel(string side, string symbol, decimal quantity, decimal price)
         {
-            throw new NotImplementedException();
+            return await NewLimitOrder(side, symbol, quantity, price, "IOC");
+        }
+
+        private async Task<OrderResponse> NewMarketOrder(string side, string symbol, decimal quantity)
+        {
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+
+            string totalParams = string.Format("symbol={0}&side={1}&type={2}&quantity={3}&timestamp={4}", symbol, side, "MARKET", quantity, timestamp);
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"symbol", symbol},
+                {"side", side },
+                {"type", "MARKET"},
+                {"quantity", quantity },
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+            return await _binance.NewOrder(_config.ApiKey, data);
+        }
+
+        private async Task<OrderResponse> NewLimitOrder(string side, string symbol, decimal quantity, decimal price, string timeInForce)
+        {
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+
+            string totalParams = string.Format("symbol={0}&side={1}&type={2}&timeInForce={3}&quantity={4}&price={5}&timestamp={6}", symbol, side, "LIMIT", timeInForce, quantity, price, timestamp);
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"symbol", symbol},
+                {"side", side },
+                {"type", "LIMIT"},
+                {"timeInForce", timeInForce},
+                {"quantity", quantity },
+                {"price", price},
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+            return await _binance.NewOrder(_config.ApiKey, data);
+        }
+
+        private static string CalculateSignature(string text, string secretKey)
+        {
+            using (var hmacsha512 = new HMACSHA256(Encoding.UTF8.GetBytes(secretKey)))
+            {
+                hmacsha512.ComputeHash(Encoding.UTF8.GetBytes(text));
+                return string.Concat(hmacsha512.Hash.Select(b => b.ToString("x2")).ToArray()); // minimalistic hex-encoding and lower case
+            }
+        }
+
+        public ISocketExchange GetSocket()
+        {
+            return new BinanceSocket(_config);
         }
     }
 

@@ -1,16 +1,16 @@
-﻿using BMCore.Contracts;
+﻿using Core.Contracts;
 using System;
-using BMCore.Models;
+using Core.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BMCore.Config;
+using Core.Config;
 using RestEase;
 using System.Text;
 using System.Security.Cryptography;
 using GdaxSharp.Models;
-using BMCore.Util;
+using Core.Util;
 using System.Linq;
-using BMCore;
+using Core;
 using Newtonsoft.Json;
 using System.Net.Http;
 
@@ -21,6 +21,7 @@ namespace GdaxSharp
         IGdaxApi _gdax;
         ExchangeConfig _config;
         private string name;
+
         public string Name
         {
             get
@@ -133,7 +134,7 @@ namespace GdaxSharp
         #region Trade
 
 
-        public async Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity)
+        public async Task<IAcceptedAction> MarketBuy(string symbol, decimal quantity)
         {
             var productId = symbol;
             if (!symbol.Contains("-"))
@@ -159,7 +160,7 @@ namespace GdaxSharp
             return new Order(order);
         }
 
-        public async Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity)
+        public async Task<IAcceptedAction> MarketSell(string symbol, decimal quantity)
         {
             var productId = symbol;
             if (!symbol.Contains("-"))
@@ -184,7 +185,7 @@ namespace GdaxSharp
             return new Order(order);
         }
 
-        public async Task<IAcceptedAction> LimitBuy(string generatedId, string symbol, decimal quantity, decimal price)
+        public async Task<IAcceptedAction> LimitBuy(string symbol, decimal quantity, decimal price)
         {
             var productId = symbol;
             if (!symbol.Contains("-"))
@@ -214,7 +215,7 @@ namespace GdaxSharp
             return new Order(order);
         }
 
-        public async Task<IAcceptedAction> LimitSell(string generatedId, string symbol, decimal quantity, decimal price)
+        public async Task<IAcceptedAction> LimitSell(string symbol, decimal quantity, decimal price)
         {
             var productId = symbol;
             if (!symbol.Contains("-"))
@@ -237,6 +238,62 @@ namespace GdaxSharp
             };
 
             string json = JsonConvert.SerializeObject(data);
+            string sig = ComputeSignature(ts, httpMethod, requestUrl, json);
+
+            var order = await _gdax.NewOrder(sig, ts, data);
+            return new Order(order);
+        }
+
+        public async Task<IAcceptedAction> FillOrKill(string side, string symbol, decimal quantity, decimal price)
+        {
+            var productId = symbol;
+            if (!symbol.Contains("-"))
+                productId = GetProductIdFromSymbol(symbol);
+
+            double ts = DateTime.UtcNow.ToUnixTimestamp();
+            string httpMethod = "POST";
+            string requestUrl = "/orders";
+
+            var data = new
+            {
+                type = "limit",
+                side = side,
+                product_id = productId,
+                price = price,
+                size = quantity.ToString("#.##"),
+                time_in_force = "FOK"
+            };
+
+            string json = JsonConvert.SerializeObject(data);
+
+            string sig = ComputeSignature(ts, httpMethod, requestUrl, json);
+
+            var order = await _gdax.NewOrder(sig, ts, data);
+            return new Order(order);
+        }
+
+        public async Task<IAcceptedAction> ImmediateOrCancel(string side, string symbol, decimal quantity, decimal price)
+        {
+            var productId = symbol;
+            if (!symbol.Contains("-"))
+                productId = GetProductIdFromSymbol(symbol);
+
+            double ts = DateTime.UtcNow.ToUnixTimestamp();
+            string httpMethod = "POST";
+            string requestUrl = "/orders";
+
+            var data = new
+            {
+                type = "limit",
+                side = side,
+                product_id = productId,
+                price = price,
+                size = quantity.ToString("#.##"),
+                time_in_force = "IOC"
+            };
+
+            string json = JsonConvert.SerializeObject(data);
+
             string sig = ComputeSignature(ts, httpMethod, requestUrl, json);
 
             var order = await _gdax.NewOrder(sig, ts, data);
@@ -265,7 +322,7 @@ namespace GdaxSharp
 
         }
 
-        public async Task<IOrder> CheckOrder(string uuid)
+        public async Task<IOrder> CheckOrder(string uuid, string symbol = "")
         {
             double ts = DateTime.UtcNow.ToUnixTimestamp();
             string httpMethod = "GET";
@@ -323,7 +380,7 @@ namespace GdaxSharp
             }
         }
 
-        private static string GetProductIdFromSymbol(string symbol)
+        public static string GetProductIdFromSymbol(string symbol)
         {
             if (symbol.EndsWith("USD"))
             {
@@ -341,6 +398,16 @@ namespace GdaxSharp
             {
                 return null;
             }
+        }
+
+        public ISocketExchange GetSocket()
+        {
+            return new GdaxSocket(_config);
+        }
+
+        public Task<IEnumerable<ITicker>> MarketSummaries()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

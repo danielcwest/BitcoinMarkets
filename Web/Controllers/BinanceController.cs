@@ -7,9 +7,9 @@ using BinanceSharp;
 using BinanceSharp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using BMCore.Contracts;
+using Core.Contracts;
 using RestEase;
-using BMCore.Config;
+using Core.Config;
 
 namespace Web.Controllers
 {

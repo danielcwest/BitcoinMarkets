@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using BMCore.Contracts;
+using Core.Contracts;
 
 namespace BittrexSharp.Domain
 {

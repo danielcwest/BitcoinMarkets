@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RestEase;
-using BMCore.Models;
-using BMCore.Contracts;
+using Core.Models;
+using Core.Contracts;
 using System.Threading.Tasks;
-using BMCore.Config;
+using Core.Config;
 using System.IO;
 using Newtonsoft.Json;
 
@@ -18,6 +18,7 @@ namespace BittrexSharp
         BittrexApi _bittrex;
 
         private string name;
+
         public string Name
         {
             get
@@ -53,31 +54,31 @@ namespace BittrexSharp
             return new BMMarket(sum.FirstOrDefault());
         }
 
-        public async Task<BMCore.Models.OrderBook> OrderBook(string symbol)
+        public async Task<Core.Models.OrderBook> OrderBook(string symbol)
         {
-            var ob = new BMCore.Models.OrderBook(symbol);
+            var ob = new Core.Models.OrderBook(symbol);
             var books = await _bittrex.GetOrderBook(GetMarketNameFromSymbol(symbol), "both", 1);
 
             if (books.Sell != null && books.Buy != null)
             {
-                ob.asks = books.Sell.Select(s => new BMCore.Models.OrderBookEntry() { price = s.Rate, quantity = s.Quantity }).Take(25).ToList();
-                ob.bids = books.Buy.Select(s => new BMCore.Models.OrderBookEntry() { price = s.Rate, quantity = s.Quantity }).Take(25).ToList();
+                ob.asks = books.Sell.Select(s => new Core.Models.OrderBookEntry() { price = s.Rate, quantity = s.Quantity }).Take(25).ToList();
+                ob.bids = books.Buy.Select(s => new Core.Models.OrderBookEntry() { price = s.Rate, quantity = s.Quantity }).Take(25).ToList();
 
-                ob.asks = BMCore.Helper.SumOrderEntries(ob.asks);
-                ob.bids = BMCore.Helper.SumOrderEntries(ob.bids);
+                ob.asks = Core.Helper.SumOrderEntries(ob.asks);
+                ob.bids = Core.Helper.SumOrderEntries(ob.bids);
             }
 
             return ob;
         }
 
-        public async Task<IAcceptedAction> LimitBuy(string generatedId, string symbol, decimal quantity, decimal rate)
+        public async Task<IAcceptedAction> LimitBuy(string symbol, decimal quantity, decimal rate)
         {
             if (!symbol.Contains("-"))
                 symbol = GetMarketNameFromSymbol(symbol);
             return await _bittrex.BuyLimit(symbol, quantity, rate);
         }
 
-        public async Task<IAcceptedAction> LimitSell(string generatedId, string symbol, decimal quantity, decimal rate)
+        public async Task<IAcceptedAction> LimitSell(string symbol, decimal quantity, decimal rate)
         {
             if (!symbol.Contains("-"))
                 symbol = GetMarketNameFromSymbol(symbol);
@@ -89,7 +90,7 @@ namespace BittrexSharp
             await _bittrex.CancelOrder(orderId);
         }
 
-        public async Task<IOrder> CheckOrder(string uuid)
+        public async Task<IOrder> CheckOrder(string uuid, string symbol = "")
         {
             var bOrder = await _bittrex.GetOrder(uuid);
             //File.WriteAllText("bittrex_order.json", JsonConvert.SerializeObject(bOrder));
@@ -154,12 +155,32 @@ namespace BittrexSharp
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> MarketBuy(string generatedId, string symbol, decimal quantity)
+        public Task<IAcceptedAction> MarketBuy(string symbol, decimal quantity)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IAcceptedAction> MarketSell(string generatedId, string symbol, decimal quantity)
+        public Task<IAcceptedAction> MarketSell(string symbol, decimal quantity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SubscribeOrderbook(string symbol)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> FillOrKill(string side, string symbol, decimal quantity, decimal price)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IAcceptedAction> ImmediateOrCancel(string side, string symbol, decimal quantity, decimal price)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ISocketExchange GetSocket()
         {
             throw new NotImplementedException();
         }
