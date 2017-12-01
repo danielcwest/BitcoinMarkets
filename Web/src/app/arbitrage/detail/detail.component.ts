@@ -4,11 +4,15 @@ import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { ExchangeService } from '../../services/exchange.service';
 import { ContextService } from '../../services/context.service';
 
+import { Order } from '../../models/order';
+import { Asset } from '../../models/asset';
 import { AppContext } from '../../models/app-context';
-import { IExchangeMarket } from '../../models/exchange-market';
+import { ArbitragePair } from '../../models/arbitrage-pair';
 import { OrderBook } from '../../models/order-book';
 import { OrderBookEntry } from '../../models/order-book-entry';
 import { ArbitrageService } from '../../services/arbitrage.service';
+import { OrderService } from '../../services/order.service';
+import { CoinMarketCapService } from '../../services/coinmarketcap.service';
 
 @Component({
     selector: 'app-detail',
@@ -17,169 +21,47 @@ import { ArbitrageService } from '../../services/arbitrage.service';
 })
 export class DetailComponent implements OnInit {
 
+	pair: ArbitragePair;
+
+	orders: Order[] = [];
+
     context: AppContext;
-    symbol: string;
-    isLoading: boolean;
-
-    baseExchangeMarket: IExchangeMarket;
-    arbExchangeMarket: IExchangeMarket;
-
-    baseOrderBook: OrderBook;
-    arbOrderBook: OrderBook;
-
-    exchanges: string[] = ['Bittrex', 'Hitbtc', 'Poloniex', 'Liqui', 'Livecoin', 'Tidex', 'Etherdelta', 'Bitz', 'Nova', 'Binance'];
-
-    // Amount in base currency to measure accurate buy/sell price
-    threshold = .25;
-
-    baseCurrency: string;
-    quoteCurrency: string;
-    spreadLast: number;
-
-
-    // Price at which I can Buy or Sell given the market depth
-    baseExactBuy: number;
-    arbExactSell: number;
-    baseBuySpread: number;
-
-    baseExactSell: number;
-    arbExactBuy: number;
-    baseSellSpread: number;
-
-    baseExchangeFee: number;
-    arbExchangeFee: number;
+	isLoading: boolean;
 
     constructor(
         private contextService: ContextService,
         private route: ActivatedRoute,
         private router: Router,
-        private exchangeService: ExchangeService,
-        private arbitrageService: ArbitrageService
+        private arbitrageService: ArbitrageService,
+		private orderService: OrderService,
+		private coincap: CoinMarketCapService
     ) { }
 
-    ngOnInit() {
-        this.symbol = this.route.snapshot.paramMap.get('ticker');
+	ngOnInit() {
+		let pairId = Number(this.route.snapshot.paramMap.get('pairId'));
 
-
-        this.contextService.context$.subscribe(context => {
-            this.context = context;
-            this.baseExchangeFee = this.arbitrageService.exchangeFees[this.context.selectedBaseExchange];
-            this.arbExchangeFee = this.arbitrageService.exchangeFees[this.context.selectedArbExchange];
-            this.refreshMarkets();
-        });
+		this.contextService.context$.subscribe(context => {
+			this.context = context;
+			this.refreshPair();
+		});
     }
 
-    refreshMarkets(): Promise<boolean> {
-        this.isLoading = true;
-        return new Promise((resolve, reject) => {
-            const promises = [];
-
-            promises.push(this.exchangeService.getMarketSummary(this.context.selectedBaseExchange, this.symbol));
-            promises.push(this.exchangeService.getMarketSummary(this.context.selectedArbExchange, this.symbol));
-
-            promises.push(this.exchangeService.getOrderBook(this.context.selectedBaseExchange, this.symbol));
-            promises.push(this.exchangeService.getOrderBook(this.context.selectedArbExchange, this.symbol));
-
-            Promise.all(promises).then(response => {
-                this.baseExchangeMarket = response[0];
-                this.arbExchangeMarket = response[1];
-                this.baseOrderBook = response[2];
-                this.arbOrderBook = response[3];
-
-                this.processMarkets();
-                this.isLoading = false;
-                resolve(true);
-            });
-        });
-    }
-
-    processMarkets(): void {
-        // console.log(this.baseExchangeMarket);
-        // console.log(this.arbExchangeMarket);
-        // console.log(this.baseOrderBook);
-        // console.log(this.arbOrderBook);
-
-        this.spreadLast = Math.abs((this.baseExchangeMarket.last - this.arbExchangeMarket.last) / this.baseExchangeMarket.last);
-
-        this.baseCurrency = this.baseExchangeMarket.baseCurrency;
-        this.quoteCurrency = this.baseExchangeMarket.quoteCurrency;
-
-        this.setThresholdPrices();
-    }
-
-    setThresholdPrices(): void {
-
-        // TODO: Optimize below
-        // Base Exchange
-        this.baseOrderBook.asks.some(e => {
-            if (e.sumBase >= this.threshold) {
-                // console.log(e);
-                this.baseExactBuy = e.price;
-                return true;
-            }
-        });
-
-        this.baseOrderBook.bids.some(e => {
-            if (e.sumBase >= this.threshold) {
-                // console.log(e);
-                this.baseExactSell = e.price;
-                return true;
-            }
-        });
-
-        // Arb Exchange
-        this.arbOrderBook.asks.some(e => {
-            if (e.sumBase >= this.threshold) {
-                // console.log(e);
-                this.arbExactBuy = e.price;
-                return true;
-            }
-        });
-
-        this.arbOrderBook.bids.some(e => {
-            if (e.sumBase >= this.threshold) {
-                // console.log(e);
-                this.arbExactSell = e.price;
-                return true;
-            }
-        });
-
-        this.baseBuySpread = Math.abs((this.baseExactBuy - this.arbExactSell) / this.baseExactBuy);
-        this.baseSellSpread = Math.abs((this.baseExactSell - this.arbExactBuy) / this.baseExactSell);
+	refreshPair(): void {
+		this.isLoading = true;
+		let pairId = Number(this.route.snapshot.paramMap.get('pairId'));
+		this.arbitrageService.getArbitragePair(pairId).then(pair => {
+			this.pair = pair;
+			this.isLoading = false;
+		});
 
 
-    }
+	}
 
-    onArbExchangeChange(exchange: string): void {
-        if (exchange !== this.context.selectedBaseExchange) {
-            this.contextService.setArbExchange(exchange);
-        } else {
-            console.log('ERROR');
-        }
-    }
-
-    onBaseExchangeChange(exchange: string): void {
-        if (exchange !== this.context.selectedArbExchange) {
-            this.contextService.setBaseExchange(exchange);
-        } else {
-            console.log('ERROR');
-        }
-    }
-
-    BuyBase(): void {
-
-    }
-
-    SellBase(): void {
-
-    }
-
-    BuyArb(): void {
-
-    }
-
-    SellArb(): void {
-
-    }
+	save(): void {
+		this.isLoading = true;
+		this.arbitrageService.saveArbitragePair(this.pair).then(result => {
+			this.refreshPair(); 
+		});
+	}
 
 }

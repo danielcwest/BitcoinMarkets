@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 
-import { ArbitrageMarket } from '../models/arbitrage-market';
+import { ArbitragePair } from '../models/arbitrage-pair';
+import { Asset } from '../models/asset';
+import { HeroStat } from '../models/hero-stat';
 import { IExchangeMarket } from '../models/exchange-market';
 import { ContextService } from '../services/context.service';
 import { ExchangeService } from '../services/exchange.service';
 import { ArbitrageService } from '../services/arbitrage.service';
 import { AppContext } from '../models/app-context';
+import { CoinMarketCapService } from '../services/coinmarketcap.service';
 
 import * as Collections from 'typescript-collections';
 
@@ -16,70 +19,74 @@ import * as Collections from 'typescript-collections';
 })
 export class ArbitrageComponent implements OnInit {
 
-    exchanges: string[] = ['Bittrex', 'Hitbtc', 'Poloniex', 'Liqui', 'Livecoin', 'Tidex', 'Etherdelta', 'Bitz', 'Nova', 'Binance'];
-
     context: AppContext;
-
-    arbitrageMarkets: ArbitrageMarket[] = [];
-
-    baseExchangeMarkets: Collections.Dictionary<string, IExchangeMarket>;
-    arbExchangeMarkets: Collections.Dictionary<string, IExchangeMarket>;
 
     sortProperty: string = 'symbol';
     sortAscending: boolean = true;
+	isLoading: boolean = false;
 
-    isLoading: boolean = false;
+	arbitragePairs: ArbitragePair[] = [];
+	heroStats: Collections.Dictionary<string, HeroStat>;
 
-    constructor(private arbitrageService: ArbitrageService, private exchangeService: ExchangeService, private contextService: ContextService) { }
+	commission: number = 0;
 
-    ngOnInit() {
+	constructor(private arbitrageService: ArbitrageService, private contextService: ContextService, private coincap: CoinMarketCapService) { }
+
+	ngOnInit() {
         this.contextService.context$.subscribe(context => {
-            this.context = context;
-            this.refreshMarkets();
-        });
+			this.context = context;
+			this.refresh();
+		});
     }
 
-    refreshMarkets(): void {
-        this.isLoading = true;
-        this.arbitrageService.refreshMarkets().then(response => {
-            this.arbitrageMarkets = response;
-            this.isLoading = false;
-        })
+    refresh(): void {
+		this.isLoading = true;
+		this.arbitrageService.getArbitragePairs().then(pairs => {
+			this.arbitragePairs = pairs;
+			this.isLoading = false;
+		});
 
+		this.arbitrageService.getHeroStats().then(heroStats => {
+			this.heroStats = heroStats;
+
+			if (heroStats.containsKey('TOTAL'))
+				this.commission = heroStats.getValue('TOTAL').commission;
+		});
     }
 
     processMarkets(): void {
-        let arbMkts: ArbitrageMarket[] = [];
-        this.baseExchangeMarkets.forEach(market => {
-            if (this.arbExchangeMarkets.containsKey(market) && this.arbExchangeMarkets.getValue(market).volume > 10) {
-                arbMkts.push(new ArbitrageMarket(this.baseExchangeMarkets.getValue(market), this.arbExchangeMarkets.getValue(market)));
-            }
-        });
-        this.arbitrageMarkets = arbMkts;
-    }
+       
+	}
 
-    changeSort(sortProp: string): void {
-        if (this.sortProperty == sortProp) {
+	getTradeCount(symbol: string): any {
+		if (!this.heroStats || !this.heroStats.size) return '';
+		if (this.heroStats.containsKey(symbol)) {
+			return this.heroStats.getValue(symbol).tradeCount;
+		} else {
+			return '';
+		}
+	}
+
+	getCommission(symbol: string): number {
+		if (!this.heroStats || !this.heroStats.size) return 0;
+		if (this.heroStats.containsKey(symbol)) {
+			return this.heroStats.getValue(symbol).commission;
+		} else {
+			return 0;
+		}
+	}
+
+	setInterval(interval: string): void {
+		this.contextService.setInterval(interval);
+	}
+
+	changeSort(sortProp: string): void {
+
+        if (sortProp && this.sortProperty == sortProp) {
             this.sortAscending = !this.sortAscending;
-        } else {
+        } else if(sortProp){
             this.sortAscending = true;
             this.sortProperty = sortProp;
-        }
-    }
-
-    onArbExchangeChange(exchange: string): void {
-        if (exchange != this.context.selectedBaseExchange) {
-            this.contextService.setArbExchange(exchange);
-        } else {
-            console.log('ERROR');
-        }
-    }
-
-    onBaseExchangeChange(exchange: string): void {
-        if (exchange != this.context.selectedArbExchange) {
-            this.contextService.setBaseExchange(exchange);
-        } else {
-            console.log('ERROR');
         }
     }
 }

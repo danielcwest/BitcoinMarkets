@@ -1,0 +1,7 @@
+.interval-buttons {
+	height: 100%;
+}
+
+.interval.active {
+	font-weight: bold;
+}

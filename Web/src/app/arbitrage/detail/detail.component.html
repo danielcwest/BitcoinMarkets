@@ -1,125 +1,79 @@
 <div class="row mt-4">
-    <div class="col">
-        <h1 class="display-2">{{symbol}}</h1>
-    </div>
-    <div class="col text-right">
-        <button class="btn" (click)="refreshMarkets()">Refresh</button>
-    </div>
+	<div class="col-8">
+		<h1 class="display-2">{{pair?.symbol}}</h1>
+		<h4><span class="badge"
+				  [class.badge-danger]="pair?.status != 'active'"
+				  [class.badge-success]="pair?.status == 'active' && pair?.type == 'market'"
+				  [class.badge-warning]="pair?.status == 'active' && pair?.type != 'market'">
+			{{pair?.status}}</span>
+		</h4>
+	</div>
 </div>
-<hr/>
-<div class="row mt-4">
-    <div class="col text-center">
-        <h4>{{baseExchangeMarket.exchange}}</h4>
-        <div class="form-group">
-            <button class="btn" (click)="BuyBase()">Buy</button>
-            <button class="btn" (click)="SellBase()">Sell</button>
-        </div>
-    </div>
-    <div class="col text-center">
-        <div class="form-group">
-            <label for="thresholdInput">Buy/Sell Threshold</label>
-            <input type="number" class="form-control" id="thresholdInput" [(ngModel)]="threshold">
-        </div>
-    </div>
-    <div class="col text-center">
-        <h4>{{arbExchangeMarket.exchange}}</h4>
+<hr />
 
-        <div class="form-group">
-            <button class="btn" (click)="BuyArb()">Buy</button>
-            <button class="btn" (click)="SellArb()">Sell</button>
-        </div>
-    </div>
-</div>
-<hr/>
 <div *ngIf="isLoading" class="load">
-    <div class="loader mx-auto"></div>
-</div>
-<div class="card">
-    <div class="car-body arb-pair">
-        <div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
-            <div class="col">
-                <h4 class="text-center"> {{baseExchangeMarket.exchange}} Last Price</h4>
-            </div>
-            <div class="col"></div>
-            <div class="col">
-                <h4 class="text-center">{{arbExchangeMarket.exchange}} Last Price</h4>
-            </div>
-        </div>
-        <div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
-            <div class="col">
-                <!-- <h1 class="text-center" [class.text-success]="baseExchangeMarket.last > arbExchangeMarket.last" [class.text-danger]="baseExchangeMarket.last < arbExchangeMarket.last">{{baseExchangeMarket.last | btcPrice}}</h1> -->
-                <h1 class="text-center">{{baseExchangeMarket.last | btcPrice}}</h1>
-            </div>
-            <div class="col">
-                <h1 class="text-center">{{spreadLast | numeral:'0.00%'}}</h1>
-            </div>
-            <div class="col">
-                <h1 class="text-center">{{arbExchangeMarket.last | btcPrice}}</h1>
-            </div>
-        </div>
-    </div>
+	<div class="loader mx-auto"></div>
 </div>
 
-<hr/>
-
-<!-- BUY at BASE *** SELL at ARB -->
-<div class="card">
-    <div class="buy-base card-body arb-pair" [class.success]="baseExactBuy < arbExactSell" [class.danger]="baseExactBuy > arbExactSell">
-        <div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
-            <div class="col">
-                <h4 class="text-center">Buy {{threshold}} {{baseCurrency}}</h4>
-            </div>
-            <div class="col"></div>
-            <div class="col">
-                <h4 class="text-center">Sell {{threshold}} {{baseCurrency}}</h4>
-            </div>
-        </div>
-        <div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
-            <div class="col">
-                <h1 *ngIf="baseExactBuy > arbExactSell " class="text-center">{{baseExactBuy | btcPrice}}</h1>
-                <h1 *ngIf="baseExactBuy < arbExactSell " class="text-center" [class.text-success]="baseExactBuy < arbExactSell" [class.text-danger]="baseExactBuy > arbExactSell">{{baseExactBuy | btcPrice}}</h1>
-
-            </div>
-            <div class="col">
-                <h1 *ngIf="baseExactBuy < arbExactSell" class="text-center spread">{{baseBuySpread - (arbExchangeFee + baseExchangeFee) | numeral:'0.00%'}}</h1>
-                <h4 *ngIf="baseExactBuy < arbExactSell" class="text-center spread">{{baseBuySpread | numeral:'0.00%'}}</h4>
-            </div>
-            <div class="col">
-                <h1 *ngIf="baseExactBuy > arbExactSell" class="text-center">{{arbExactSell | btcPrice}}</h1>
-                <h1 *ngIf="baseExactBuy < arbExactSell" class="text-center" [class.text-success]="baseExactBuy > arbExactSell" [class.text-danger]="baseExactBuy < arbExactSell">{{arbExactSell | btcPrice}}</h1>
-            </div>
-        </div>
-    </div>
+<div class="row" *ngIf="pair">
+	<div class="col"></div>
+	<div class="col">
+		<form #pairForm="ngForm">
+			<div class="form-group row">
+				<div class="col-6">
+					<label for="bidspread">Bid Spread</label>
+					<div class="input-group">
+						<span class="input-group-addon">{{pair.bidSpread | numeral:'0.00%'}}</span>
+						<input class="form-control" type="number" [(ngModel)]="pair.bidSpread" id="bidspread" name="bidSpread" step="0.001">
+					</div>
+				</div>
+				<div class="col-6">
+					<label for="askspread">Ask Spread </label>
+					<div class="input-group">
+						<input class="form-control" type="number" [(ngModel)]="pair.askSpread" id="askspread" name="askSpread" step="0.001">
+						<span class="input-group-addon">{{pair.askSpread | numeral:'0.00%'}}</span>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="tradeThreshold">Trade Threshold</label>
+				<div class="input-group">
+					<span class="input-group-addon">{{pair.tradeThreshold | numeral:'0.00%'}}</span>
+					<input class="form-control" type="number" [(ngModel)]="pair.tradeThreshold" id="tradeThreshold" name="tradeThreshold" step="0.0001">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="type">Pair Type</label>
+				<div class="input-group">
+					<input class="form-control" type="text" [(ngModel)]="pair.type" id="type" name="type">
+				</div>
+			</div>
+			<div class="form-group row">
+				<button type="button" class="btn btn-primary btn-lg btn-block" (click)="save()">Save</button> 
+			</div>
+		</form>
+	</div>
+	<div class="col"></div>
 </div>
-<hr/>
 
-<!-- SELL at BASE *** BUY at ARB -->
-<div class="card">
-    <div class="sell-base card-body arb-pair" [class.success]="baseExactSell > arbExactBuy" [class.danger]="baseExactSell < arbExactBuy">
-        <div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket">
-            <div class="col">
-                <h4 class="text-center">Sell {{threshold}} {{baseCurrency}}</h4>
-            </div>
-            <div class="col"></div>
-            <div class="col">
-                <h4 class="text-center">Buy {{threshold}} {{baseCurrency}}</h4>
-            </div>
-        </div>
+<table class="table" *ngIf="orders.length > 0">
+	<thead>
+		<tr>
+			<th>Base Order</th>
+			<th>Counter Order</th>
+			<th>Base Quantity</th>
+			<th>Counter Quantity</th>
+			<th>Commission</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr *ngFor="let order of orders">
+			<td>{{order.baseOrderUuid}}</td>
+			<td>{{order.counterOrderUuid}}</td>
+			<td>{{order.baseQuantityFilled}}</td>
+			<td>{{order.counterQuantityFilled}}</td>
+			<td>{{order.commission}}</td>
+		</tr>
+	</tbody>
+</table>
 
-        <div class="row" *ngIf="baseExchangeMarket && arbExchangeMarket" [class.success]="baseSellSpread > 0">
-            <div class="col">
-                <h1 *ngIf="baseExactSell < arbExactBuy" class="text-center">{{baseExactSell | btcPrice}}</h1>
-                <h1 *ngIf="baseExactSell > arbExactBuy" class="text-center" [class.text-danger]="baseExactSell > arbExactBuy">{{baseExactSell | btcPrice}}</h1>
-            </div>
-            <div class="col">
-                <h1 *ngIf="baseExactSell > arbExactBuy" class="text-center spread">{{baseSellSpread - (arbExchangeFee + baseExchangeFee) | numeral:'0.00%'}}</h1>
-                <h4 *ngIf="baseExactSell > arbExactBuy" class="text-center spread">{{baseSellSpread | numeral:'0.00%'}}</h4>
-            </div>
-            <div class="col">
-                <h1 *ngIf="baseExactSell < arbExactBuy" class="text-center">{{arbExactBuy | btcPrice}}</h1>
-                <h1 *ngIf="baseExactSell > arbExactBuy" class="text-center" [class.text-success]="baseExactSell > arbExactBuy">{{arbExactBuy | btcPrice}}</h1>
-            </div>
-        </div>
-    </div>
-</div>
-<hr/>

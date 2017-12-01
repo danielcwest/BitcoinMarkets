@@ -43,6 +43,12 @@ namespace HitbtcSharp.Models
                 this.QuoteCurrency = this.MarketName.Replace("ETH", "");
                 this.Link = string.Format("https://hitbtc.com/exchange/{0}-to-ETH", this.QuoteCurrency);
             }
+            else if (this.MarketName.EndsWith("USD"))
+            {
+                this.BaseCurrency = "USD";
+                this.QuoteCurrency = this.MarketName.Replace("USD", "");
+                this.Link = string.Format("https://hitbtc.com/exchange/{0}-to-USD", this.QuoteCurrency);
+            }
         }
     }
 }

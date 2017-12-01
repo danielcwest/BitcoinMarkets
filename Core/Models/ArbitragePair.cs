@@ -15,15 +15,16 @@ namespace Core.Models
         public string MarketCurrency { get; set; }
     }
 
-    public class ArbitragePair
+    public class ArbitragePair : IArbitragePairDTO
     {
         public int Id { get; set; }
         public string BaseCurrency { get; set; }
         public string MarketCurrency { get; set; }
         public string Symbol { get; set; }
+        public string Status { get; set; }
+        public string Type { get; set; }
         public string BaseSymbol { get; set; }
         public string CounterSymbol { get; set; }
-        public DateTime LastRunUtc { get; set; }
         public decimal TradeThreshold { get; set; }
         public decimal SpreadThreshold { get; set; }
         public decimal WithdrawalThreshold { get; set; }
@@ -47,15 +48,18 @@ namespace Core.Models
         public ITicker counterMarket { get; set; }
         public OrderBook counterBook { get; set; }
 
+        public ArbitragePair() { }
+
         public ArbitragePair(DbArbitragePair dbPair)
         {
             this.Id = dbPair.Id;
             this.BaseCurrency = dbPair.BaseCurrency;
             this.MarketCurrency = dbPair.MarketCurrency;
             this.Symbol = dbPair.Symbol;
+            this.Type = dbPair.Type;
+            this.Status = dbPair.Status;
             this.BaseSymbol = dbPair.BaseSymbol;
             this.CounterSymbol = dbPair.CounterSymbol;
-            this.LastRunUtc = dbPair.LastRunUtc;
             this.TradeThreshold = dbPair.TradeThreshold;
             this.SpreadThreshold = dbPair.SpreadThreshold;
             this.WithdrawalThreshold = dbPair.WithdrawalThreshold;

@@ -21,6 +21,12 @@ var AppComponent = (function () {
         var _this = this;
         this.contextService.context$.subscribe(function (context) { return _this.context = context; });
     };
+    AppComponent.prototype.refreshPairs = function () {
+        this.contextService.notify();
+    };
+    AppComponent.prototype.setInterval = function (interval) {
+        this.contextService.setInterval(interval);
+    };
     return AppComponent;
 }());
 AppComponent = __decorate([

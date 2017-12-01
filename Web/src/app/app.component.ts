@@ -17,5 +17,13 @@ export class AppComponent implements OnInit {
 
     ngOnInit() {
         this.contextService.context$.subscribe(context => this.context = context);
-    }
+	}
+
+	refreshPairs(): void {
+		this.contextService.notify();
+	}
+
+	setInterval(interval: string): void {
+		this.contextService.setInterval(interval);
+	}
 }

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var AppContext = (function () {
     function AppContext() {
+        this.interval = '1h';
     }
     return AppContext;
 }());

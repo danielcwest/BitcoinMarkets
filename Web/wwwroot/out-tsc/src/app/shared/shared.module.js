@@ -9,7 +9,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var common_1 = require("@angular/common");
 var comma_separated_number_pipe_1 = require("./comma-separated-number.pipe");
-var price_change_component_1 = require("./price-change/price-change.component");
 var numeral_pipe_1 = require("./numeral.pipe");
 var btc_price_pipe_1 = require("./btc-price.pipe");
 var order_by_pipe_1 = require("./order-by.pipe");
@@ -23,8 +22,8 @@ SharedModule = __decorate([
         imports: [
             common_1.CommonModule
         ],
-        declarations: [comma_separated_number_pipe_1.CommaSeparatedNumberPipe, price_change_component_1.PriceChangeComponent, numeral_pipe_1.NumeralPipe, btc_price_pipe_1.BtcPricePipe, order_by_pipe_1.OrderByPipe],
-        exports: [comma_separated_number_pipe_1.CommaSeparatedNumberPipe, price_change_component_1.PriceChangeComponent, numeral_pipe_1.NumeralPipe, btc_price_pipe_1.BtcPricePipe, order_by_pipe_1.OrderByPipe]
+        declarations: [comma_separated_number_pipe_1.CommaSeparatedNumberPipe, numeral_pipe_1.NumeralPipe, btc_price_pipe_1.BtcPricePipe, order_by_pipe_1.OrderByPipe],
+        exports: [comma_separated_number_pipe_1.CommaSeparatedNumberPipe, numeral_pipe_1.NumeralPipe, btc_price_pipe_1.BtcPricePipe, order_by_pipe_1.OrderByPipe]
     })
 ], SharedModule);
 exports.SharedModule = SharedModule;

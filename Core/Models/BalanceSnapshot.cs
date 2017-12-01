@@ -9,11 +9,13 @@ namespace Core.Models
     {
         public decimal Total { get; set; }
         public string Currency { get; set; }
+        public decimal BtcPrice { get; set; }
 
-        public BalanceSnapshot(ICurrencyBalance b)
+        public BalanceSnapshot(ICurrencyBalance b, ITicker ticker)
         {
             this.Currency = b.Currency;
             this.Total = b.Available + b.Held;
+            this.BtcPrice = ticker.Last;
         }
     }
 }

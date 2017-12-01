@@ -14,7 +14,7 @@ var detail_component_1 = require("./arbitrage/detail/detail.component");
 var routes = [
     {
         path: '',
-        redirectTo: '/dashboard',
+        redirectTo: '/arbitrage',
         pathMatch: 'full'
     },
     {
@@ -26,7 +26,7 @@ var routes = [
         component: arbitrage_component_1.ArbitrageComponent
     },
     {
-        path: 'arbitrage/:ticker',
+        path: 'arbitrage/:pairId',
         component: detail_component_1.DetailComponent
     }
 ];

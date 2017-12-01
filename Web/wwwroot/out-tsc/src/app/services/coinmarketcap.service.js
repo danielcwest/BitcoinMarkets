@@ -33,6 +33,24 @@ var CoinMarketCapService = (function () {
             return result;
         }).catch(this.handleError);
     };
+    CoinMarketCapService.prototype.getBaseTickers = function () {
+        return this.http.get("https://api.coinmarketcap.com/v1/ticker/?limit=5").toPromise().then(function (response) {
+            var result = response.json();
+            return result;
+        }).catch(this.handleError);
+    };
+    CoinMarketCapService.prototype.getBitcoinTicker = function () {
+        return this.http.get("https://api.coinmarketcap.com/v1/ticker/bitcoin/").toPromise().then(function (response) {
+            var result = response.json();
+            return result[0];
+        }).catch(this.handleError);
+    };
+    CoinMarketCapService.prototype.getEthereumTicker = function () {
+        return this.http.get("https://api.coinmarketcap.com/v1/ticker/ethereum/").toPromise().then(function (response) {
+            var result = response.json();
+            return result[0];
+        }).catch(this.handleError);
+    };
     CoinMarketCapService.prototype.handleError = function (error) {
         console.log(error);
         //console.error('An error occurred', error);

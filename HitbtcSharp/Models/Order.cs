@@ -134,5 +134,35 @@ namespace HitbtcSharp.Models
             this.IsClosed = order.status == "filled" || order.status == "canceled" || order.status == "expired";
             this.Side = order.side;
         }
+
+        public Order(IEnumerable<Trade> trades)
+        {
+            if (trades.Any())
+            {
+                this.Uuid = trades.FirstOrDefault().orderId;
+                this.Exchange = "Hitbtc";
+                this.Symbol = trades.FirstOrDefault().symbol;
+                this.Side = this.Symbol = trades.FirstOrDefault().side;
+                this.QuantityFilled = trades.Sum(t => t.quantity);
+                this.Quantity = trades.Sum(t => t.quantity);
+                this.AvgRate = trades.Average(t => t.price);
+                this.Fees = trades.Sum(t => t.fee);
+
+                //this.Cost = trades.Sum(t => (t.quantity * t.price) + t.fee);
+
+                if (this.Side == "buy")
+                {
+                    this.CostProceeds = trades.Sum(t => (t.quantity * t.price) + t.fee);
+                }
+                else
+                {
+                    this.CostProceeds = trades.Sum(t => (t.quantity * t.price) - t.fee);
+                }
+
+                this.IsOpen = false;
+                this.IsFilled = true;
+                this.IsClosed = true;
+            }
+        }
     }
 }

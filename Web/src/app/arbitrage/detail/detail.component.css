@@ -1,11 +1,3 @@
-input {
-	width: 150px;
-	margin: 0 auto;
-}
-
-.arb-pair {
-	padding: 25px;
-}
 
 .success h1 {
 	font-size: 4.0rem;
@@ -13,4 +5,12 @@ input {
 
 .danger h1 {
 	font-size: 2.0rem;
+}
+
+.bordered-box {
+	position: relative;
+	padding: 1rem;
+	margin: 1rem -1rem;
+	border: solid #f7f7f9;
+	border-width: .2rem 0 0;
 }

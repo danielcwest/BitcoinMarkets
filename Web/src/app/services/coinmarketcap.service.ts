@@ -31,7 +31,29 @@ export class CoinMarketCapService {
             let result = response.json() as TickerGlobal;
             return result;
         }).catch(this.handleError);
-    }
+	}
+
+	getBaseTickers(): Promise<Asset[]> {
+
+		return this.http.get(`https://api.coinmarketcap.com/v1/ticker/?limit=5`).toPromise().then(response => {
+			let result = response.json() as Asset[];
+			return result;
+		}).catch(this.handleError);
+	}
+
+	getBitcoinTicker(): Promise<Asset> {
+		return this.http.get(`https://api.coinmarketcap.com/v1/ticker/bitcoin/`).toPromise().then(response => {
+			let result = response.json() as Asset[];
+			return result[0];
+		}).catch(this.handleError);
+	}
+
+	getEthereumTicker(): Promise<Asset> {
+		return this.http.get(`https://api.coinmarketcap.com/v1/ticker/ethereum/`).toPromise().then(response => {
+			let result = response.json() as Asset[];
+			return result[0];
+		}).catch(this.handleError);
+	}
 
     private handleError(error: any): Promise<any> {
         console.log(error);

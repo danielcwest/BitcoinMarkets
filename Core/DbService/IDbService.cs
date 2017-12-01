@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Core.Config;
 using RestEase;
+using Core.Models;
+using Core.Contracts;
 
 namespace Core.DbService
 {
@@ -16,10 +18,7 @@ namespace Core.DbService
 
         void InsertArbitragePair(string baseExchange, string arbExchange, string symbol, string baseSymbol, string counterSymbol, string baseCurrency, string marketCurrency);
         IEnumerable<DbArbitragePair> GetArbitragePairs(string type, string baseExchange = "", string arbExchange = "");
-        void UpdateArbitragePair(string baseExchange, string arbExchange, string symbol, bool isTrade = false, bool isError = false, bool isOpportunity = false, object payload = null);
-        void UpdateArbitragePairById(int id, bool isTrade = false, bool isError = false, bool isOpportunity = false, bool isFunded = false, object payload = null);
-        void InsertArbitrageOpportunity(int pairId, decimal basePrice, decimal arbPrice, decimal spread, decimal threshold);
-        DbArbitragePair GetArbitragePair(int pairId);
+        void SaveArbitragePair(IArbitragePairDTO dto);
 
         int InsertTransaction(int pairId, string type);
         void UpdateTransactionStatus(int id, string status, object payload = null);
@@ -34,8 +33,10 @@ namespace Core.DbService
         void UpdateOrder(int id, string baseUuid = "", string counterUuid = "", decimal baseRate = 0m, decimal counterRate = 0m, string status = "", decimal baseQuantityFilled = 0m, decimal counterQuantityFilled = 0m, decimal baseCost = 0m, decimal counterCost = 0m, decimal commission = 0m, object payload = null);
         IEnumerable<DbMakerOrder> GetMakerOrdersByStatus(string status, int pairId = 0);
 
-        void InsertBalanceSnapshot(string currency, string exchange, decimal available, decimal held, decimal price, int processId);
-        IEnumerable<DbBalance> GetBalanceSnapshots(string exchange = "", string currency = "", DateTime? fromDate = null, int processId = 0);
+        void InsertBalanceSnapshot(string currency, string baseExchange, string counterExchange, decimal total, decimal price, int processId = 0);
+        IEnumerable<DbBalance> GetBalanceSnapshots(string currency = "", string baseExchange = "", string counterExchange = "", DateTime? fromDate = null, int processId = 0);
+
+        IEnumerable<DbHeroStat> GetHeroStats(int hours);
 
     }
 }

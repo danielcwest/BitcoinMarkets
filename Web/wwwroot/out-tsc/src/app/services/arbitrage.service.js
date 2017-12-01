@@ -10,65 +10,77 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
-var arbitrage_market_1 = require("../models/arbitrage-market");
+var http_1 = require("@angular/http");
 var context_service_1 = require("./context.service");
-var exchange_service_1 = require("./exchange.service");
+var coinmarketcap_service_1 = require("./coinmarketcap.service");
 var Collections = require("typescript-collections");
 var ArbitrageService = (function () {
-    function ArbitrageService(contextService, exchangeService) {
+    function ArbitrageService(http, contextService, coincap) {
         var _this = this;
+        this.http = http;
         this.contextService = contextService;
-        this.exchangeService = exchangeService;
-        this.exchanges = ['Bittrex', 'Hitbtc', 'Poloniex', 'Liqui', 'Livecoin', 'Tidex', 'Etherdelta', 'Bitz', 'Nova', 'Binance'];
-        // TODO: make dynamic
-        this.exchangeFees = { 'Bittrex': .0025, 'Hitbtc': .0010, 'Poloniex': .0025, 'Binance': .0010 };
+        this.coincap = coincap;
         this.contextService.context$.subscribe(function (context) {
             _this.context = context;
-            _this.refreshMarkets();
         });
     }
-    ArbitrageService.prototype.refreshMarkets = function () {
+    ArbitrageService.prototype.getArbitragePairs = function () {
         var _this = this;
-        return new Promise(function (resolve, reject) {
-            var promises = [];
-            promises.push(_this.exchangeService.getMarketSummaries(_this.context.selectedBaseExchange));
-            promises.push(_this.exchangeService.getMarketSummaries(_this.context.selectedArbExchange));
-            Promise.all(promises).then(function (response) {
-                var baseExchangeMarkets = response[0];
-                var arbExchangeMarkets = response[1];
-                var dic = new Collections.Dictionary();
-                baseExchangeMarkets.forEach(function (market) {
-                    if (arbExchangeMarkets.containsKey(market)) {
-                        dic.setValue(market, new arbitrage_market_1.ArbitrageMarket(baseExchangeMarkets.getValue(market), arbExchangeMarkets.getValue(market)));
-                    }
+        return this.http.get("/api/arbitrage/get").toPromise().then(function (response) {
+            var result = response.json();
+            var dic = new Collections.Dictionary();
+            result.forEach(function (pair) {
+                dic.setValue(pair.id, pair);
+            });
+            _this.arbitragePairs = dic;
+            return result;
+        }).catch(this.handleError);
+    };
+    ArbitrageService.prototype.getArbitragePair = function (pairId) {
+        var _this = this;
+        return this.http.get("/api/arbitrage/getpair?id=" + pairId).toPromise().then(function (response) {
+            var result = response.json();
+            _this.arbitragePairs.setValue(result.id, result);
+            return result;
+        }).catch(this.handleError);
+    };
+    ArbitrageService.prototype.saveArbitragePair = function (pair) {
+        return this.http.post("/api/arbitrage/save", pair).toPromise().then(function (result) { return true; });
+    };
+    ArbitrageService.prototype.getHeroStats = function () {
+        var _this = this;
+        var baseTickers = new Collections.Dictionary();
+        return this.coincap.getBaseTickers().then(function (tickers) {
+            tickers.forEach(function (t) {
+                if (t.symbol == 'BTC' || t.symbol == 'ETH')
+                    baseTickers.setValue(t.symbol, t);
+            });
+            var total = 0;
+            var trades = 0;
+            return _this.getHeroStats().then(function (stats) {
+                stats.forEach(function (s) {
+                    var stat = stats.getValue(s);
+                    if (stat.symbol.endsWith('BTC'))
+                        stat.commission = stat.commission * baseTickers.getValue('BTC').price_usd;
+                    else if (stat.symbol.endsWith('ETH'))
+                        stat.commission = stat.commission * baseTickers.getValue('ETH').price_usd;
+                    total += stat.commission;
+                    trades += stat.tradeCount;
                 });
-                _this.arbitrageMarkets = dic;
-                resolve(_this.arbitrageMarkets.values());
+                return stats;
             });
         });
     };
-    ArbitrageService.prototype.refreshSymbols = function () {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            var promises = [];
-            _this.exchanges.forEach(function (exchange) { return promises.push(_this.exchangeService.getSymbols(exchange)); });
-            Promise.all(promises).then(function (response) {
-                var i = 0;
-                _this.exchanges.forEach(function (exchange) {
-                    _this.exchangeMarketSymbols.setValue(exchange, response[i++]);
-                });
-                resolve(true);
-            });
-        });
-    };
-    ArbitrageService.prototype.getArbitrageMarket = function (symbol) {
-        return this.arbitrageMarkets.getValue(symbol);
+    ArbitrageService.prototype.handleError = function (error) {
+        console.log(error);
+        //console.error('An error occurred', error);
+        return Promise.reject(error.message || error);
     };
     return ArbitrageService;
 }());
 ArbitrageService = __decorate([
     core_1.Injectable(),
-    __metadata("design:paramtypes", [context_service_1.ContextService, exchange_service_1.ExchangeService])
+    __metadata("design:paramtypes", [http_1.Http, context_service_1.ContextService, coinmarketcap_service_1.CoinMarketCapService])
 ], ArbitrageService);
 exports.ArbitrageService = ArbitrageService;
 //# sourceMappingURL=arbitrage.service.js.map

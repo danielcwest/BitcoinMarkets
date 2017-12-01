@@ -13,32 +13,27 @@ var core_1 = require("@angular/core");
 var config_service_1 = require("../services/config.service");
 var coinmarketcap_service_1 = require("../services/coinmarketcap.service");
 var context_service_1 = require("../services/context.service");
-var bittrex_service_1 = require("../services/bittrex.service");
+var arbitrage_service_1 = require("../services/arbitrage.service");
 var asset_group_1 = require("../models/asset-group");
 var DashboardComponent = (function () {
-    function DashboardComponent(configService, bittrex, coinMarketCapService, contextService) {
+    function DashboardComponent(configService, coincap, contextService, arbitrageService) {
         this.configService = configService;
-        this.bittrex = bittrex;
-        this.coinMarketCapService = coinMarketCapService;
+        this.coincap = coincap;
         this.contextService = contextService;
+        this.arbitrageService = arbitrageService;
+        this.isLoading = false;
     }
     DashboardComponent.prototype.ngOnInit = function () {
         var _this = this;
-        this.contextService.context$.subscribe(function (context) { return _this.context = context; });
-        this.refresh();
+        this.contextService.context$.subscribe(function (context) {
+            _this.context = context;
+            _this.refresh();
+        });
     };
     DashboardComponent.prototype.setInterval = function (interval) {
         this.contextService.setInterval(interval);
     };
     DashboardComponent.prototype.refresh = function () {
-        var _this = this;
-        this.configService.getGroupConfig().then(function (groups) {
-            _this.coinMarketCapService.getAssets().then(function (assets) {
-                //Aggregate all assets
-                _this.global = new asset_group_1.AssetGroup('all', assets, '');
-                _this.createAssetGroups(assets, groups);
-            });
-        });
     };
     DashboardComponent.prototype.createAssetGroups = function (assets, groups) {
         var ags = [];
@@ -57,7 +52,7 @@ DashboardComponent = __decorate([
         templateUrl: './dashboard.component.html',
         styleUrls: ['./dashboard.component.css']
     }),
-    __metadata("design:paramtypes", [config_service_1.ConfigService, bittrex_service_1.BittrexService, coinmarketcap_service_1.CoinMarketCapService, context_service_1.ContextService])
+    __metadata("design:paramtypes", [config_service_1.ConfigService, coinmarketcap_service_1.CoinMarketCapService, context_service_1.ContextService, arbitrage_service_1.ArbitrageService])
 ], DashboardComponent);
 exports.DashboardComponent = DashboardComponent;
 //# sourceMappingURL=dashboard.component.js.map

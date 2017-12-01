@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Core.Config;
 using RestEase;
+using Core.Models;
+using Core.Contracts;
 
 namespace Core.DbService
 {
@@ -125,46 +127,19 @@ namespace Core.DbService
             }
         }
 
-        public void UpdateArbitragePair(string baseExchange, string arbExchange, string symbol, bool isTrade = false, bool isError = false, bool isOpportunity = false, object payload = null)
+        public void SaveArbitragePair(IArbitragePairDTO dto)
         {
-            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateArbitragePair", 15,
+            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.SaveArbitragePair", 15,
                 new SqlParameter[]
                 {
-                    new SqlParameter { ParameterName = "@baseExchange", Value = baseExchange },
-                    new SqlParameter { ParameterName = "@arbExchange", Value = arbExchange },
-                    new SqlParameter { ParameterName = "@symbol", Value = symbol },
-                    new SqlParameter { ParameterName = "@isTrade", Value = isTrade },
-                    new SqlParameter { ParameterName = "@isError", Value = isError },
-                    new SqlParameter { ParameterName = "@isOpportunity", Value = isOpportunity },
-                    new SqlParameter { ParameterName = "@meta", Value = (payload == null) ? "" : JsonConvert.SerializeObject(payload)}
-                });
-        }
-
-        public void UpdateArbitragePairById(int id, bool isTrade = false, bool isError = false, bool isOpportunity = false, bool isFunded = false, object payload = null)
-        {
-            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.UpdateArbitragePairById", 15,
-                new SqlParameter[]
-                {
-                    new SqlParameter { ParameterName = "@Id", Value = id },
-                    new SqlParameter { ParameterName = "@isTrade", Value = isTrade },
-                    new SqlParameter { ParameterName = "@isError", Value = isError },
-                    new SqlParameter { ParameterName = "@isOpportunity", Value = isOpportunity },
-                    new SqlParameter { ParameterName = "@isFunded", Value = isFunded },
-                    new SqlParameter { ParameterName = "@meta", Value = (payload == null) ? "" : JsonConvert.SerializeObject(payload)}
-                });
-
-        }
-
-        public void InsertArbitrageOpportunity(int pairId, decimal basePrice, decimal arbPrice, decimal spread, decimal threshold)
-        {
-            DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertOpportunity", 15,
-                new SqlParameter[]
-                {
-                    new SqlParameter { ParameterName = "@pairId", Value = pairId },
-                    new SqlParameter { ParameterName = "@basePrice", Value = basePrice },
-                    new SqlParameter { ParameterName = "@arbPrice", Value = arbPrice},
-                    new SqlParameter { ParameterName = "@spread", Value = spread},
-                    new SqlParameter { ParameterName = "@threshold", Value = threshold}
+                    new SqlParameter { ParameterName = "@id", Value = dto.Id },
+                    new SqlParameter { ParameterName = "@status", Value = dto.Status },
+                    new SqlParameter { ParameterName = "@type", Value = dto.Type },
+                    new SqlParameter { ParameterName = "@tradeThreshold", Value = dto.TradeThreshold },
+                    new SqlParameter { ParameterName = "@increment", Value = dto.Increment },
+                    new SqlParameter { ParameterName = "@tickSize", Value = dto.TickSize },
+                    new SqlParameter { ParameterName = "@askSpread", Value = dto.AskSpread },
+                    new SqlParameter { ParameterName = "@bidSpread", Value = dto.BidSpread }
                 });
         }
 
@@ -311,27 +286,28 @@ namespace Core.DbService
             }
         }
 
-        public void InsertBalanceSnapshot(string currency, string exchange, decimal available, decimal held, decimal price, int processId)
+        public void InsertBalanceSnapshot(string currency, string baseExchange, string counterExchange, decimal total, decimal price, int processId = 0)
         {
             DbServiceHelper.ExecuteNonQuery(sqlConnectionString, "dbo.InsertBalanceSnapshot", 15,
                 new SqlParameter[]
                 {
                     new SqlParameter { ParameterName = "@currency", Value = currency },
-                    new SqlParameter { ParameterName = "@exchange", Value = exchange },
-                    new SqlParameter { ParameterName = "@available", Value = available},
-                    new SqlParameter { ParameterName = "@held", Value = held},
+                    new SqlParameter { ParameterName = "@baseExchange", Value = baseExchange },
+                    new SqlParameter { ParameterName = "@counterExchange", Value = counterExchange },
+                    new SqlParameter { ParameterName = "@total", Value = total},
                     new SqlParameter { ParameterName = "@price", Value = price},
                     new SqlParameter { ParameterName = "@processId", Value = processId}
                 });
         }
 
-        public IEnumerable<DbBalance> GetBalanceSnapshots(string exchange = "", string currency = "", DateTime? fromDate = null, int processId = 0)
+        public IEnumerable<DbBalance> GetBalanceSnapshots(string currency = "", string baseExchange = "", string counterExchange = "", DateTime? fromDate = null, int processId = 0)
         {
             using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetBalances", 15,
                 new SqlParameter[]
                 {
-                        new SqlParameter { ParameterName = "@exchange", Value = exchange },
                         new SqlParameter { ParameterName = "@currency", Value = currency },
+                        new SqlParameter { ParameterName = "@baseExchange", Value = baseExchange },
+                        new SqlParameter { ParameterName = "@counterExchange", Value = counterExchange },   
                         new SqlParameter { ParameterName = "@fromDate", Value = fromDate },
                         new SqlParameter { ParameterName = "@processId", Value = processId }
                 }))
@@ -360,13 +336,16 @@ namespace Core.DbService
                 });
         }
 
-        public DbArbitragePair GetArbitragePair(int pairId)
+        public IEnumerable<DbHeroStat> GetHeroStats(int hours)
         {
-            return (DbArbitragePair)DbServiceHelper.ExecuteScalar(sqlConnectionString, "dbo.GetArbitragePair", 15,
-                            new SqlParameter[]
-                            {
-                    new SqlParameter { ParameterName = "@id", Value = pairId }
-                            });
+            using (var reader = DbServiceHelper.ExecuteQuery(sqlConnectionString, "dbo.GetHeroStats", 15,
+                new SqlParameter[]
+                {
+                        new SqlParameter { ParameterName = "@hours", Value = hours }
+                }))
+            {
+                return reader.ToList<DbHeroStat>();
+            }
         }
     }
 }

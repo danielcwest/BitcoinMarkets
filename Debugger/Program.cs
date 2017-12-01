@@ -53,9 +53,11 @@ namespace Debugger
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
                 var binance = (Binance)exchanges["Binance"];
 
-                var engine = new ArbitrageEngine(hitbtc, binance, dbService, arbitrageConfig.Gmail);
+               // var order = hitbtc.GetOrder("8188127779").Result;
 
-                engine.StartEngine(masterToken.Token, 35);
+                var engine = new ArbitrageEngine(hitbtc, binance, dbService, arbitrageConfig.Gmail);
+    
+                //engine.StartEngine(masterToken.Token, 1000);
 
                 //    var trades = binance.GetTrades("ETHBTC").Result;
                 // var gdax = (GdaxSocket)exchanges["Gdax"];
@@ -64,7 +66,7 @@ namespace Debugger
 
                 // hitbtc.SubscribeTrades("ETHBTC");
 
-              //  Console.ReadKey();
+                //  Console.ReadKey();
 
                 logger.Trace("Complete");
             }

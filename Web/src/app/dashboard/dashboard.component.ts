@@ -3,8 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { ConfigService } from '../services/config.service';
 import { CoinMarketCapService } from '../services/coinmarketcap.service';
 import { ContextService } from '../services/context.service';
-import { BittrexService } from '../services/bittrex.service';
+import { ArbitrageService } from '../services/arbitrage.service';
 
+import { HeroStat } from '../models/hero-stat';
 import { Asset } from '../models/asset';
 import { AssetGroup } from '../models/asset-group';
 import { ConfigGroup } from '../models/config-group';
@@ -22,27 +23,23 @@ export class DashboardComponent implements OnInit {
 
     assetGroups: AssetGroup[];
     global: AssetGroup;
+	isLoading: boolean = false;
 
-    constructor(private configService: ConfigService, private bittrex: BittrexService, private coinMarketCapService: CoinMarketCapService, private contextService: ContextService) { }
+	constructor(private configService: ConfigService, private coincap: CoinMarketCapService, private contextService: ContextService, private arbitrageService: ArbitrageService) { }
 
     ngOnInit() {
-        this.contextService.context$.subscribe(context => this.context = context);
-
-        this.refresh();
+		this.contextService.context$.subscribe(context => {
+			this.context = context;
+			this.refresh();
+		});
     }
 
     setInterval(interval: string): void {
         this.contextService.setInterval(interval);
     }
 
-    refresh(): void {
-        this.configService.getGroupConfig().then(groups => {
-            this.coinMarketCapService.getAssets().then(assets => {
-                //Aggregate all assets
-                this.global = new AssetGroup('all', assets, '');
-                this.createAssetGroups(assets, groups);
-            });
-        });
+	refresh(): void {
+		
     }
 
     createAssetGroups(assets: Asset[], groups: ConfigGroup[]): void {

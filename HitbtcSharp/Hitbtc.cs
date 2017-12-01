@@ -23,8 +23,6 @@ namespace HitbtcSharp
     {
         IHitbtcApi _hitbtc;
         ExchangeConfig _config;
-        RpcClient client;
-        OrderBookCache cache;
 
         private string name;
         public string Name
@@ -151,23 +149,31 @@ namespace HitbtcSharp
             await _hitbtc.CancelOrder(orderId);
         }
 
+        //public async Task<IOrder> CheckOrder(string orderId, string symbol = "")
+        //{
+        //    HitbtcOrder order = null;
+        //    int offset = 0;
+
+        //    while (order == null && offset < 50000)//Kill switch, shitty code
+        //    {
+        //        var orders = _hitbtc.GetOrders(offset).Result;
+
+        //        offset += 100;
+
+        //        logger.Trace("Checking orders {0} - {1}", offset - 100, offset);
+
+        //        order = orders.Where(o => o.Uuid == orderId).FirstOrDefault();
+        //    }
+
+        //    var trades = await GetTradesForOrder(order.symbol, order.Uuid);
+
+        //    return new Order(order, trades);
+        //}
+
         public async Task<IOrder> CheckOrder(string orderId, string symbol = "")
         {
-            string dateStr = DateTime.UtcNow.AddHours(-1).ToString("o");
-            var orders = await _hitbtc.GetOrdersByDate(dateStr);
-            var order = orders.Where(o => o.Uuid == orderId).FirstOrDefault();
-
-            if(order != null)
-            {
-                var trades = await GetTradesForOrder(order.symbol, order.Uuid);
-
-                return new Order(order, trades);
-            }
-            else
-            {
-                return null;
-            }
-
+            var trades = await _hitbtc.GetTradesForOrder(orderId);
+            return new Order(trades);
         }
 
         //Hitbtc requires a transfer from trading to main before we can withdrawal

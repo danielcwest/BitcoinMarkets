@@ -11,13 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var Rx_1 = require("rxjs/Rx");
+var app_context_1 = require("../models/app-context");
 var ContextService = (function () {
     function ContextService() {
         //dashboard/market summary
         this.intervals = ['1h', '24h', '7d'];
-        this.contextSource = new Rx_1.BehaviorSubject({ interval: '24h', assetCount: 250, selectedBaseExchange: 'Bittrex', selectedArbExchange: 'Hitbtc' });
+        this.contextSource = new Rx_1.BehaviorSubject(new app_context_1.AppContext());
         this.context$ = this.contextSource.asObservable();
-        this.context = { interval: '24h', assetCount: 250, selectedBaseExchange: 'Bittrex', selectedArbExchange: 'Hitbtc' };
+        this.context = new app_context_1.AppContext();
     }
     ContextService.prototype.setInterval = function (interval) {
         if (this.intervals.indexOf(interval) != -1) {
@@ -31,12 +32,7 @@ var ContextService = (function () {
             this.contextSource.next(this.context);
         }
     };
-    ContextService.prototype.setBaseExchange = function (exchange) {
-        this.context.selectedBaseExchange = exchange;
-        this.contextSource.next(this.context);
-    };
-    ContextService.prototype.setArbExchange = function (exchange) {
-        this.context.selectedArbExchange = exchange;
+    ContextService.prototype.notify = function () {
         this.contextSource.next(this.context);
     };
     return ContextService;

@@ -10,69 +10,67 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
-var arbitrage_market_1 = require("../models/arbitrage-market");
 var context_service_1 = require("../services/context.service");
-var exchange_service_1 = require("../services/exchange.service");
 var arbitrage_service_1 = require("../services/arbitrage.service");
+var coinmarketcap_service_1 = require("../services/coinmarketcap.service");
 var ArbitrageComponent = (function () {
-    function ArbitrageComponent(arbitrageService, exchangeService, contextService) {
+    function ArbitrageComponent(arbitrageService, contextService, coincap) {
         this.arbitrageService = arbitrageService;
-        this.exchangeService = exchangeService;
         this.contextService = contextService;
-        this.exchanges = ['Bittrex', 'Hitbtc', 'Poloniex', 'Liqui', 'Livecoin', 'Tidex', 'Etherdelta', 'Bitz', 'Nova', 'Binance'];
-        this.arbitrageMarkets = [];
+        this.coincap = coincap;
         this.sortProperty = 'symbol';
         this.sortAscending = true;
         this.isLoading = false;
+        this.arbitragePairs = [];
     }
     ArbitrageComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.contextService.context$.subscribe(function (context) {
             _this.context = context;
-            _this.refreshMarkets();
+            _this.refresh();
         });
     };
-    ArbitrageComponent.prototype.refreshMarkets = function () {
+    ArbitrageComponent.prototype.refresh = function () {
         var _this = this;
         this.isLoading = true;
-        this.arbitrageService.refreshMarkets().then(function (response) {
-            _this.arbitrageMarkets = response;
+        this.arbitrageService.getArbitragePairs().then(function (pairs) {
+            _this.arbitragePairs = pairs;
             _this.isLoading = false;
         });
+        this.arbitrageService.getHeroStats().then(function (heroStats) { return _this.heroStats = heroStats; });
     };
     ArbitrageComponent.prototype.processMarkets = function () {
-        var _this = this;
-        var arbMkts = [];
-        this.baseExchangeMarkets.forEach(function (market) {
-            if (_this.arbExchangeMarkets.containsKey(market) && _this.arbExchangeMarkets.getValue(market).volume > 10) {
-                arbMkts.push(new arbitrage_market_1.ArbitrageMarket(_this.baseExchangeMarkets.getValue(market), _this.arbExchangeMarkets.getValue(market)));
-            }
-        });
-        this.arbitrageMarkets = arbMkts;
+    };
+    ArbitrageComponent.prototype.getTradeCount = function (pair) {
+        if (!this.heroStats || !this.heroStats.size)
+            return '';
+        if (this.heroStats.containsKey(pair.symbol)) {
+            return this.heroStats.getValue(pair.symbol).tradeCount;
+        }
+        else {
+            return '';
+        }
+    };
+    ArbitrageComponent.prototype.getCommission = function (pair) {
+        if (!this.heroStats || !this.heroStats.size)
+            return 0;
+        if (this.heroStats.containsKey(pair.symbol)) {
+            return this.heroStats.getValue(pair.symbol).commission;
+        }
+        else {
+            return 0;
+        }
+    };
+    ArbitrageComponent.prototype.setInterval = function (interval) {
+        this.contextService.setInterval(interval);
     };
     ArbitrageComponent.prototype.changeSort = function (sortProp) {
-        if (this.sortProperty == sortProp) {
+        if (sortProp && this.sortProperty == sortProp) {
             this.sortAscending = !this.sortAscending;
         }
-        else {
+        else if (sortProp) {
             this.sortAscending = true;
             this.sortProperty = sortProp;
-        }
-    };
-    ArbitrageComponent.prototype.onArbExchangeChange = function (exchange) {
-        if (exchange != this.context.selectedBaseExchange) {
-            this.contextService.setArbExchange(exchange);
-        }
-        else {
-            console.log('ERROR');
-        }
-    };
-    ArbitrageComponent.prototype.onBaseExchangeChange = function (exchange) {
-        if (exchange != this.context.selectedArbExchange) {
-            this.contextService.setBaseExchange(exchange);
-        }
-        else {
-            console.log('ERROR');
         }
     };
     return ArbitrageComponent;
@@ -83,7 +81,7 @@ ArbitrageComponent = __decorate([
         templateUrl: './arbitrage.component.html',
         styleUrls: ['./arbitrage.component.css']
     }),
-    __metadata("design:paramtypes", [arbitrage_service_1.ArbitrageService, exchange_service_1.ExchangeService, context_service_1.ContextService])
+    __metadata("design:paramtypes", [arbitrage_service_1.ArbitrageService, context_service_1.ContextService, coinmarketcap_service_1.CoinMarketCapService])
 ], ArbitrageComponent);
 exports.ArbitrageComponent = ArbitrageComponent;
 //# sourceMappingURL=arbitrage.component.js.map

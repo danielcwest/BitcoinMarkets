@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
+import { Headers, Http, Response } from '@angular/http';
 
-import { ArbitrageMarket } from '../models/arbitrage-market';
+import { ArbitragePair } from '../models/arbitrage-pair';
+import { Asset } from '../models/asset';
 import { IExchangeMarket } from '../models/exchange-market';
 import { ContextService } from './context.service';
-import { ExchangeService } from './exchange.service';
-import { BittrexService } from './bittrex.service';
+import { CoinMarketCapService } from './coinmarketcap.service';
 import { AppContext } from '../models/app-context';
 import { OrderBook } from '../models/order-book';
 import { OrderBookEntry } from '../models/order-book-entry';
+import { HeroStat } from '../models/hero-stat';
 
 import * as Collections from 'typescript-collections';
 
@@ -17,73 +19,87 @@ export class ArbitrageService {
 
     context: AppContext;
 
-    exchanges: string[] = ['Bittrex', 'Hitbtc', 'Poloniex', 'Liqui', 'Livecoin', 'Tidex', 'Etherdelta', 'Bitz', 'Nova', 'Binance'];
+	arbitragePairs: Collections.Dictionary<number, ArbitragePair>;
 
-    // TODO: make dynamic
-    exchangeFees: { [exchange: string]: number } = { 'Bittrex': .0025, 'Hitbtc': .0010, 'Poloniex': .0025, 'Binance': .0010 };
-
-    arbitrageMarkets: Collections.Dictionary<string, ArbitrageMarket>;
-
-    exchangeMarketSymbols: Collections.Dictionary<string, Collections.Dictionary<string, boolean>>;
-
-    baseExchangeMarkets: Collections.Dictionary<string, IExchangeMarket>;
-    arbExchangeMarkets: Collections.Dictionary<string, IExchangeMarket>;
-
-    baseExchangeMarket: IExchangeMarket;
-    arbExchangeMarket: IExchangeMarket;
-
-    baseOrderBook: OrderBook;
-    arbOrderBook: OrderBook;
-
-    constructor(private contextService: ContextService, private exchangeService: ExchangeService) {
+	constructor(private http: Http, private contextService: ContextService, private coincap: CoinMarketCapService) {
 
         this.contextService.context$.subscribe(context => {
             this.context = context;
-            this.refreshMarkets();
         });
     }
 
+	getArbitragePairs(): Promise<ArbitragePair[]> {
+		return this.http.get(`/api/arbitrage/get`).toPromise().then(response => {
+			let result = response.json() as ArbitragePair[];
 
+			const dic = new Collections.Dictionary<number, ArbitragePair>();
+			result.forEach(pair => {
+					dic.setValue(pair.id, pair);				
+			});
+			this.arbitragePairs = dic;
 
-    refreshMarkets(): Promise<ArbitrageMarket[]> {
-        return new Promise((resolve, reject) => {
-            const promises = [];
+			return result;
+		}).catch(this.handleError);
+	}
 
-            promises.push(this.exchangeService.getMarketSummaries(this.context.selectedBaseExchange));
-            promises.push(this.exchangeService.getMarketSummaries(this.context.selectedArbExchange));
-            Promise.all(promises).then(response => {
-                const baseExchangeMarkets = response[0];
-                const arbExchangeMarkets = response[1];
+	getArbitragePair(pairId: number): Promise<ArbitragePair> {
+		return this.http.get(`/api/arbitrage/getpair?id=${pairId}`).toPromise().then(response => {
+			let result = response.json() as ArbitragePair;
 
-                const dic = new Collections.Dictionary<string, ArbitrageMarket>();
-                baseExchangeMarkets.forEach(market => {
-                    if (arbExchangeMarkets.containsKey(market)) {
-                        dic.setValue(market, new ArbitrageMarket(baseExchangeMarkets.getValue(market), arbExchangeMarkets.getValue(market)));
-                    }
-                });
-                this.arbitrageMarkets = dic;
-                resolve(this.arbitrageMarkets.values());
-            });
-        });
-    }
+			this.arbitragePairs.setValue(result.id, result);
 
-    refreshSymbols(): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            let promises = [];
+			return result;
+		}).catch(this.handleError);	}
 
-            this.exchanges.forEach(exchange => promises.push(this.exchangeService.getSymbols(exchange)))
+	saveArbitragePair(pair: ArbitragePair): Promise<boolean> {
+		return this.http.post(`/api/arbitrage/save`, pair).toPromise().then(result => true);
+	}
 
-            Promise.all(promises).then(response => {
-                let i = 0;
-                this.exchanges.forEach(exchange => {
-                    this.exchangeMarketSymbols.setValue(exchange, response[i++]);
-                });
-                resolve(true);
-            });
-        });
-    }
+	getStats(): Promise<Collections.Dictionary<string, HeroStat>> {
+		return this.http.get(`/api/arbitrage/getherostats?interval=${this.context.interval}`).toPromise().then(response => {
+			let result = response.json() as HeroStat[];
+			const dic = new Collections.Dictionary<string, HeroStat>();
+			result.forEach(stat => {
+				dic.setValue(stat.symbol, stat);
+			});
+			return dic;
+		}).catch(this.handleError);
+	}
 
-    getArbitrageMarket(symbol: string): ArbitrageMarket {
-        return this.arbitrageMarkets.getValue(symbol);
-    }
+	getHeroStats(): Promise<Collections.Dictionary<string, HeroStat>> {
+
+		var baseTickers = new Collections.Dictionary<string, Asset>();
+		return this.coincap.getBaseTickers().then(tickers => {
+			tickers.forEach(t => {
+				if (t.symbol == 'BTC' || t.symbol == 'ETH')
+					baseTickers.setValue(t.symbol, t);
+			});
+
+			var total = 0;
+			var trades = 0;
+			return this.getStats().then(stats => {
+				stats.forEach(s => {
+					let stat = stats.getValue(s);
+
+					if (stat.symbol.endsWith('BTC'))
+						stat.commission = stat.commission * baseTickers.getValue('BTC').price_usd;
+					else if (stat.symbol.endsWith('ETH'))
+						stat.commission = stat.commission * baseTickers.getValue('ETH').price_usd;
+
+					total += stat.commission;
+					trades += stat.tradeCount;
+				});
+
+				var totalStat = <HeroStat>{ symbol: 'TOTAL', commission: total, tradeCount: trades };
+				stats.setValue(totalStat.symbol, totalStat);
+				return stats;
+			});
+		});
+	}
+
+	private handleError(error: any): Promise<any> {
+		console.log(error);
+		//console.error('An error occurred', error);
+		return Promise.reject(error.message || error);
+	}
 }

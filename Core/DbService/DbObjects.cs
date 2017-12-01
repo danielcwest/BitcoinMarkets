@@ -8,11 +8,12 @@ namespace Core.DbService
         public string BaseExchange;
         public string CounterExchange;
         public string Symbol;
+        public string Status;
+        public string Type;
         public string BaseSymbol;
         public string CounterSymbol;
         public string BaseCurrency;
         public string MarketCurrency;
-        public DateTime LastRunUtc;
         public decimal TradeThreshold;
         public decimal SpreadThreshold;
         public decimal WithdrawalThreshold;
@@ -110,18 +111,25 @@ namespace Core.DbService
         public decimal AskSpread;
         public decimal BidSpread;
         public int ProcessId;
+        public decimal Commission;
     }
 
     public class DbBalance
     {
         public string Currency;
-        public string Exchange;
-        public decimal Available;
-        public decimal Held;
+        public string BaseExchange;
+        public string CounterExchange;
         public decimal Total;
-        public decimal Price;
+        public decimal BtcValue;
         public int ProcessId;
         public DateTime CreatedUtc;
+    }
+
+    public class DbHeroStat
+    {
+        public string Symbol;
+        public decimal Commission;
+        public int TradeCount;
     }
 
 }

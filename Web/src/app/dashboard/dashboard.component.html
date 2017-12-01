@@ -1,48 +1,12 @@
 <div class="row mt-4">
 	<div class="col">
-		<h1>Market Summary</h1>
+		<h1>Dashboard</h1>
 	</div>
 	<div class="col">
-		<div class="btn-group float-right interval-buttons" role="group" aria-label="Basic example">
-			<button type="button" class="btn btn-link interval" (click)="setInterval('1h')" [class.active]="context.interval == '1h'">1h</button>
-			<button type="button" class="btn btn-link interval" (click)="setInterval('24h')" [class.active]="context.interval == '24h'">24h</button>
-			<button type="button" class="btn btn-link interval" (click)="setInterval('7d')" [class.active]="context.interval == '7d'">7d</button>
-		</div>
 	</div>
+</div>
+<hr />
+<div *ngIf="isLoading" class="load">
+	<div class="loader mx-auto"></div>
 </div>
 
-<div class="jumbotron jumbotron-fluid">
-	<div class="container" *ngIf="global">
-		<div class="row text-center">
-			<div class="col">
-				<h1 class="display-4">${{global.market_cap_usd | commaSeparatedNumber}}</h1>
-			</div>
-			<div class="col">
-				<h1 class="display-4">
-					<app-price-change [priceChange]="global" [shortHand]="true"></app-price-change>
-				</h1>
-			</div>
-		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col" *ngFor="let group of assetGroups">
-		<div class="card">
-			<div class="card-body">
-				<h4 class="card-title">${{group.market_cap_usd | commaSeparatedNumber}}</h4>
-				<p class="card-text" *ngIf="context.interval == '1h'">{{group.percent_change_1h}}%</p>
-				<p class="card-text" *ngIf="context.interval == '24h'">{{group.percent_change_24h}}%</p>
-				<p class="card-text" *ngIf="context.interval == '7d'">{{group.percent_change_7d}}%</p>
-			</div>
-			<ul class="list-group list-group-flush">
-				<li *ngFor="let item of group.assets" class="list-group-item">
-					<img src="https://files.coinmarketcap.com/static/img/coins/16x16/{{item.id}}.png" class="currency-logo">{{item.name}}
-					<span *ngIf="context.interval == '1h'" class="price" [class.price-down]="item.percent_change_1h < 0" [class.price-up]="item.percent_change_1h > 0">{{item.price_usd}}</span>
-					<span *ngIf="context.interval == '24h'" class="price" [class.price-down]="item.percent_change_24h < 0" [class.price-up]="item.percent_change_24h > 0">{{item.price_usd}}</span>
-					<span *ngIf="context.interval == '7d'" class="price" [class.price-down]="item.percent_change_7d < 0" [class.price-up]="item.percent_change_7d > 0">{{item.price_usd}}</span>
-
-				</li>
-			</ul>
-		</div>
-	</div>
-</div>

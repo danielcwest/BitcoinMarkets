@@ -8,7 +8,7 @@ import { DetailComponent } from './arbitrage/detail/detail.component';
 const routes: Routes = [
     {
         path: '',
-        redirectTo: '/dashboard',
+        redirectTo: '/arbitrage',
         pathMatch: 'full'
     },
     {
@@ -20,7 +20,7 @@ const routes: Routes = [
         component: ArbitrageComponent
     },
     {
-        path: 'arbitrage/:ticker',
+        path: 'arbitrage/:pairId',
         component: DetailComponent
     }
 ];

@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { CommaSeparatedNumberPipe } from './comma-separated-number.pipe';
-import { PriceChangeComponent } from './price-change/price-change.component';
 import { NumeralPipe } from './numeral.pipe';
 import { BtcPricePipe } from './btc-price.pipe';
 import { OrderByPipe } from './order-by.pipe';
@@ -11,7 +10,7 @@ import { OrderByPipe } from './order-by.pipe';
     imports: [
         CommonModule
     ],
-    declarations: [CommaSeparatedNumberPipe, PriceChangeComponent, NumeralPipe, BtcPricePipe, OrderByPipe],
-    exports: [CommaSeparatedNumberPipe, PriceChangeComponent, NumeralPipe, BtcPricePipe, OrderByPipe]
+    declarations: [CommaSeparatedNumberPipe, NumeralPipe, BtcPricePipe, OrderByPipe],
+    exports: [CommaSeparatedNumberPipe, NumeralPipe, BtcPricePipe, OrderByPipe]
 })
 export class SharedModule { }

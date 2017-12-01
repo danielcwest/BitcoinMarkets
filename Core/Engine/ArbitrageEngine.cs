@@ -47,9 +47,7 @@ namespace Core.Engine
             {
                 Console.WriteLine("ArbitrageEngine Starting ...");
 
-                var preSnap = TakeBalanceSnapshot().Result;
-
-                var pairs = dbService.GetArbitragePairs("market", "Hitbtc", "Binance").Select(p => new ArbitragePair(p));
+                var pairs = dbService.GetArbitragePairs("market", baseExchange.Name, counterExchange.Name).Select(p => new ArbitragePair(p));
 
                 foreach (var pair in pairs)
                 {
@@ -65,40 +63,45 @@ namespace Core.Engine
                     EndWorkForPair(pair);
                 }
 
+                TakeBalanceSnapshot().Wait();
+
                 CloseConnections();
-
-                var postSnap = TakeBalanceSnapshot().Result;
-
-                ProcessSnapshots(pairs, preSnap, postSnap);
             }
         }
 
-        public async Task<ConcurrentDictionary<string, BalanceSnapshot>> TakeBalanceSnapshot()
+        public async Task TakeBalanceSnapshot()
         {
-            var snapshot = new ConcurrentDictionary<string, BalanceSnapshot>();
-
             try
             {
-                var baseBalances = await baseExchange.GetBalances();
-                var counterBalances = await counterExchange.GetBalances();
+                var pairs = dbService.GetArbitragePairs("", baseExchange.Name, counterExchange.Name).Select(p => new ArbitragePair(p));
 
-                foreach (var b in baseBalances.Select(b => new BalanceSnapshot(b)).Where(b => b.Total > 0))
-                {
-                    snapshot[b.Currency] = b;
-                }
+                var summaries = await baseExchange.MarketSummaries();
+                var tickers = summaries.Where(s => s.BaseCurrency == "BTC" || s.QuoteCurrency == "BTC").ToDictionary(s => s.QuoteCurrency);
 
-                foreach (var c in counterBalances.Select(c => new BalanceSnapshot(c)).Where(c => c.Total > 0))
+                var bs = await baseExchange.GetBalances();
+                var cs = await counterExchange.GetBalances();
+
+                var baseBalances = bs.ToDictionary(b => b.Currency);
+                var counterBalances = cs.ToDictionary(c => c.Currency);
+
+                //First take BTC snapshot
+                if (tickers.ContainsKey("BTC"))
                 {
-                    if (snapshot.ContainsKey(c.Currency))
-                    {
-                        var snap = snapshot[c.Currency];
-                        snap.Total += c.Total;
-                        snapshot[c.Currency] = snap;
-                    }
+                    InsertBalanceSnapshot("USD", tickers["BTC"].Last, baseBalances, counterBalances);
+                    InsertBalanceSnapshot("BTC", 1, baseBalances, counterBalances);
                 }
-                //logger.Trace(JsonConvert.SerializeObject(balanceSnapshot, Formatting.Indented));
+                else
+                    logger.Error("No Ticker for BTC Balance Snapshot");
+
+                foreach (var pair in pairs.Where(p => p.BaseCurrency == "BTC"))
+                {
+                    if (tickers.ContainsKey(pair.MarketCurrency))
+                        InsertBalanceSnapshot(pair.MarketCurrency, tickers[pair.MarketCurrency].Last, baseBalances, counterBalances);
+                    else
+                        logger.Error("No Ticker for {0} Balance Snapshot", pair.MarketCurrency);
+                }
             }
-            catch(ApiException ae)
+            catch (ApiException ae)
             {
                 logger.Error(JsonConvert.SerializeObject(JsonConvert.DeserializeObject(ae.Content), Formatting.Indented));
             }
@@ -106,8 +109,24 @@ namespace Core.Engine
             {
                 logger.Error(e);
             }
+        }
 
-            return snapshot;
+        private void InsertBalanceSnapshot(string currency, decimal price, Dictionary<string, ICurrencyBalance> baseBalances, Dictionary<string, ICurrencyBalance> counterBalances, int processId = 0)
+        {
+            decimal total = 0m;
+
+            if (baseBalances.ContainsKey(currency))
+            {
+                total += baseBalances[currency].Available + baseBalances[currency].Held;
+            }
+
+            if (counterBalances.ContainsKey(currency))
+            {
+                total += counterBalances[currency].Available + counterBalances[currency].Held;
+            }
+
+            if (total < 0.01m) total = 0m;
+            dbService.InsertBalanceSnapshot(currency, baseExchange.Name, counterExchange.Name, total, price, processId);
         }
 
         public void ProcessSnapshots(IEnumerable<ArbitragePair> pairs, ConcurrentDictionary<string, BalanceSnapshot> preSnapshot, ConcurrentDictionary<string, BalanceSnapshot> postSnapshot)
@@ -116,9 +135,20 @@ namespace Core.Engine
             {
                 try
                 {
+                    decimal commission = 0m;
+
                     Dictionary<string, object> changes = new Dictionary<string, object>();
 
                     var summaries = baseExchange.MarketSummaries().Result.ToDictionary(s => s.MarketName);
+
+                    var btcTicker = summaries["BTCUSD"];
+                    var btcPre = preSnapshot["BTC"];
+                    var btcPost = postSnapshot["BTC"];
+
+
+                    var ethTicker = summaries["ETHUSD"];
+                    var ethPre = preSnapshot["ETH"];
+                    var ethPost = postSnapshot["ETH"];
 
                     foreach (var pair in pairs)
                     {
@@ -129,36 +159,31 @@ namespace Core.Engine
 
                         if (marketPre.Total != marketPost.Total)
                         {
-                            decimal diff = marketPost.Total - marketPre.Total;
-
-                            changes.Add(pair.MarketCurrency, new { Pre = marketPre.Total, Post = marketPost.Total, RawDiff = diff, Price = ticker.Last, Diff = diff * ticker.Last });
+                            decimal bPrice = (pair.BaseCurrency == "BTC") ? btcTicker.Last : ethTicker.Last;
+                            decimal diff = (marketPost.Total - marketPre.Total) * ticker.Last * bPrice;
+                            commission += diff;
+                            changes.Add(pair.Symbol, new { Pre = marketPre.Total, Post = marketPost.Total, RawDiff = diff, Price = ticker.Last, Commission = diff });
                         }
                     }
 
-                    var btcTicker = summaries["BTCUSD"];
-                    var btcPre = preSnapshot["BTC"];
-                    var btcPost = postSnapshot["BTC"];
-
                     if (btcPre.Total != btcPost.Total)
                     {
-                        decimal diff = btcPost.Total - btcPre.Total;
-
-                        changes.Add("BTC", new { Pre = btcPre.Total, Post = btcPost.Total, RawDiff = diff, Price = btcTicker.Last, Diff = diff * btcTicker.Last });
+                        decimal diff = (btcPost.Total - btcPre.Total) * btcTicker.Last;
+                        commission += diff;
+                        changes.Add("BTC", new { Pre = btcPre.Total, Post = btcPost.Total, RawDiff = diff, Price = btcTicker.Last, Commission = diff });
                     }
-
-                    var ethTicker = summaries["ETHUSD"];
-                    var ethPre = preSnapshot["ETH"];
-                    var ethPost = postSnapshot["ETH"];
 
                     if (ethPre.Total != ethPost.Total)
                     {
-                        decimal diff = ethPost.Total - ethPre.Total;
-
-                        changes.Add("ETH", new { Pre = ethPre.Total, Post = ethPost.Total, RawDiff = diff, Price = ethTicker.Last, Diff = diff * ethTicker.Last });
+                        decimal diff = (ethPost.Total - ethPre.Total) * ethTicker.Last;
+                        commission += diff;
+                        changes.Add("ETH", new { Pre = ethPre.Total, Post = ethPost.Total, RawDiff = diff, Price = ethTicker.Last, Commission = diff });
                     }
 
                     if (changes.Any())
                     {
+                        changes.Add("TOTAL", new { Pre = ethPre.Total, Post = ethPost.Total, RawDiff = 0, Price = 0, Commission = commission });
+
                         logger.Trace("!!!SNAPSHOT!!!");
                         logger.Trace(JsonConvert.SerializeObject(changes, Formatting.Indented));
                     }
@@ -190,11 +215,12 @@ namespace Core.Engine
                         decimal buy = Helper.RoundPrice(pair, counterSell - (counterSell * pair.BidSpread));
                         decimal sell = Helper.RoundPrice(pair, counterBuy + (counterBuy * pair.AskSpread));
 
-                        if(buy >= counterSell){
+                        if (buy >= counterSell)
+                        {
                             buy -= pair.TickSize;
                         }
 
-                        if(sell <= counterBuy)
+                        if (sell <= counterBuy)
                         {
                             sell += pair.TickSize;
                         }
@@ -271,7 +297,7 @@ namespace Core.Engine
                     var baseOrder = await baseExchange.CheckOrder(order.BaseOrderUuid, pair.Symbol);
                     var counterOrder = await counterExchange.CheckOrder(order.CounterOrderUuid, pair.Symbol);
 
-                    if(baseOrder != null && counterOrder != null)
+                    if (baseOrder != null && counterOrder != null)
                     {
                         decimal commission = 0m;
                         if (baseOrder.Side == "buy")
@@ -284,8 +310,8 @@ namespace Core.Engine
                         }
 
                         dbService.UpdateOrder(order.Id, baseRate: baseOrder.AvgRate, counterRate: counterOrder.AvgRate, baseCost: baseOrder.CostProceeds, counterCost: counterOrder.CostProceeds, commission: commission, status: "complete", baseQuantityFilled: baseOrder.QuantityFilled, counterQuantityFilled: counterOrder.QuantityFilled);
-                    }                  
-                   // await EmailHelper.SendSimpleMailAsync(gmail, string.Format("Trade {0} - {1}", baseOrder.Symbol, commission), JsonConvert.SerializeObject(new { baseOrder = baseOrder, counterOrder = counterOrder }, Formatting.Indented));
+                    }
+                    // await EmailHelper.SendSimpleMailAsync(gmail, string.Format("Trade {0} - {1}", baseOrder.Symbol, commission), JsonConvert.SerializeObject(new { baseOrder = baseOrder, counterOrder = counterOrder }, Formatting.Indented));
 
                 }
                 catch (Exception e)
@@ -314,9 +340,10 @@ namespace Core.Engine
             {
                 EndWorkForPair(pair);
 
-                if (ae.Content.Contains("Insufficient"))
+                if (ae.Content.ToLowerInvariant().Contains("insufficient"))
                 {
-                    dbService.UpdateArbitragePairById(pair.Id, isError: true);
+                    pair.Status = "error";
+                    dbService.SaveArbitragePair(pair);
                 }
                 logger.Error(JsonConvert.SerializeObject(JsonConvert.DeserializeObject(ae.Content), Formatting.Indented));
             }
@@ -347,7 +374,8 @@ namespace Core.Engine
 
                 if (ae.Content.ToLowerInvariant().Contains("insufficient"))
                 {
-                    dbService.UpdateArbitragePairById(pair.Id, isError: true);
+                    pair.Status = "error";
+                    dbService.SaveArbitragePair(pair);
                 }
                 logger.Error(JsonConvert.SerializeObject(JsonConvert.DeserializeObject(ae.Content), Formatting.Indented));
             }
@@ -380,7 +408,8 @@ namespace Core.Engine
             {
                 if (ae.Content.ToLowerInvariant().Contains("insufficient"))
                 {
-                    dbService.UpdateArbitragePairById(pair.Id, isError: true);
+                    pair.Status = "error";
+                    dbService.SaveArbitragePair(pair);
                 }
                 logger.Error(JsonConvert.SerializeObject(JsonConvert.DeserializeObject(ae.Content), Formatting.Indented));
             }
