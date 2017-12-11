@@ -13,5 +13,14 @@ namespace HitbtcSharp.Models
         public decimal price { get; set; }
         public decimal quantity { get; set; }
         public string timeInForce { get; set; }
+        public bool strictValidate { get; set; }
+    }
+
+    public class OrderReplaceRequest
+    {
+        public string clientOrderId { get; set; }
+        public string requestClientId { get; set; }
+        public decimal price { get; set; }
+        public decimal quantity { get; set; }
     }
 }

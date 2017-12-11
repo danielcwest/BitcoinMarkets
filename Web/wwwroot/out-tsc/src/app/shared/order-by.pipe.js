@@ -7,7 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
-var OrderByPipe = (function () {
+var OrderByPipe = /** @class */ (function () {
     function OrderByPipe() {
     }
     OrderByPipe.prototype.transform = function (array, orderField, orderAscending, skip) {
@@ -36,10 +36,10 @@ var OrderByPipe = (function () {
         }
         return array;
     };
+    OrderByPipe = __decorate([
+        core_1.Pipe({ name: 'orderBy' })
+    ], OrderByPipe);
     return OrderByPipe;
 }());
-OrderByPipe = __decorate([
-    core_1.Pipe({ name: 'orderBy' })
-], OrderByPipe);
 exports.OrderByPipe = OrderByPipe;
 //# sourceMappingURL=order-by.pipe.js.map

@@ -26,6 +26,8 @@ namespace Core.Contracts
 
         void SubscribeTrades(string symbol);
 
+        void Reset();
+
         Task<IAcceptedAction> ImmediateOrCancel(string side, string symbol, decimal quantity, decimal price);
 
     }

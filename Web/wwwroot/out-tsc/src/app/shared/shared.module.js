@@ -12,19 +12,19 @@ var comma_separated_number_pipe_1 = require("./comma-separated-number.pipe");
 var numeral_pipe_1 = require("./numeral.pipe");
 var btc_price_pipe_1 = require("./btc-price.pipe");
 var order_by_pipe_1 = require("./order-by.pipe");
-var SharedModule = (function () {
+var SharedModule = /** @class */ (function () {
     function SharedModule() {
     }
+    SharedModule = __decorate([
+        core_1.NgModule({
+            imports: [
+                common_1.CommonModule
+            ],
+            declarations: [comma_separated_number_pipe_1.CommaSeparatedNumberPipe, numeral_pipe_1.NumeralPipe, btc_price_pipe_1.BtcPricePipe, order_by_pipe_1.OrderByPipe],
+            exports: [comma_separated_number_pipe_1.CommaSeparatedNumberPipe, numeral_pipe_1.NumeralPipe, btc_price_pipe_1.BtcPricePipe, order_by_pipe_1.OrderByPipe]
+        })
+    ], SharedModule);
     return SharedModule;
 }());
-SharedModule = __decorate([
-    core_1.NgModule({
-        imports: [
-            common_1.CommonModule
-        ],
-        declarations: [comma_separated_number_pipe_1.CommaSeparatedNumberPipe, numeral_pipe_1.NumeralPipe, btc_price_pipe_1.BtcPricePipe, order_by_pipe_1.OrderByPipe],
-        exports: [comma_separated_number_pipe_1.CommaSeparatedNumberPipe, numeral_pipe_1.NumeralPipe, btc_price_pipe_1.BtcPricePipe, order_by_pipe_1.OrderByPipe]
-    })
-], SharedModule);
 exports.SharedModule = SharedModule;
 //# sourceMappingURL=shared.module.js.map

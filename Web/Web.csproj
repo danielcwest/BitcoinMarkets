@@ -1,37 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="wwwroot\out-tsc\**" />
-    <Content Remove="wwwroot\out-tsc\**" />
-    <EmbeddedResource Remove="wwwroot\out-tsc\**" />
-    <None Remove="wwwroot\out-tsc\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Remove="wwwroot\favicon.ico" />
-    <Content Remove="wwwroot\index.html" />
-    <Content Remove="wwwroot\inline.bundle.js" />
-    <Content Remove="wwwroot\inline.bundle.js.map" />
-    <Content Remove="wwwroot\main.bundle.js" />
-    <Content Remove="wwwroot\main.bundle.js.map" />
-    <Content Remove="wwwroot\open-iconic.3cf97837524dd7445e9d.woff" />
-    <Content Remove="wwwroot\open-iconic.47151e87c5a8666791a9.eot" />
-    <Content Remove="wwwroot\open-iconic.527eff645d8ead16666a.otf" />
-    <Content Remove="wwwroot\open-iconic.93cc7aa654ae36b08287.ttf" />
-    <Content Remove="wwwroot\open-iconic.eca2c26759a009a4a936.svg" />
-    <Content Remove="wwwroot\polyfills.bundle.js" />
-    <Content Remove="wwwroot\polyfills.bundle.js.map" />
-    <Content Remove="wwwroot\scripts.bundle.js" />
-    <Content Remove="wwwroot\styles.bundle.js" />
-    <Content Remove="wwwroot\styles.bundle.js.map" />
-    <Content Remove="wwwroot\vendor.bundle.js" />
-    <Content Remove="wwwroot\vendor.bundle.js.map" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
+  <Target Name="CreateLogsFolder" AfterTargets="AfterPublish">
+  <MakeDir Directories="$(PublishDir)logs" Condition="!Exists('$(PublishDir)logs')" />
+  <MakeDir Directories="$(PublishUrl)logs" Condition="!Exists('$(PublishUrl)logs')" />
+</Target>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0" />
@@ -51,9 +26,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BittrexSharp\BittrexSharp.csproj" />
+    <ProjectReference Include="..\GdaxSharp\GdaxSharp.csproj" />
     <ProjectReference Include="..\HitbtcSharp\HitbtcSharp.csproj" />
     <ProjectReference Include="..\BinanceSharp\BinanceSharp.csproj" />
 	<ProjectReference Include="..\Core\Core.csproj" />
+	<ProjectReference Include="..\OkexSharp\OkexSharp.csproj" />
   </ItemGroup>
   <ItemGroup>
  <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="2.0.0" />
@@ -62,8 +39,9 @@
     <None Include="appsettings.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup> 
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+  <!--<ItemGroup Condition="'$(Configuration)' == 'Release'">
+  <None Include="src\**\*" CopyToOutputDirectory="Always" />
+</ItemGroup>-->
 </Project>

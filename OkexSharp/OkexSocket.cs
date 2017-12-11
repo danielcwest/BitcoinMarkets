@@ -235,6 +235,11 @@ namespace OkexSharp
             throw new NotImplementedException();
         }
 
+        public void Reset()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

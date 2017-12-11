@@ -12,6 +12,8 @@ using Newtonsoft.Json;
 using BinanceSharp.Models;
 using System.Linq;
 using Core;
+using RestEase;
+using Core.Engine;
 
 namespace BinanceSharp
 {
@@ -74,9 +76,18 @@ namespace BinanceSharp
 
         public async Task CacheOrderbook(string symbol)
         {
-            var depth = await _binance.OrderBook(symbol);
+            try
+            {
+                var depth = await _binance.OrderBook(symbol);
 
-            cache = new OrderBookCache(depth);
+                cache = new OrderBookCache(depth);
+            }
+            catch(ApiException ae)
+            {
+                logger.Error(ae);
+                cache = new OrderBookCache(new OrderBook(symbol));
+            }
+
         }
 
         public void SubscribeOrderbook(string symbol)
@@ -183,7 +194,7 @@ namespace BinanceSharp
                     var match = new Match()
                     {
                         QuantityFilled = userEvent.QuantityOfLastFilledTrade,
-                        Side = userEvent.Side.ToLowerInvariant(),
+                        Side = userEvent.Side.ToLowerInvariant() == "buy" ? OrderSide.buy : OrderSide.sell,
                         Symbol = userEvent.Symbol,
                         Uuid = userEvent.TradeId.ToString()
                     };
@@ -201,6 +212,11 @@ namespace BinanceSharp
         internal void DispatchTrade(Match match)
         {
             OnMatch?.Invoke(match);
+        }
+
+        public Task<IAcceptedAction> ImmediateOrCancel(string side, string symbol, decimal quantity, decimal price)
+        {
+            throw new NotImplementedException();
         }
 
         #region IDisposable
@@ -221,19 +237,26 @@ namespace BinanceSharp
             if (disposed)
                 return;
 
-            if (disposing && socket != null)
+            if (disposing)
             {
-                socket.Close();
-                socket = null;
+                Reset();
             }
 
             disposed = true;
         }
 
-        public Task<IAcceptedAction> ImmediateOrCancel(string side, string symbol, decimal quantity, decimal price)
+        public void Reset()
         {
-            throw new NotImplementedException();
+            if (socket != null)
+            {
+                socket.Close();
+                socket = null;
+            }
+
+            cache = null;
         }
+
+
 
         #endregion
     }

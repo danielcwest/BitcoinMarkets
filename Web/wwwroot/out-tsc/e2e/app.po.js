@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var protractor_1 = require("protractor");
-var AppPage = (function () {
+var AppPage = /** @class */ (function () {
     function AppPage() {
     }
     AppPage.prototype.navigateTo = function () {

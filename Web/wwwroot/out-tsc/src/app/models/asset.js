@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var moment = require("moment");
-var Asset = (function () {
+var Asset = /** @class */ (function () {
     function Asset(item) {
         this.id = item.id;
         this.name = item.name;

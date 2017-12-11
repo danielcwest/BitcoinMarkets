@@ -7,16 +7,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
-var CommaSeparatedNumberPipe = (function () {
+var CommaSeparatedNumberPipe = /** @class */ (function () {
     function CommaSeparatedNumberPipe() {
     }
     CommaSeparatedNumberPipe.prototype.transform = function (value, args) {
         return value.toLocaleString();
     };
+    CommaSeparatedNumberPipe = __decorate([
+        core_1.Pipe({ name: 'commaSeparatedNumber' })
+    ], CommaSeparatedNumberPipe);
     return CommaSeparatedNumberPipe;
 }());
-CommaSeparatedNumberPipe = __decorate([
-    core_1.Pipe({ name: 'commaSeparatedNumber' })
-], CommaSeparatedNumberPipe);
 exports.CommaSeparatedNumberPipe = CommaSeparatedNumberPipe;
 //# sourceMappingURL=comma-separated-number.pipe.js.map

@@ -55,8 +55,12 @@ namespace Web.Controllers
 		public IEnumerable<DbHeroStat> GetHeroStats(string interval)
 		{
 			int hours = 1;
-			if(interval == "24h")			
-				hours = 7;
+			if (interval == "4h")
+				hours = 4;
+			else if(interval == "12h")			
+				hours = 12;
+			else if (interval == "24h")
+				hours = 24;
 			else if(interval == "7d")		
 				hours = 168;
 			

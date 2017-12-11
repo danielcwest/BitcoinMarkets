@@ -7,14 +7,12 @@ import { AppComponent } from './app.component';
 import { ServicesModule } from './services/services.module';
 import { AppRoutingModule } from './app-routing.module';
 import { SharedModule } from './shared/shared.module';
-import { DashboardComponent } from './dashboard/dashboard.component';
 import { ArbitrageComponent } from './arbitrage/arbitrage.component';
 import { DetailComponent } from './arbitrage/detail/detail.component';
 
 @NgModule({
     declarations: [
         AppComponent,
-        DashboardComponent,
         ArbitrageComponent,
         DetailComponent
     ],

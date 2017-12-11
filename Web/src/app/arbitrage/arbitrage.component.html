@@ -13,11 +13,13 @@
 			<th>Symbol</th>
 			<th>Status</th>
 			<th>Type</th>
+			<th>Trade Threshold</th>
+			<th>Base Balance</th>
+			<th>Counter Balance</th>
 			<th>Bid Spread</th>
 			<th>Ask Spread</th>
-			<th>Trade Threshold</th>
-			<th>Trade Count</th>
 			<th>Commission</th>
+			<th>Trade Count</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -30,11 +32,13 @@
 		{{pair?.status}}
 	</span></td>
 			<td>{{pair.type}}</td>
+			<td>{{pair.tradeThreshold | numeral:'0.00%'}}</td>
+			<td>{{getBaseBalance(pair) | numeral:'0.00'}}</td>
+			<td>{{getCounterBalance(pair) | numeral:'0.00'}}</td>
 			<td>{{pair.bidSpread | numeral:'0.00%'}}</td>
 			<td>{{pair.askSpread | numeral:'0.00%'}}</td>
-			<td>{{pair.tradeThreshold | numeral:'0.00%'}}</td>
+			<td>{{getCommission(pair.symbol)  | numeral:'$0,0.00'}}</td>
 			<td>{{getTradeCount(pair.symbol)}}</td>
-			<td>{{getCommission(pair.symbol)  | numeral:'$0,0.00'}}</td>			
 		</tr>
 	</tbody>
 </table>

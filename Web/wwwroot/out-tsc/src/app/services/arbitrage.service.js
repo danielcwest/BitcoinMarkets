@@ -14,7 +14,7 @@ var http_1 = require("@angular/http");
 var context_service_1 = require("./context.service");
 var coinmarketcap_service_1 = require("./coinmarketcap.service");
 var Collections = require("typescript-collections");
-var ArbitrageService = (function () {
+var ArbitrageService = /** @class */ (function () {
     function ArbitrageService(http, contextService, coincap) {
         var _this = this;
         this.http = http;
@@ -47,6 +47,16 @@ var ArbitrageService = (function () {
     ArbitrageService.prototype.saveArbitragePair = function (pair) {
         return this.http.post("/api/arbitrage/save", pair).toPromise().then(function (result) { return true; });
     };
+    ArbitrageService.prototype.getStats = function () {
+        return this.http.get("/api/arbitrage/getherostats?interval=" + this.context.interval).toPromise().then(function (response) {
+            var result = response.json();
+            var dic = new Collections.Dictionary();
+            result.forEach(function (stat) {
+                dic.setValue(stat.symbol, stat);
+            });
+            return dic;
+        }).catch(this.handleError);
+    };
     ArbitrageService.prototype.getHeroStats = function () {
         var _this = this;
         var baseTickers = new Collections.Dictionary();
@@ -57,7 +67,7 @@ var ArbitrageService = (function () {
             });
             var total = 0;
             var trades = 0;
-            return _this.getHeroStats().then(function (stats) {
+            return _this.getStats().then(function (stats) {
                 stats.forEach(function (s) {
                     var stat = stats.getValue(s);
                     if (stat.symbol.endsWith('BTC'))
@@ -67,6 +77,8 @@ var ArbitrageService = (function () {
                     total += stat.commission;
                     trades += stat.tradeCount;
                 });
+                var totalStat = { symbol: 'TOTAL', commission: total, tradeCount: trades };
+                stats.setValue(totalStat.symbol, totalStat);
                 return stats;
             });
         });
@@ -76,11 +88,11 @@ var ArbitrageService = (function () {
         //console.error('An error occurred', error);
         return Promise.reject(error.message || error);
     };
+    ArbitrageService = __decorate([
+        core_1.Injectable(),
+        __metadata("design:paramtypes", [http_1.Http, context_service_1.ContextService, coinmarketcap_service_1.CoinMarketCapService])
+    ], ArbitrageService);
     return ArbitrageService;
 }());
-ArbitrageService = __decorate([
-    core_1.Injectable(),
-    __metadata("design:paramtypes", [http_1.Http, context_service_1.ContextService, coinmarketcap_service_1.CoinMarketCapService])
-], ArbitrageService);
 exports.ArbitrageService = ArbitrageService;
 //# sourceMappingURL=arbitrage.service.js.map

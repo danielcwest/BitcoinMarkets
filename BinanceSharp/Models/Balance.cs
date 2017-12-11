@@ -10,11 +10,15 @@ namespace BinanceSharp.Models
 {
     public class Balance : ICurrencyBalance
     {
-        [JsonProperty("asset")]
         public string Currency { get; set; }
-        [JsonProperty("free")]
         public decimal Available { get; set; }
-        [JsonProperty("locked")]
         public decimal Held { get; set; }
+
+        public Balance(BalanceResponse res)
+        {
+            Currency = res.asset;
+            Available = res.free;
+            Held = res.locked;
+        }
     }
 }

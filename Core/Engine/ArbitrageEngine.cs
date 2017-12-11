@@ -25,16 +25,14 @@ namespace Core.Engine
         ConcurrentDictionary<string, ISocketExchange> counterSockets;
 
         IDbService dbService;
-        GmailConfig gmail;
 
         ConcurrentDictionary<string, CancellationTokenSource> tokens;
 
-        public ArbitrageEngine(IExchange baseExchange, IExchange counterExchange, IDbService dbService, GmailConfig gmail)
+        public ArbitrageEngine(IExchange baseExchange, IExchange counterExchange, IDbService dbService)
         {
             this.baseExchange = baseExchange;
             this.counterExchange = counterExchange;
             this.dbService = dbService;
-            this.gmail = gmail;
             baseSockets = new ConcurrentDictionary<string, ISocketExchange>();
             counterSockets = new ConcurrentDictionary<string, ISocketExchange>();
         }
@@ -300,7 +298,7 @@ namespace Core.Engine
                     if (baseOrder != null && counterOrder != null)
                     {
                         decimal commission = 0m;
-                        if (baseOrder.Side == "buy")
+                        if (baseOrder.Side == OrderSide.buy)
                         {
                             commission = counterOrder.CostProceeds - baseOrder.CostProceeds;
                         }
@@ -391,13 +389,13 @@ namespace Core.Engine
             {
                 decimal quantity = Helper.RoundQuantity(pair, trade.QuantityFilled);
 
-                if (trade.Side == "sell")
+                if (trade.Side == OrderSide.sell)
                 {
                     var result = await counterExchange.MarketBuy(trade.Symbol, quantity);
                     logger.Trace(string.Format("COUNTER BUY {0} {1} {2} {3}", pair.Symbol, quantity, trade.Uuid, result.Uuid));
                     dbService.InsertMakerOrder(pair.Id, "basesell", trade.Uuid, result.Uuid);
                 }
-                else if (trade.Side == "buy")
+                else if (trade.Side == OrderSide.buy)
                 {
                     var result = await counterExchange.MarketSell(trade.Symbol, quantity);
                     logger.Trace(string.Format("COUNTER SELL {0} {1} {2} {3}", pair.Symbol, quantity, trade.Uuid, result.Uuid));
@@ -427,15 +425,15 @@ namespace Core.Engine
             var wtoken = new CancellationTokenSource();
 
             // Set the tasks.
-            var task1 = (ActionBlock<ArbitragePair>)CreateNeverEndingTask((p, ct) => ProcessOrderBook(p, ct), wtoken.Token);
-            var task2 = (ActionBlock<ArbitragePair>)CreateNeverEndingTask((p, ct) => ProcessTrades(p, ct), wtoken.Token);
+        //    var task1 = (ActionBlock<ArbitragePair>)CreateNeverEndingTask((p, ct) => ProcessOrderBook(p, ct), wtoken.Token);
+           // var task2 = (ActionBlock<ArbitragePair>)CreateNeverEndingTask((p, ct) => ProcessTrades(p, ct), wtoken.Token);
             var task3 = (ActionBlock<ArbitragePair>)CreateNeverEndingTask((p, ct) => AuditCompletedOrdersForPair(p, ct), wtoken.Token);
 
             if (tokens.TryAdd(pair.Symbol, wtoken))
             {
                 // Start the task.  Post the time.
-                task1.Post(pair);
-                task2.Post(pair);
+            //    task1.Post(pair);
+            //    task2.Post(pair);
                 task3.Post(pair);
             }
         }

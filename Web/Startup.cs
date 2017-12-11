@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace Web
 {
@@ -40,10 +41,10 @@ namespace Web
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.UseMvc();
+			app.UseMvc();
 
-            app.UseDefaultFiles();
-            app.UseStaticFiles();
-        }
+			app.UseDefaultFiles();
+			app.UseStaticFiles();
+		}
     }
 }

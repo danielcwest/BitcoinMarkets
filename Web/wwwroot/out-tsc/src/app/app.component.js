@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var config_service_1 = require("./services/config.service");
 var context_service_1 = require("./services/context.service");
-var AppComponent = (function () {
+var AppComponent = /** @class */ (function () {
     function AppComponent(configService, contextService) {
         this.configService = configService;
         this.contextService = contextService;
@@ -27,15 +27,15 @@ var AppComponent = (function () {
     AppComponent.prototype.setInterval = function (interval) {
         this.contextService.setInterval(interval);
     };
+    AppComponent = __decorate([
+        core_1.Component({
+            selector: 'app-root',
+            templateUrl: './app.component.html',
+            styleUrls: ['./app.component.css']
+        }),
+        __metadata("design:paramtypes", [config_service_1.ConfigService, context_service_1.ContextService])
+    ], AppComponent);
     return AppComponent;
 }());
-AppComponent = __decorate([
-    core_1.Component({
-        selector: 'app-root',
-        templateUrl: './app.component.html',
-        styleUrls: ['./app.component.css']
-    }),
-    __metadata("design:paramtypes", [config_service_1.ConfigService, context_service_1.ContextService])
-], AppComponent);
 exports.AppComponent = AppComponent;
 //# sourceMappingURL=app.component.js.map

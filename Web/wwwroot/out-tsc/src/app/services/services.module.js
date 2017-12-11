@@ -14,19 +14,19 @@ var context_service_1 = require("./context.service");
 var exchange_service_1 = require("./exchange.service");
 var arbitrage_service_1 = require("./arbitrage.service");
 var order_service_1 = require("./order.service");
-var ServicesModule = (function () {
+var ServicesModule = /** @class */ (function () {
     function ServicesModule() {
     }
+    ServicesModule = __decorate([
+        core_1.NgModule({
+            imports: [
+                common_1.CommonModule
+            ],
+            declarations: [],
+            providers: [coinmarketcap_service_1.CoinMarketCapService, config_service_1.ConfigService, context_service_1.ContextService, exchange_service_1.ExchangeService, arbitrage_service_1.ArbitrageService, order_service_1.OrderService]
+        })
+    ], ServicesModule);
     return ServicesModule;
 }());
-ServicesModule = __decorate([
-    core_1.NgModule({
-        imports: [
-            common_1.CommonModule
-        ],
-        declarations: [],
-        providers: [coinmarketcap_service_1.CoinMarketCapService, config_service_1.ConfigService, context_service_1.ContextService, exchange_service_1.ExchangeService, arbitrage_service_1.ArbitrageService, order_service_1.OrderService]
-    })
-], ServicesModule);
 exports.ServicesModule = ServicesModule;
 //# sourceMappingURL=services.module.js.map

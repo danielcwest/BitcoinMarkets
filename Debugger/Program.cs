@@ -1,4 +1,5 @@
 ﻿using BinanceSharp;
+using BittrexSharp;
 using Core;
 using Core.Config;
 using Core.Contracts;
@@ -16,16 +17,21 @@ using NLog;
 using OkexSharp;
 using RestEase;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
+using WebSocketSharp;
 
 namespace Debugger
 {
     class Program
     {
+
+        //dotnet publish -c Release -r win10-x64
+
         static void Main(string[] args)
         {
             #region config
@@ -48,25 +54,40 @@ namespace Debugger
             {
                 var dbService = new BMDbService(configuration.GetValue<string>("LocalSqlConnectionString"), arbitrageConfig.Gmail);
 
+                var configs = arbitrageConfig.Exchanges.ToDictionary(c => c.Name);
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
 
+                var binance = new Binance(configs["Binance"]);//(Binance)exchanges["Binance"];
                 var hitbtc = (Hitbtc)exchanges["Hitbtc"];
-                var binance = (Binance)exchanges["Binance"];
+                var gdax = (Gdax)exchanges["Gdax"];
 
-               // var order = hitbtc.GetOrder("8188127779").Result;
 
-                var engine = new ArbitrageEngine(hitbtc, binance, dbService, arbitrageConfig.Gmail);
-    
-                //engine.StartEngine(masterToken.Token, 1000);
+                var hitMarkets = hitbtc.Symbols().Result.ToDictionary(s => s.LocalSymbol);
+                var biMarkets = binance.Symbols().Result.ToDictionary(s => s.LocalSymbol);
 
-                //    var trades = binance.GetTrades("ETHBTC").Result;
-                // var gdax = (GdaxSocket)exchanges["Gdax"];
-                //  var okex = (OkexSocket)exchanges["Okex"];
-                //engine.StartEngine(masterToken.Token, 60);
+                //EngineHelper.TakeProfit(dbService, hitbtc, binance, 0.05m);
 
-                // hitbtc.SubscribeTrades("ETHBTC");
+                     var hitbtcV2 = new HitbtcSocketV2(configs["Hitbtc"]);
 
-                //  Console.ReadKey();
+                    var engineV2 = new ArbitrageEngineV2(hitbtcV2, binance, dbService);
+
+                //        var balanceManager = new BalanceManager(dbService);
+                //       balanceManager.Start(hitbtc, binance);
+
+                //     var addr = hitbtc.GetDepositAddress("XRP").Result;
+                //     var res = binance.Withdraw(addr.Currency, 100m, addr.Address, addr.Tag).Result;
+                  engineV2.StartEngine(hitbtcV2, binance);
+
+
+
+                //   var res = hitbtc.Withdraw("QTUM", 70.0m, "QfqN1UUFwCQiM8ENn1193J6TVFSyyVR3eu").Result;
+                //  var res2 = binance.Withdraw("QTUM", 70.0m, "QfqN1UUFwCQiM8ENn1193J6TVFSyyVR3eu").Result;
+
+                //AuditOrder("XMRBTC", "8903177267", "1614791", hitbtc, binance);
+
+                //Console.ReadKey();
+
+                //var result = gdax.MarketSell("BTCUSD", 0.63405632m).Result;
 
                 logger.Trace("Complete");
             }
@@ -79,6 +100,26 @@ namespace Debugger
                 }
                 masterToken.Cancel();
                 Console.WriteLine(e);
+            }
+        }
+
+        public static void AuditOrder(string symbol, string baseUuid, string counterUuid, IExchange baseExchange, IExchange counterExchange)
+        {
+
+            var baseOrder = baseExchange.CheckOrder(baseUuid, symbol).Result;
+            var counterOrder = counterExchange.CheckOrder(counterUuid, symbol).Result;
+
+            if (baseOrder != null && counterOrder != null)
+            {
+                decimal commission = 0m;
+                if (baseOrder.Side == OrderSide.buy)
+                {
+                    commission = counterOrder.CostProceeds - baseOrder.CostProceeds;
+                }
+                else
+                {
+                    commission = baseOrder.CostProceeds - counterOrder.CostProceeds;
+                }
             }
         }
     }

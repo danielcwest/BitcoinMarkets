@@ -13,7 +13,6 @@ using System.Net.Http.Headers;
 using Core.Config;
 using System.IO;
 using Newtonsoft.Json;
-using HitbtcSharp.RPC;
 using Core.Engine;
 using NLog;
 
@@ -183,24 +182,19 @@ namespace HitbtcSharp
 
             PayoutTransaction tx;
             if (quantity > balance.Available)
-                tx = await TransferToMain(quantity, currency);
-
-            return await WithdrawFromMain(currency, quantity, address, paymentId);
-        }
-
-        private async Task<PayoutTransaction> WithdrawFromMain(string currency, decimal quantity, string address, string paymentId = null)
-        {
-            long nonce = GetNonce();
-            string pathAndQuery = string.Format("/api/1/payment/payout?nonce={0}&apikey={1}amount={2}&currency_code={3}&address={4}", nonce, _config.ApiKey, quantity, currency, address);
-            string sign = CalculateSignature(pathAndQuery, _config.Secret);
+                tx = await TransferToMain(quantity, currency); 
 
             var data = new Dictionary<string, object> {
+                {"currency", currency },
                 {"amount", quantity},
-                {"currency_code", currency },
-                {"address", address}
+                {"address", address},
+                {"includeFee", true }
             };
 
-            return await _hitbtc.WithdrawV1(sign, nonce, _config.ApiKey, data);
+            if (!string.IsNullOrWhiteSpace(paymentId))
+                data.Add("paymentId", paymentId);
+
+            return await _hitbtc.Withdraw(data);
         }
 
         public async Task<IWithdrawal> GetWithdrawal(string uuid)
@@ -215,7 +209,7 @@ namespace HitbtcSharp
         public async Task<IDepositAddress> GetDepositAddress(string currency)
         {
             var address = await _hitbtc.GetAddress(currency);
-            return new DepositAddress() { Currency = currency, Address = address.address };
+            return new DepositAddress() { Currency = currency, Address = address.address, Tag = address.paymentId };
         }
 
         public async Task<ICurrencyBalance> GetMainBalance(string currency)
@@ -287,7 +281,7 @@ namespace HitbtcSharp
 
         public async Task<IEnumerable<ICurrencyBalance>> GetBalances()
         {
-            await MoveBalancesToTrading();
+            //await MoveBalancesToTrading();
             return await _hitbtc.GetTradingBalances();
         }
 
@@ -363,7 +357,7 @@ namespace HitbtcSharp
 
         public ISocketExchange GetSocket()
         {
-            return new HitbtcSocket(_config);
+            return null;
         }
     }
 }

@@ -12,36 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var http_1 = require("@angular/http");
 var context_service_1 = require("./context.service");
-var Collections = require("typescript-collections");
-var ExchangeService = (function () {
+var ExchangeService = /** @class */ (function () {
     function ExchangeService(http, contextService) {
         var _this = this;
         this.http = http;
         this.contextService = contextService;
         this.contextService.context$.subscribe(function (context) { return _this.context = context; });
     }
-    ExchangeService.prototype.getMarketSummaries = function (exchange) {
-        return this.http.get("/api/" + exchange + "/marketsummaries/").toPromise().then(function (response) {
-            var result = response.json();
-            var dic = new Collections.Dictionary();
-            result.forEach(function (market) { return dic.setValue(market.symbol, market); });
-            return dic;
-        });
-    };
-    ExchangeService.prototype.getMarketSummary = function (exchange, symbol) {
-        return this.http.get("/api/" + exchange + "/marketsummary?symbol=" + symbol).toPromise().then(function (response) {
-            var result = response.json();
-            return result;
-        });
-    };
-    ExchangeService.prototype.getOrderBook = function (exchange, symbol) {
-        return this.http.get("/api/" + exchange + "/orderbook?symbol=" + symbol).toPromise().then(function (response) {
-            var result = response.json();
-            return result;
-        });
-    };
-    ExchangeService.prototype.getSymbols = function (exchange) {
-        return this.http.get("/api/" + exchange + "/symbols").toPromise().then(function (response) {
+    ExchangeService.prototype.getBalances = function () {
+        return this.http.get("/api/exchange/GetBalances").toPromise().then(function (response) {
             var result = response.json();
             return result;
         });
@@ -51,11 +30,11 @@ var ExchangeService = (function () {
         //console.error('An error occurred', error);
         return Promise.reject(error.message || error);
     };
+    ExchangeService = __decorate([
+        core_1.Injectable(),
+        __metadata("design:paramtypes", [http_1.Http, context_service_1.ContextService])
+    ], ExchangeService);
     return ExchangeService;
 }());
-ExchangeService = __decorate([
-    core_1.Injectable(),
-    __metadata("design:paramtypes", [http_1.Http, context_service_1.ContextService])
-], ExchangeService);
 exports.ExchangeService = ExchangeService;
 //# sourceMappingURL=exchange.service.js.map

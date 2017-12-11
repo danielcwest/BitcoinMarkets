@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Core.Contracts;
+using Core.Engine;
 
 namespace BittrexSharp.Domain
 {
@@ -18,7 +19,7 @@ namespace BittrexSharp.Domain
         public bool IsFilled { get; set; }
         public decimal AvgRate { get; set; }
         public decimal QuantityFilled { get; set; }
-        public string Side { get; set; }
+        public OrderSide Side { get; set; }
 
         public Order(BittrexOrder order)
         {

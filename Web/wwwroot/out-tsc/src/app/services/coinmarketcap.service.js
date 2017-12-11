@@ -13,7 +13,7 @@ var core_1 = require("@angular/core");
 var http_1 = require("@angular/http");
 var context_service_1 = require("./context.service");
 var asset_1 = require("../models/asset");
-var CoinMarketCapService = (function () {
+var CoinMarketCapService = /** @class */ (function () {
     function CoinMarketCapService(http, contextService) {
         var _this = this;
         this.http = http;
@@ -56,11 +56,11 @@ var CoinMarketCapService = (function () {
         //console.error('An error occurred', error);
         return Promise.reject(error.message || error);
     };
+    CoinMarketCapService = __decorate([
+        core_1.Injectable(),
+        __metadata("design:paramtypes", [http_1.Http, context_service_1.ContextService])
+    ], CoinMarketCapService);
     return CoinMarketCapService;
 }());
-CoinMarketCapService = __decorate([
-    core_1.Injectable(),
-    __metadata("design:paramtypes", [http_1.Http, context_service_1.ContextService])
-], CoinMarketCapService);
 exports.CoinMarketCapService = CoinMarketCapService;
 //# sourceMappingURL=coinmarketcap.service.js.map

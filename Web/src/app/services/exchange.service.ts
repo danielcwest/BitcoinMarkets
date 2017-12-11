@@ -7,7 +7,8 @@ import { Observable } from 'rxjs/Observable';
 import { ContextService } from './context.service';
 import { IExchangeMarket } from '../models/exchange-market';
 import { AppContext } from '../models/app-context';
-import { OrderBook } from '../models/order-book';
+import { CurrencyBalance } from '../models/balance';
+import { ExchangeBalances } from '../models/exchange-balances';
 
 import * as Collections from 'typescript-collections';
 
@@ -20,32 +21,9 @@ export class ExchangeService {
         this.contextService.context$.subscribe(context => this.context = context);
     }
 
-    getMarketSummaries(exchange: string): Promise<Collections.Dictionary<string, IExchangeMarket>> {
-        return this.http.get(`/api/${exchange}/marketsummaries/`).toPromise().then(response => {
-            let result = response.json() as IExchangeMarket[];
-            let dic = new Collections.Dictionary<string, IExchangeMarket>();
-            result.forEach(market => dic.setValue(market.symbol, market));
-            return dic;
-        });
-    }
-
-    getMarketSummary(exchange: string, symbol: string): Promise<IExchangeMarket> {
-        return this.http.get(`/api/${exchange}/marketsummary?symbol=${symbol}`).toPromise().then(response => {
-            let result = response.json() as IExchangeMarket;
-            return result;
-        });
-    }
-
-    getOrderBook(exchange: string, symbol: string): Promise<OrderBook> {
-        return this.http.get(`/api/${exchange}/orderbook?symbol=${symbol}`).toPromise().then(response => {
-            let result = response.json() as OrderBook;
-            return result;
-        });
-    }
-
-    getSymbols(exchange: string): Promise<string[]> {
-        return this.http.get(`/api/${exchange}/symbols`).toPromise().then(response => {
-            let result = response.json() as string[];
+	getBalances(): Promise<ExchangeBalances> {
+		return this.http.get(`/api/exchange/GetBalances`).toPromise().then(response => {
+			let result = response.json() as ExchangeBalances;
             return result;
         });
     }

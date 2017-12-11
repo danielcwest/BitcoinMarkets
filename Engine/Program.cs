@@ -45,14 +45,18 @@ namespace Engine
 
                 var dbService = new BMDbService(configuration.GetValue<string>("LocalSqlConnectionString"), arbitrageConfig.Gmail);
 
+                var configs = arbitrageConfig.Exchanges.ToDictionary(c => c.Name);
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
 
-                var hitbtc = (Hitbtc)exchanges["Hitbtc"];
                 var binance = (Binance)exchanges["Binance"];
+                var hitbtcV2 = new HitbtcSocketV2(configs["Hitbtc"]);
 
-                var engine = new ArbitrageEngine(hitbtc, binance, dbService, arbitrageConfig.Gmail);
+                var balanceManager = new BalanceManager(dbService);
+                var engineV2 = new ArbitrageEngineV2(hitbtcV2, binance, dbService);
 
-                engine.StartEngine(masterToken.Token, 60);
+                balanceManager.Start(hitbtcV2.Rest, binance);
+                engineV2.StartEngine(hitbtcV2, binance);              
+
             }
             catch (Exception e)
             {

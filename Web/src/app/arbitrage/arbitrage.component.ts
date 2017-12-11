@@ -9,6 +9,7 @@ import { ExchangeService } from '../services/exchange.service';
 import { ArbitrageService } from '../services/arbitrage.service';
 import { AppContext } from '../models/app-context';
 import { CoinMarketCapService } from '../services/coinmarketcap.service';
+import { ExchangeBalances } from '../models/exchange-balances';
 
 import * as Collections from 'typescript-collections';
 
@@ -27,13 +28,14 @@ export class ArbitrageComponent implements OnInit {
 
 	arbitragePairs: ArbitragePair[] = [];
 	heroStats: Collections.Dictionary<string, HeroStat>;
+	exchangeBalances: ExchangeBalances;
 
 	commission: number = 0;
 
-	constructor(private arbitrageService: ArbitrageService, private contextService: ContextService, private coincap: CoinMarketCapService) { }
+	constructor(private arbitrageService: ArbitrageService, private contextService: ContextService, private coincap: CoinMarketCapService, private exchangeService: ExchangeService) { }
 
 	ngOnInit() {
-        this.contextService.context$.subscribe(context => {
+		this.contextService.context$.subscribe(context => {
 			this.context = context;
 			this.refresh();
 		});
@@ -51,6 +53,10 @@ export class ArbitrageComponent implements OnInit {
 
 			if (heroStats.containsKey('TOTAL'))
 				this.commission = heroStats.getValue('TOTAL').commission;
+		});
+
+		this.exchangeService.getBalances().then(balances => {
+			this.exchangeBalances = balances;
 		});
     }
 
@@ -76,12 +82,27 @@ export class ArbitrageComponent implements OnInit {
 		}
 	}
 
+	getBaseBalance(pair: ArbitragePair): number {
+		if (!this.exchangeBalances || !this.exchangeBalances[pair.baseExchange] || !this.exchangeBalances[pair.baseExchange][pair.marketCurrency]) return 0;
+
+		var balance = this.exchangeBalances[pair.baseExchange][pair.marketCurrency].available;
+
+		return balance;
+	}
+
+	getCounterBalance(pair: ArbitragePair): number {
+		if (!this.exchangeBalances || !this.exchangeBalances[pair.counterExchange] || !this.exchangeBalances[pair.counterExchange][pair.marketCurrency]) return 0;
+
+		var balance = this.exchangeBalances[pair.counterExchange][pair.marketCurrency].available;
+
+		return balance;
+	}
+
 	setInterval(interval: string): void {
 		this.contextService.setInterval(interval);
 	}
 
 	changeSort(sortProp: string): void {
-
         if (sortProp && this.sortProperty == sortProp) {
             this.sortAscending = !this.sortAscending;
         } else if(sortProp){

@@ -1,4 +1,5 @@
 ﻿using Core.Contracts;
+using Core.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,7 @@ namespace BinanceSharp.Models
         public decimal Fees { get; set; }
         public bool IsFilled { get; set; }
         public bool IsClosed { get; set; }
-        public string Side { get; set; }
+        public OrderSide Side { get; set; }
 
         public Order(BinanceOrder order)
         {
@@ -47,13 +48,16 @@ namespace BinanceSharp.Models
             this.CostProceeds = order.executedQty * order.price - ((order.executedQty * order.price) * 0.001m);
             this.AvgRate = order.price;
             this.Fees = 0m;
-            this.Side = order.side;
+            this.Side = order.side.ToLowerInvariant() == "buy" ? OrderSide.buy : OrderSide.sell;
             this.IsFilled = order.status == "FILLED";
             this.IsClosed = order.status == "FILLED" || order.status == "CANCELED" || order.status == "REJECTED" || order.status == "EXPIRED";
         }
 
-        public Order(BinanceOrder order, IEnumerable<BinanceTrade> trades)
+        public Order(BinanceOrder order, IEnumerable<BinanceTrade> trades, ITicker bnbTicker)
         {
+            if (!trades.Any())
+                throw new Exception("NO TRADES REMOVE ME MAYBE");
+
             this.Uuid = order.orderId.ToString();
             this.Exchange = "Binance";
             this.Symbol = order.symbol;
@@ -62,6 +66,7 @@ namespace BinanceSharp.Models
             this.CostProceeds = order.executedQty * order.price;
             this.AvgRate = order.price;
             this.Fees = 0m;
+            this.Side = order.side.ToLowerInvariant() == "buy" ? OrderSide.buy : OrderSide.sell;
 
             if (trades.Any())
             {
@@ -69,17 +74,28 @@ namespace BinanceSharp.Models
                 this.AvgRate = trades.Average(t => t.price);
                 this.Fees = trades.Sum(t => t.commission);
 
-                if (order.side == "BUY")
+                if(trades.FirstOrDefault().commissionAsset == "BNB")
                 {
-                    this.CostProceeds = (this.Quantity * this.AvgRate) + (this.Quantity * this.AvgRate) * 0.001m;
+                    this.Fees *= bnbTicker.Last;
+
+                }
+                else if (trades.FirstOrDefault().commissionAsset != "BTC" && trades.FirstOrDefault().commissionAsset != "ETH")
+                {
+                    this.Fees *= this.AvgRate;
+                }
+
+                decimal rawCost = this.QuantityFilled * this.AvgRate;
+
+                if (this.Side == OrderSide.buy)
+                {
+                    this.CostProceeds = rawCost + Fees;
                 }
                 else
                 {
-                    this.CostProceeds = (this.Quantity * this.AvgRate) - (this.Quantity * this.AvgRate) * 0.001m;
+                    this.CostProceeds = rawCost - Fees;
                 }
             }
 
-            this.Side = order.side.ToLowerInvariant();
             this.IsFilled = order.status == "FILLED";
             this.IsClosed = order.status == "FILLED" || order.status == "CANCELED" || order.status == "REJECTED" || order.status == "EXPIRED";
         }

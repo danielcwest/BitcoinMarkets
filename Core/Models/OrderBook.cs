@@ -30,8 +30,16 @@ namespace Core.Models
         public OrderBookCache(OrderBook book)
         {
             Symbol = book.symbol;
-            Bids = new ConcurrentDictionary<decimal, OrderBookEntry>(book.bids.ToDictionary(b => b.price));
-            Asks = new ConcurrentDictionary<decimal, OrderBookEntry>(book.asks.ToDictionary(b => b.price));
+
+            if(book.bids.Any())
+                Bids = new ConcurrentDictionary<decimal, OrderBookEntry>(book.bids.ToDictionary(b => b.price));
+            else
+                Bids = new ConcurrentDictionary<decimal, OrderBookEntry>();
+
+            if (book.asks.Any())
+                Asks = new ConcurrentDictionary<decimal, OrderBookEntry>(book.asks.ToDictionary(b => b.price));
+            else
+                Asks = new ConcurrentDictionary<decimal, OrderBookEntry>();
         }
 
         public OrderBook ToOrderBook()

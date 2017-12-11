@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var AssetGroup = (function () {
+var AssetGroup = /** @class */ (function () {
     function AssetGroup(name, assetGroup, description) {
         if (description === void 0) { description = ''; }
         this.name = name;

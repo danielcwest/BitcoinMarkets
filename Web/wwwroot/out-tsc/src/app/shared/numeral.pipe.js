@@ -8,18 +8,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var numeral = require("numeral");
-var NumeralPipe = (function () {
+var NumeralPipe = /** @class */ (function () {
     function NumeralPipe() {
     }
     NumeralPipe.prototype.transform = function (value, format) {
         return numeral(value).format(format);
     };
+    NumeralPipe = __decorate([
+        core_1.Pipe({
+            name: 'numeral'
+        })
+    ], NumeralPipe);
     return NumeralPipe;
 }());
-NumeralPipe = __decorate([
-    core_1.Pipe({
-        name: 'numeral'
-    })
-], NumeralPipe);
 exports.NumeralPipe = NumeralPipe;
 //# sourceMappingURL=numeral.pipe.js.map

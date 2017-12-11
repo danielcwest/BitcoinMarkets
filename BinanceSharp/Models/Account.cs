@@ -13,6 +13,6 @@ namespace BinanceSharp.Models
         public bool canTrade { get; set; }
         public bool canWithdraw { get; set; }
         public bool canDeposit { get; set; }
-        public List<Balance> balances { get; set; }
+        public List<BalanceResponse> balances { get; set; }
     }
 }

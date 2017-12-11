@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var http_1 = require("@angular/http");
-var ConfigService = (function () {
+var ConfigService = /** @class */ (function () {
     function ConfigService(http) {
         this.http = http;
     }
@@ -26,11 +26,11 @@ var ConfigService = (function () {
         //console.error('An error occurred', error);
         return Promise.reject(error.message || error);
     };
+    ConfigService = __decorate([
+        core_1.Injectable(),
+        __metadata("design:paramtypes", [http_1.Http])
+    ], ConfigService);
     return ConfigService;
 }());
-ConfigService = __decorate([
-    core_1.Injectable(),
-    __metadata("design:paramtypes", [http_1.Http])
-], ConfigService);
 exports.ConfigService = ConfigService;
 //# sourceMappingURL=config.service.js.map

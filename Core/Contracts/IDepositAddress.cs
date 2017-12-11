@@ -8,5 +8,6 @@ namespace Core.Contracts
     {
         string Currency { get; set; }
         string Address { get; set; }
+        string Tag { get; set; }
     }
 }

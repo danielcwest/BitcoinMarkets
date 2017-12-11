@@ -8,7 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var router_1 = require("@angular/router");
-var dashboard_component_1 = require("./dashboard/dashboard.component");
 var arbitrage_component_1 = require("./arbitrage/arbitrage.component");
 var detail_component_1 = require("./arbitrage/detail/detail.component");
 var routes = [
@@ -16,10 +15,6 @@ var routes = [
         path: '',
         redirectTo: '/arbitrage',
         pathMatch: 'full'
-    },
-    {
-        path: 'dashboard',
-        component: dashboard_component_1.DashboardComponent
     },
     {
         path: 'arbitrage',
@@ -30,16 +25,16 @@ var routes = [
         component: detail_component_1.DetailComponent
     }
 ];
-var AppRoutingModule = (function () {
+var AppRoutingModule = /** @class */ (function () {
     function AppRoutingModule() {
     }
+    AppRoutingModule = __decorate([
+        core_1.NgModule({
+            imports: [router_1.RouterModule.forRoot(routes)],
+            exports: [router_1.RouterModule]
+        })
+    ], AppRoutingModule);
     return AppRoutingModule;
 }());
-AppRoutingModule = __decorate([
-    core_1.NgModule({
-        imports: [router_1.RouterModule.forRoot(routes)],
-        exports: [router_1.RouterModule]
-    })
-], AppRoutingModule);
 exports.AppRoutingModule = AppRoutingModule;
 //# sourceMappingURL=app-routing.module.js.map

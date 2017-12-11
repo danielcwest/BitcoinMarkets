@@ -6,6 +6,7 @@ import { ContextService } from '../../services/context.service';
 
 import { Order } from '../../models/order';
 import { Asset } from '../../models/asset';
+import { HeroStat } from '../../models/hero-stat';
 import { AppContext } from '../../models/app-context';
 import { ArbitragePair } from '../../models/arbitrage-pair';
 import { OrderBook } from '../../models/order-book';
@@ -25,8 +26,12 @@ export class DetailComponent implements OnInit {
 
 	orders: Order[] = [];
 
+	heroStat: HeroStat;
     context: AppContext;
 	isLoading: boolean;
+
+	baseBalance: number;
+	counterBalance: number;
 
     constructor(
         private contextService: ContextService,
@@ -34,12 +39,12 @@ export class DetailComponent implements OnInit {
         private router: Router,
         private arbitrageService: ArbitrageService,
 		private orderService: OrderService,
-		private coincap: CoinMarketCapService
+		private coincap: CoinMarketCapService,
+		private exchangeService: ExchangeService
     ) { }
 
 	ngOnInit() {
 		let pairId = Number(this.route.snapshot.paramMap.get('pairId'));
-
 		this.contextService.context$.subscribe(context => {
 			this.context = context;
 			this.refreshPair();
@@ -51,8 +56,21 @@ export class DetailComponent implements OnInit {
 		let pairId = Number(this.route.snapshot.paramMap.get('pairId'));
 		this.arbitrageService.getArbitragePair(pairId).then(pair => {
 			this.pair = pair;
-			this.isLoading = false;
+			this.exchangeService.getBalances().then(balances => {
+				if (balances && balances[pair.baseExchange] && balances[pair.baseExchange][pair.marketCurrency]) {
+					this.baseBalance = balances[pair.baseExchange][pair.marketCurrency].available;
+				}
+				if (balances && balances[pair.counterExchange] && balances[pair.counterExchange][pair.marketCurrency]) {
+					this.counterBalance = balances[pair.counterExchange][pair.marketCurrency].available;
+				}
+				this.isLoading = false;
+			});
+
+			this.arbitrageService.getHeroStats().then(heroStats => {
+				this.heroStat = heroStats.getValue(this.pair.symbol);
+			});
 		});
+
 
 
 	}

@@ -93,16 +93,26 @@ namespace BinanceSharp
 
             var data = new Dictionary<string, object> {
                 {"symbol", symbol },
-                {"orderId", uuid },               
+                {"orderId", uuid },
                 {"timestamp", timestamp},
                 {"signature", sign}
             };
 
+
             var order = await _binance.GetOrder(_config.ApiKey, data);
 
-            var trades = await GetTrades(symbol);
+            var trades = await GetTrades(symbol, order.time);
 
-            return new Order(order, trades.Where(t => t.time == order.time));
+            ITicker bnbTicker = null;
+            if (symbol.Contains("BTC"))
+            {
+                bnbTicker = await Ticker("BNBBTC");
+            }else if (symbol.Contains("ETH"))
+            {
+                bnbTicker = await Ticker("BNBETH");
+            }
+
+            return new Order(order, trades.Where(t => t.time == order.time), bnbTicker);
         }
 
         public async Task<IEnumerable<BinanceTrade>> GetTrades(string symbol)
@@ -120,14 +130,112 @@ namespace BinanceSharp
             return await _binance.GetTrades(_config.ApiKey, data);
         }
 
-        public Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
+        public async Task<IEnumerable<BinanceTrade>> GetTrades(string symbol, long ts)
         {
-            throw new NotImplementedException();
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string totalParams = string.Format("symbol={0}&timestamp={1}", symbol, timestamp);
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"symbol", symbol },
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+            var trades = await GetPagedTrades(symbol, ts, 0);
+
+            while(trades.LastOrDefault().time < ts)
+            {
+                trades = await GetPagedTrades(symbol, ts, trades.LastOrDefault().id);
+            }
+
+            return trades;
         }
 
-        public Task<IDepositAddress> GetDepositAddress(string currency)
+        public async Task<IEnumerable<BinanceTrade>> GetPagedTrades(string symbol, long ts, int fromId)
         {
-            throw new NotImplementedException();
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string totalParams = string.Format("symbol={0}&fromId={1}&timestamp={2}", symbol, fromId, timestamp);
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"symbol", symbol },
+                {"fromId", fromId },
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+            var trades = await _binance.GetTrades(_config.ApiKey, data);
+
+            return trades;
+        }
+
+        public async Task<IAcceptedAction> Withdraw(string currency, decimal quantity, string address, string paymentId = null)
+        {
+            if (string.IsNullOrWhiteSpace(paymentId))
+            {
+                return await WithdrawNoTag(currency, quantity, address);
+            }
+            else
+            {
+                return await WithdrawWithTag(currency, quantity, address, paymentId);
+            }
+        }
+
+        public async Task<IAcceptedAction> WithdrawNoTag(string currency, decimal quantity, string address)
+        {
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string totalParams = string.Format("asset={0}&address={1}&amount={2}&name={3}&timestamp={4}", currency, address, quantity, "hitbtc", timestamp);
+
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"asset", currency },
+                {"address", address },
+                {"amount", quantity },
+                {"name", "hitbtc" },
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+            return await _binance.Withdraw(_config.ApiKey, data);
+        }
+
+        public async Task<IAcceptedAction> WithdrawWithTag(string currency, decimal quantity, string address, string tag)
+        {
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string totalParams = string.Format("asset={0}&address={1}&addressTag={2}&amount={3}&name={4}&timestamp={5}", currency, address, tag, quantity, "hitbtc", timestamp);
+
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"asset", currency },
+                {"address", address },
+                {"addressTag", tag },
+                {"amount", quantity },
+                {"name", "hitbtc" },
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+            return await _binance.Withdraw(_config.ApiKey, data);
+        }
+
+        public async Task<IDepositAddress> GetDepositAddress(string currency)
+        {
+            int recvWindow = 1000000;
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string totalParams = string.Format("asset={0}&recvWindow={1}&timestamp={2}", currency, recvWindow,  timestamp);
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"asset", currency },
+                {"recvWindow", recvWindow  },
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+           return await _binance.DepositAddress(_config.ApiKey, data);
         }
 
         public async Task<IAcceptedAction> LimitBuy(string symbol, decimal quantity, decimal rate)
@@ -140,9 +248,20 @@ namespace BinanceSharp
             return await NewLimitOrder("sell", symbol, quantity, rate, "GTC");
         }
 
-        public Task<IWithdrawal> GetWithdrawal(string uuid)
+        public async Task<IWithdrawal> GetWithdrawal(string uuid)
         {
-            throw new NotImplementedException();
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string totalParams = string.Format("timestamp={0}", timestamp);
+            string sign = CalculateSignature(totalParams, _config.Secret);
+
+            var data = new Dictionary<string, object> {
+                {"timestamp", timestamp},
+                {"signature", sign}
+            };
+
+            var withdrawals = await _binance.WithdrawHistory(_config.ApiKey, data);
+
+            return withdrawals.Single(w => w.Uuid == uuid);
         }
 
         public async Task<IEnumerable<ICurrencyBalance>> GetBalances()
@@ -158,7 +277,7 @@ namespace BinanceSharp
 
             var account = await _binance.GetAccount(_config.ApiKey, data);
 
-            return account.balances;
+            return account.balances.Select(b => new Balance(b));
         }
 
         Task<IEnumerable<string>> IExchange.CancelOrders(string symbol)

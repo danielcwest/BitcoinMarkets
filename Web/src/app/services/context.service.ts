@@ -13,7 +13,7 @@ export class ContextService {
 
 
     //dashboard/market summary
-    intervals: string[] = ['1h', '24h', '7d'];
+    intervals: string[] = ['1h', '4h', '12h', '24h', '7d'];
 
 	private contextSource = new BehaviorSubject<AppContext>(new AppContext());
     context$ = this.contextSource.asObservable();

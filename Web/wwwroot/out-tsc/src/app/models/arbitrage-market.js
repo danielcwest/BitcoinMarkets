@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var ArbitrageMarket = (function () {
+var ArbitrageMarket = /** @class */ (function () {
     function ArbitrageMarket(base, arb) {
         //Should be the same for each
         this.quoteCurrency = base.quoteCurrency;

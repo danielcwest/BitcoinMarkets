@@ -1,14 +1,25 @@
 <div class="row mt-4">
-	<div class="col-8">
-		<h1 class="display-2">{{pair?.symbol}}</h1>
-		<h4><span class="badge"
-				  [class.badge-danger]="pair?.status != 'active'"
-				  [class.badge-success]="pair?.status == 'active' && pair?.type == 'market'"
-				  [class.badge-warning]="pair?.status == 'active' && pair?.type != 'market'">
-			{{pair?.status}}</span>
-		</h4>
+	<div class="col">
+		<h2 class="text-center pt-2">{{pair?.baseExchange}}</h2>
+		<h2 class="text-center pt-2">{{baseBalance}}</h2>
 	</div>
-</div>
+		<div class="col">
+			<h1 class="display-2 text-center">{{pair?.symbol}}</h1>
+			<h4 class="text-center">
+				<span class="badge"
+					  [class.badge-danger]="pair?.status != 'active'"
+					  [class.badge-success]="pair?.status == 'active' && pair?.type == 'market'"
+					  [class.badge-warning]="pair?.status == 'active' && pair?.type != 'market'">
+					{{pair?.status}}
+				</span>
+			</h4>
+			<h1 class="display-4 text-center">{{heroStat?.commission | numeral:'$0,0.00'}} / {{heroStat?.tradeCount}}</h1>
+		</div>
+	<div class="col">
+		<h2 class="text-center pt-2">{{pair?.counterExchange}}</h2>
+		<h2 class="text-center pt-2">{{counterBalance}}</h2>
+	</div>
+	</div>
 <hr />
 
 <div *ngIf="isLoading" class="load">
@@ -46,6 +57,12 @@
 				<label for="type">Pair Type</label>
 				<div class="input-group">
 					<input class="form-control" type="text" [(ngModel)]="pair.type" id="type" name="type">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="type">Pair Status</label>
+				<div class="input-group">
+					<input class="form-control" type="text" [(ngModel)]="pair.status" id="status" name="status">
 				</div>
 			</div>
 			<div class="form-group row">

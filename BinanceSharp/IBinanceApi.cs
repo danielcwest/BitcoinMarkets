@@ -59,5 +59,14 @@ namespace BinanceSharp
 
         [Delete("/api/v1/userDataStream")]
         Task CloseUserDataStream([Body] object listenKey);
+
+        [Post("/wapi/v3/withdraw.html")]
+        Task<WithdrawalResponse> Withdraw([Header("X-MBX-APIKEY")] string apiKey, [QueryMap] Dictionary<string, object> data);
+
+        [Get("/wapi/v3/depositAddress.html")]
+        Task<AddressResponse> DepositAddress([Header("X-MBX-APIKEY")] string apiKey, [QueryMap] Dictionary<string, object> data);
+
+        [Get("/wapi/v3/withdrawHistory.html")]
+        Task<IEnumerable<Withdrawal>> WithdrawHistory([Header("X-MBX-APIKEY")] string apiKey, [QueryMap] Dictionary<string, object> data);
     }
 }

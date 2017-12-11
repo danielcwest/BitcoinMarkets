@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var http_1 = require("@angular/http");
 var context_service_1 = require("./context.service");
-var OrderService = (function () {
+var OrderService = /** @class */ (function () {
     function OrderService(http, contextService) {
         var _this = this;
         this.http = http;
@@ -32,11 +32,11 @@ var OrderService = (function () {
         //console.error('An error occurred', error);
         return Promise.reject(error.message || error);
     };
+    OrderService = __decorate([
+        core_1.Injectable(),
+        __metadata("design:paramtypes", [http_1.Http, context_service_1.ContextService])
+    ], OrderService);
     return OrderService;
 }());
-OrderService = __decorate([
-    core_1.Injectable(),
-    __metadata("design:paramtypes", [http_1.Http, context_service_1.ContextService])
-], OrderService);
 exports.OrderService = OrderService;
 //# sourceMappingURL=order.service.js.map

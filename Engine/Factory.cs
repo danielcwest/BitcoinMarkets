@@ -30,7 +30,6 @@ namespace Engine
             switch (ExchangeConfig.Name)
             {
                 case "Binance": return new BinanceSocket(ExchangeConfig);
-                case "Hitbtc": return new HitbtcSocket(ExchangeConfig);
                 case "Gdax": return new GdaxSocket(ExchangeConfig);
                 case "Okex": return new OkexSocket(ExchangeConfig);
                 default: return null;

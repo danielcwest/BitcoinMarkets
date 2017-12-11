@@ -24,16 +24,14 @@ webpackEmptyAsyncContext.id = "../../../../../src/$$_gendir lazy recursive";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppRoutingModule; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_router__ = __webpack_require__("../../../router/@angular/router.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dashboard_dashboard_component__ = __webpack_require__("../../../../../src/app/dashboard/dashboard.component.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__arbitrage_arbitrage_component__ = __webpack_require__("../../../../../src/app/arbitrage/arbitrage.component.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__arbitrage_detail_detail_component__ = __webpack_require__("../../../../../src/app/arbitrage/detail/detail.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__arbitrage_arbitrage_component__ = __webpack_require__("../../../../../src/app/arbitrage/arbitrage.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__arbitrage_detail_detail_component__ = __webpack_require__("../../../../../src/app/arbitrage/detail/detail.component.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-
 
 
 
@@ -45,16 +43,12 @@ var routes = [
         pathMatch: 'full'
     },
     {
-        path: 'dashboard',
-        component: __WEBPACK_IMPORTED_MODULE_2__dashboard_dashboard_component__["a" /* DashboardComponent */]
-    },
-    {
         path: 'arbitrage',
-        component: __WEBPACK_IMPORTED_MODULE_3__arbitrage_arbitrage_component__["a" /* ArbitrageComponent */]
+        component: __WEBPACK_IMPORTED_MODULE_2__arbitrage_arbitrage_component__["a" /* ArbitrageComponent */]
     },
     {
         path: 'arbitrage/:pairId',
-        component: __WEBPACK_IMPORTED_MODULE_4__arbitrage_detail_detail_component__["a" /* DetailComponent */]
+        component: __WEBPACK_IMPORTED_MODULE_3__arbitrage_detail_detail_component__["a" /* DetailComponent */]
     }
 ];
 var AppRoutingModule = (function () {
@@ -94,7 +88,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<nav class=\"navbar navbar-expand-lg navbar-light bg-light\">\r\n\t<a class=\"navbar-brand\" href=\"http://localhost:50001\">Bitcoin Markets</a>\r\n\t<button class=\"navbar-toggler\" type=\"button\" data-toggle=\"collapse\" data-target=\"#navbarNavAltMarkup\" aria-controls=\"navbarNavAltMarkup\"\r\n\t    aria-expanded=\"false\" aria-label=\"Toggle navigation\">\r\n      <span class=\"navbar-toggler-icon\"></span>\r\n    </button>\r\n\t<div class=\"collapse navbar-collapse\" id=\"navbarNavAltMarkup\">\r\n\t\t<div class=\"navbar-nav\">\r\n\t\t\t<a routerLink=\"/dashboard\" routerLinkActive=\"active\" class=\"nav-item nav-link\">Dashboard</a>\r\n\t\t\t<a routerLink=\"/arbitrage\" routerLinkActive=\"active\" class=\"nav-item nav-link\">Arbitrage</a>\r\n\t\t</div>\r\n\t</div>\r\n\t<div class=\"text-right\">\r\n\t\t<div class=\"btn-group interval-buttons\" role=\"group\" aria-label=\"Basic example\">\r\n\t\t\t<button type=\"button\" class=\"btn btn-link interval\" (click)=\"setInterval('1h')\" [class.active]=\"context.interval == '1h'\">1h</button>\r\n\t\t\t<button type=\"button\" class=\"btn btn-link interval\" (click)=\"setInterval('24h')\" [class.active]=\"context.interval == '24h'\">24h</button>\r\n\t\t\t<button type=\"button\" class=\"btn btn-link interval\" (click)=\"setInterval('7d')\" [class.active]=\"context.interval == '7d'\">7d</button>\r\n\t\t</div>\r\n\t\t<button class=\"btn refresh right\" (click)=\"refreshPairs()\">Refresh</button>\r\n\t</div>\r\n</nav>\r\n<div class=\"container\">\r\n\t<router-outlet>\r\n\t</router-outlet>\r\n</div>\r\n"
+module.exports = "<nav class=\"navbar navbar-expand-lg navbar-light bg-light\">\r\n\t<a class=\"navbar-brand\" href=\"/\">Bitcoin Markets</a>\r\n\t<button class=\"navbar-toggler\" type=\"button\" data-toggle=\"collapse\" data-target=\"#navbarNavAltMarkup\" aria-controls=\"navbarNavAltMarkup\"\r\n\t    aria-expanded=\"false\" aria-label=\"Toggle navigation\">\r\n      <span class=\"navbar-toggler-icon\"></span>\r\n    </button>\r\n\t<div class=\"collapse navbar-collapse\" id=\"navbarNavAltMarkup\">\r\n\t\t<div class=\"navbar-nav\">\r\n\t\t\t<a routerLink=\"/dashboard\" routerLinkActive=\"active\" class=\"nav-item nav-link\">Dashboard</a>\r\n\t\t\t<a routerLink=\"/arbitrage\" routerLinkActive=\"active\" class=\"nav-item nav-link\">Arbitrage</a>\r\n\t\t</div>\r\n\t</div>\r\n\t<div class=\"text-right\">\r\n\t\t<div class=\"btn-group interval-buttons\" role=\"group\" aria-label=\"Basic example\">\r\n\t\t\t<button type=\"button\" class=\"btn btn-link interval\" (click)=\"setInterval('1h')\" [class.active]=\"context.interval == '1h'\">1h</button>\r\n\t\t\t<button type=\"button\" class=\"btn btn-link interval\" (click)=\"setInterval('4h')\" [class.active]=\"context.interval == '4h'\">4h</button>\r\n\t\t\t<button type=\"button\" class=\"btn btn-link interval\" (click)=\"setInterval('12h')\" [class.active]=\"context.interval == '12h'\">12h</button>\r\n\t\t\t<button type=\"button\" class=\"btn btn-link interval\" (click)=\"setInterval('24h')\" [class.active]=\"context.interval == '24h'\">24h</button>\r\n\t\t\t<button type=\"button\" class=\"btn btn-link interval\" (click)=\"setInterval('7d')\" [class.active]=\"context.interval == '7d'\">7d</button>\r\n\t\t</div>\r\n\t\t<button class=\"btn refresh right\" (click)=\"refreshPairs()\">Refresh</button>\r\n\t</div>\r\n</nav>\r\n<div class=\"container\">\r\n\t<router-outlet>\r\n\t</router-outlet>\r\n</div>\r\n"
 
 /***/ }),
 
@@ -162,16 +156,14 @@ var _a, _b;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_services_module__ = __webpack_require__("../../../../../src/app/services/services.module.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__app_routing_module__ = __webpack_require__("../../../../../src/app/app-routing.module.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__shared_shared_module__ = __webpack_require__("../../../../../src/app/shared/shared.module.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__dashboard_dashboard_component__ = __webpack_require__("../../../../../src/app/dashboard/dashboard.component.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__arbitrage_arbitrage_component__ = __webpack_require__("../../../../../src/app/arbitrage/arbitrage.component.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__arbitrage_detail_detail_component__ = __webpack_require__("../../../../../src/app/arbitrage/detail/detail.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__arbitrage_arbitrage_component__ = __webpack_require__("../../../../../src/app/arbitrage/arbitrage.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__arbitrage_detail_detail_component__ = __webpack_require__("../../../../../src/app/arbitrage/detail/detail.component.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-
 
 
 
@@ -191,9 +183,8 @@ AppModule = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["M" /* NgModule */])({
         declarations: [
             __WEBPACK_IMPORTED_MODULE_4__app_component__["a" /* AppComponent */],
-            __WEBPACK_IMPORTED_MODULE_8__dashboard_dashboard_component__["a" /* DashboardComponent */],
-            __WEBPACK_IMPORTED_MODULE_9__arbitrage_arbitrage_component__["a" /* ArbitrageComponent */],
-            __WEBPACK_IMPORTED_MODULE_10__arbitrage_detail_detail_component__["a" /* DetailComponent */]
+            __WEBPACK_IMPORTED_MODULE_8__arbitrage_arbitrage_component__["a" /* ArbitrageComponent */],
+            __WEBPACK_IMPORTED_MODULE_9__arbitrage_detail_detail_component__["a" /* DetailComponent */]
         ],
         imports: [
             __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["a" /* BrowserModule */],
@@ -233,7 +224,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/arbitrage/arbitrage.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"row mt-4\">\r\n\t<div class=\"col\">\r\n\t\t<h1>Arbitrage King <span class=\"float-right\">{{getCommission('TOTAL')  | numeral:'$0,0.00'}}</span></h1>\r\n\t</div>\r\n</div>\r\n<hr />\r\n<div *ngIf=\"isLoading\" class=\"load\">\r\n\t<div class=\"loader mx-auto\"></div>\r\n</div>\r\n<table class=\"table\" *ngIf=\"arbitragePairs.length > 0\">\r\n\t<thead>\r\n\t\t<tr>\r\n\t\t\t<th>Symbol</th>\r\n\t\t\t<th>Status</th>\r\n\t\t\t<th>Type</th>\r\n\t\t\t<th>Bid Spread</th>\r\n\t\t\t<th>Ask Spread</th>\r\n\t\t\t<th>Trade Threshold</th>\r\n\t\t\t<th>Trade Count</th>\r\n\t\t\t<th>Commission</th>\r\n\t\t</tr>\r\n\t</thead>\r\n\t<tbody>\r\n\t\t<tr *ngFor=\"let pair of arbitragePairs\">\r\n\t\t\t<th scope=\"row\"><a [routerLink]=\"[ './', pair.id ]\">{{pair.symbol}}</a></th>\r\n\t\t\t<td><span class=\"badge\"\r\n\t\t  [class.badge-danger]=\"pair?.status != 'active'\"\r\n\t\t  [class.badge-success]=\"pair?.status == 'active' && pair?.type == 'market'\"\r\n\t\t  [class.badge-warning]=\"pair?.status == 'active' && pair?.type != 'market'\">\r\n\t\t{{pair?.status}}\r\n\t</span></td>\r\n\t\t\t<td>{{pair.type}}</td>\r\n\t\t\t<td>{{pair.bidSpread | numeral:'0.00%'}}</td>\r\n\t\t\t<td>{{pair.askSpread | numeral:'0.00%'}}</td>\r\n\t\t\t<td>{{pair.tradeThreshold | numeral:'0.00%'}}</td>\r\n\t\t\t<td>{{getTradeCount(pair.symbol)}}</td>\r\n\t\t\t<td>{{getCommission(pair.symbol)  | numeral:'$0,0.00'}}</td>\t\t\t\r\n\t\t</tr>\r\n\t</tbody>\r\n</table>\r\n"
+module.exports = "<div class=\"row mt-4\">\r\n\t<div class=\"col\">\r\n\t\t<h1>Arbitrage King <span class=\"float-right\">{{getCommission('TOTAL')  | numeral:'$0,0.00'}}</span></h1>\r\n\t</div>\r\n</div>\r\n<hr />\r\n<div *ngIf=\"isLoading\" class=\"load\">\r\n\t<div class=\"loader mx-auto\"></div>\r\n</div>\r\n<table class=\"table\" *ngIf=\"arbitragePairs.length > 0\">\r\n\t<thead>\r\n\t\t<tr>\r\n\t\t\t<th>Symbol</th>\r\n\t\t\t<th>Status</th>\r\n\t\t\t<th>Type</th>\r\n\t\t\t<th>Trade Threshold</th>\r\n\t\t\t<th>Base Balance</th>\r\n\t\t\t<th>Counter Balance</th>\r\n\t\t\t<th>Bid Spread</th>\r\n\t\t\t<th>Ask Spread</th>\r\n\t\t\t<th>Commission</th>\r\n\t\t\t<th>Trade Count</th>\r\n\t\t</tr>\r\n\t</thead>\r\n\t<tbody>\r\n\t\t<tr *ngFor=\"let pair of arbitragePairs\">\r\n\t\t\t<th scope=\"row\"><a [routerLink]=\"[ './', pair.id ]\">{{pair.symbol}}</a></th>\r\n\t\t\t<td><span class=\"badge\"\r\n\t\t  [class.badge-danger]=\"pair?.status != 'active'\"\r\n\t\t  [class.badge-success]=\"pair?.status == 'active' && pair?.type == 'market'\"\r\n\t\t  [class.badge-warning]=\"pair?.status == 'active' && pair?.type != 'market'\">\r\n\t\t{{pair?.status}}\r\n\t</span></td>\r\n\t\t\t<td>{{pair.type}}</td>\r\n\t\t\t<td>{{pair.tradeThreshold | numeral:'0.00%'}}</td>\r\n\t\t\t<td>{{getBaseBalance(pair) | numeral:'0.00'}}</td>\r\n\t\t\t<td>{{getCounterBalance(pair) | numeral:'0.00'}}</td>\r\n\t\t\t<td>{{pair.bidSpread | numeral:'0.00%'}}</td>\r\n\t\t\t<td>{{pair.askSpread | numeral:'0.00%'}}</td>\r\n\t\t\t<td>{{getCommission(pair.symbol)  | numeral:'$0,0.00'}}</td>\r\n\t\t\t<td>{{getTradeCount(pair.symbol)}}</td>\r\n\t\t</tr>\r\n\t</tbody>\r\n</table>\r\n"
 
 /***/ }),
 
@@ -244,8 +235,9 @@ module.exports = "<div class=\"row mt-4\">\r\n\t<div class=\"col\">\r\n\t\t<h1>A
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ArbitrageComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_context_service__ = __webpack_require__("../../../../../src/app/services/context.service.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_arbitrage_service__ = __webpack_require__("../../../../../src/app/services/arbitrage.service.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_coinmarketcap_service__ = __webpack_require__("../../../../../src/app/services/coinmarketcap.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_exchange_service__ = __webpack_require__("../../../../../src/app/services/exchange.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_arbitrage_service__ = __webpack_require__("../../../../../src/app/services/arbitrage.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_coinmarketcap_service__ = __webpack_require__("../../../../../src/app/services/coinmarketcap.service.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -259,11 +251,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
 var ArbitrageComponent = (function () {
-    function ArbitrageComponent(arbitrageService, contextService, coincap) {
+    function ArbitrageComponent(arbitrageService, contextService, coincap, exchangeService) {
         this.arbitrageService = arbitrageService;
         this.contextService = contextService;
         this.coincap = coincap;
+        this.exchangeService = exchangeService;
         this.sortProperty = 'symbol';
         this.sortAscending = true;
         this.isLoading = false;
@@ -289,6 +283,9 @@ var ArbitrageComponent = (function () {
             if (heroStats.containsKey('TOTAL'))
                 _this.commission = heroStats.getValue('TOTAL').commission;
         });
+        this.exchangeService.getBalances().then(function (balances) {
+            _this.exchangeBalances = balances;
+        });
     };
     ArbitrageComponent.prototype.processMarkets = function () {
     };
@@ -312,6 +309,18 @@ var ArbitrageComponent = (function () {
             return 0;
         }
     };
+    ArbitrageComponent.prototype.getBaseBalance = function (pair) {
+        if (!this.exchangeBalances || !this.exchangeBalances[pair.baseExchange] || !this.exchangeBalances[pair.baseExchange][pair.marketCurrency])
+            return 0;
+        var balance = this.exchangeBalances[pair.baseExchange][pair.marketCurrency].available;
+        return balance;
+    };
+    ArbitrageComponent.prototype.getCounterBalance = function (pair) {
+        if (!this.exchangeBalances || !this.exchangeBalances[pair.counterExchange] || !this.exchangeBalances[pair.counterExchange][pair.marketCurrency])
+            return 0;
+        var balance = this.exchangeBalances[pair.counterExchange][pair.marketCurrency].available;
+        return balance;
+    };
     ArbitrageComponent.prototype.setInterval = function (interval) {
         this.contextService.setInterval(interval);
     };
@@ -332,10 +341,10 @@ ArbitrageComponent = __decorate([
         template: __webpack_require__("../../../../../src/app/arbitrage/arbitrage.component.html"),
         styles: [__webpack_require__("../../../../../src/app/arbitrage/arbitrage.component.css")]
     }),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_2__services_arbitrage_service__["a" /* ArbitrageService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_2__services_arbitrage_service__["a" /* ArbitrageService */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_1__services_context_service__["a" /* ContextService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services_context_service__["a" /* ContextService */]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_3__services_coinmarketcap_service__["a" /* CoinMarketCapService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_3__services_coinmarketcap_service__["a" /* CoinMarketCapService */]) === "function" && _c || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_3__services_arbitrage_service__["a" /* ArbitrageService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_3__services_arbitrage_service__["a" /* ArbitrageService */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_1__services_context_service__["a" /* ContextService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services_context_service__["a" /* ContextService */]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_4__services_coinmarketcap_service__["a" /* CoinMarketCapService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_4__services_coinmarketcap_service__["a" /* CoinMarketCapService */]) === "function" && _c || Object, typeof (_d = typeof __WEBPACK_IMPORTED_MODULE_2__services_exchange_service__["a" /* ExchangeService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_2__services_exchange_service__["a" /* ExchangeService */]) === "function" && _d || Object])
 ], ArbitrageComponent);
 
-var _a, _b, _c;
+var _a, _b, _c, _d;
 //# sourceMappingURL=arbitrage.component.js.map
 
 /***/ }),
@@ -361,7 +370,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/arbitrage/detail/detail.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"row mt-4\">\r\n\t<div class=\"col-8\">\r\n\t\t<h1 class=\"display-2\">{{pair?.symbol}}</h1>\r\n\t\t<h4><span class=\"badge\"\r\n\t\t\t\t  [class.badge-danger]=\"pair?.status != 'active'\"\r\n\t\t\t\t  [class.badge-success]=\"pair?.status == 'active' && pair?.type == 'market'\"\r\n\t\t\t\t  [class.badge-warning]=\"pair?.status == 'active' && pair?.type != 'market'\">\r\n\t\t\t{{pair?.status}}</span>\r\n\t\t</h4>\r\n\t</div>\r\n</div>\r\n<hr />\r\n\r\n<div *ngIf=\"isLoading\" class=\"load\">\r\n\t<div class=\"loader mx-auto\"></div>\r\n</div>\r\n\r\n<div class=\"row\" *ngIf=\"pair\">\r\n\t<div class=\"col\"></div>\r\n\t<div class=\"col\">\r\n\t\t<form #pairForm=\"ngForm\">\r\n\t\t\t<div class=\"form-group row\">\r\n\t\t\t\t<div class=\"col-6\">\r\n\t\t\t\t\t<label for=\"bidspread\">Bid Spread</label>\r\n\t\t\t\t\t<div class=\"input-group\">\r\n\t\t\t\t\t\t<span class=\"input-group-addon\">{{pair.bidSpread | numeral:'0.00%'}}</span>\r\n\t\t\t\t\t\t<input class=\"form-control\" type=\"number\" [(ngModel)]=\"pair.bidSpread\" id=\"bidspread\" name=\"bidSpread\" step=\"0.001\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class=\"col-6\">\r\n\t\t\t\t\t<label for=\"askspread\">Ask Spread </label>\r\n\t\t\t\t\t<div class=\"input-group\">\r\n\t\t\t\t\t\t<input class=\"form-control\" type=\"number\" [(ngModel)]=\"pair.askSpread\" id=\"askspread\" name=\"askSpread\" step=\"0.001\">\r\n\t\t\t\t\t\t<span class=\"input-group-addon\">{{pair.askSpread | numeral:'0.00%'}}</span>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t\t<div class=\"form-group row\">\r\n\t\t\t\t<label for=\"tradeThreshold\">Trade Threshold</label>\r\n\t\t\t\t<div class=\"input-group\">\r\n\t\t\t\t\t<span class=\"input-group-addon\">{{pair.tradeThreshold | numeral:'0.00%'}}</span>\r\n\t\t\t\t\t<input class=\"form-control\" type=\"number\" [(ngModel)]=\"pair.tradeThreshold\" id=\"tradeThreshold\" name=\"tradeThreshold\" step=\"0.0001\">\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t\t<div class=\"form-group row\">\r\n\t\t\t\t<label for=\"type\">Pair Type</label>\r\n\t\t\t\t<div class=\"input-group\">\r\n\t\t\t\t\t<input class=\"form-control\" type=\"text\" [(ngModel)]=\"pair.type\" id=\"type\" name=\"type\">\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t\t<div class=\"form-group row\">\r\n\t\t\t\t<button type=\"button\" class=\"btn btn-primary btn-lg btn-block\" (click)=\"save()\">Save</button> \r\n\t\t\t</div>\r\n\t\t</form>\r\n\t</div>\r\n\t<div class=\"col\"></div>\r\n</div>\r\n\r\n<table class=\"table\" *ngIf=\"orders.length > 0\">\r\n\t<thead>\r\n\t\t<tr>\r\n\t\t\t<th>Base Order</th>\r\n\t\t\t<th>Counter Order</th>\r\n\t\t\t<th>Base Quantity</th>\r\n\t\t\t<th>Counter Quantity</th>\r\n\t\t\t<th>Commission</th>\r\n\t\t</tr>\r\n\t</thead>\r\n\t<tbody>\r\n\t\t<tr *ngFor=\"let order of orders\">\r\n\t\t\t<td>{{order.baseOrderUuid}}</td>\r\n\t\t\t<td>{{order.counterOrderUuid}}</td>\r\n\t\t\t<td>{{order.baseQuantityFilled}}</td>\r\n\t\t\t<td>{{order.counterQuantityFilled}}</td>\r\n\t\t\t<td>{{order.commission}}</td>\r\n\t\t</tr>\r\n\t</tbody>\r\n</table>\r\n\r\n"
+module.exports = "<div class=\"row mt-4\">\r\n\t<div class=\"col\">\r\n\t\t<h2 class=\"text-center pt-2\">{{pair?.baseExchange}}</h2>\r\n\t\t<h2 class=\"text-center pt-2\">{{baseBalance}}</h2>\r\n\t</div>\r\n\t\t<div class=\"col\">\r\n\t\t\t<h1 class=\"display-2 text-center\">{{pair?.symbol}}</h1>\r\n\t\t\t<h4 class=\"text-center\">\r\n\t\t\t\t<span class=\"badge\"\r\n\t\t\t\t\t  [class.badge-danger]=\"pair?.status != 'active'\"\r\n\t\t\t\t\t  [class.badge-success]=\"pair?.status == 'active' && pair?.type == 'market'\"\r\n\t\t\t\t\t  [class.badge-warning]=\"pair?.status == 'active' && pair?.type != 'market'\">\r\n\t\t\t\t\t{{pair?.status}}\r\n\t\t\t\t</span>\r\n\t\t\t</h4>\r\n\t\t\t<h1 class=\"display-4 text-center\">{{heroStat?.commission | numeral:'$0,0.00'}} / {{heroStat?.tradeCount}}</h1>\r\n\t\t</div>\r\n\t<div class=\"col\">\r\n\t\t<h2 class=\"text-center pt-2\">{{pair?.counterExchange}}</h2>\r\n\t\t<h2 class=\"text-center pt-2\">{{counterBalance}}</h2>\r\n\t</div>\r\n\t</div>\r\n<hr />\r\n\r\n<div *ngIf=\"isLoading\" class=\"load\">\r\n\t<div class=\"loader mx-auto\"></div>\r\n</div>\r\n\r\n<div class=\"row\" *ngIf=\"pair\">\r\n\t<div class=\"col\"></div>\r\n\t<div class=\"col\">\r\n\t\t<form #pairForm=\"ngForm\">\r\n\t\t\t<div class=\"form-group row\">\r\n\t\t\t\t<div class=\"col-6\">\r\n\t\t\t\t\t<label for=\"bidspread\">Bid Spread</label>\r\n\t\t\t\t\t<div class=\"input-group\">\r\n\t\t\t\t\t\t<span class=\"input-group-addon\">{{pair.bidSpread | numeral:'0.00%'}}</span>\r\n\t\t\t\t\t\t<input class=\"form-control\" type=\"number\" [(ngModel)]=\"pair.bidSpread\" id=\"bidspread\" name=\"bidSpread\" step=\"0.001\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class=\"col-6\">\r\n\t\t\t\t\t<label for=\"askspread\">Ask Spread </label>\r\n\t\t\t\t\t<div class=\"input-group\">\r\n\t\t\t\t\t\t<input class=\"form-control\" type=\"number\" [(ngModel)]=\"pair.askSpread\" id=\"askspread\" name=\"askSpread\" step=\"0.001\">\r\n\t\t\t\t\t\t<span class=\"input-group-addon\">{{pair.askSpread | numeral:'0.00%'}}</span>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t\t<div class=\"form-group row\">\r\n\t\t\t\t<label for=\"tradeThreshold\">Trade Threshold</label>\r\n\t\t\t\t<div class=\"input-group\">\r\n\t\t\t\t\t<span class=\"input-group-addon\">{{pair.tradeThreshold | numeral:'0.00%'}}</span>\r\n\t\t\t\t\t<input class=\"form-control\" type=\"number\" [(ngModel)]=\"pair.tradeThreshold\" id=\"tradeThreshold\" name=\"tradeThreshold\" step=\"0.0001\">\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t\t<div class=\"form-group row\">\r\n\t\t\t\t<label for=\"type\">Pair Type</label>\r\n\t\t\t\t<div class=\"input-group\">\r\n\t\t\t\t\t<input class=\"form-control\" type=\"text\" [(ngModel)]=\"pair.type\" id=\"type\" name=\"type\">\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t\t<div class=\"form-group row\">\r\n\t\t\t\t<label for=\"type\">Pair Status</label>\r\n\t\t\t\t<div class=\"input-group\">\r\n\t\t\t\t\t<input class=\"form-control\" type=\"text\" [(ngModel)]=\"pair.status\" id=\"status\" name=\"status\">\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t\t<div class=\"form-group row\">\r\n\t\t\t\t<button type=\"button\" class=\"btn btn-primary btn-lg btn-block\" (click)=\"save()\">Save</button> \r\n\t\t\t</div>\r\n\t\t</form>\r\n\t</div>\r\n\t<div class=\"col\"></div>\r\n</div>\r\n\r\n<table class=\"table\" *ngIf=\"orders.length > 0\">\r\n\t<thead>\r\n\t\t<tr>\r\n\t\t\t<th>Base Order</th>\r\n\t\t\t<th>Counter Order</th>\r\n\t\t\t<th>Base Quantity</th>\r\n\t\t\t<th>Counter Quantity</th>\r\n\t\t\t<th>Commission</th>\r\n\t\t</tr>\r\n\t</thead>\r\n\t<tbody>\r\n\t\t<tr *ngFor=\"let order of orders\">\r\n\t\t\t<td>{{order.baseOrderUuid}}</td>\r\n\t\t\t<td>{{order.counterOrderUuid}}</td>\r\n\t\t\t<td>{{order.baseQuantityFilled}}</td>\r\n\t\t\t<td>{{order.counterQuantityFilled}}</td>\r\n\t\t\t<td>{{order.commission}}</td>\r\n\t\t</tr>\r\n\t</tbody>\r\n</table>\r\n\r\n"
 
 /***/ }),
 
@@ -372,10 +381,11 @@ module.exports = "<div class=\"row mt-4\">\r\n\t<div class=\"col-8\">\r\n\t\t<h1
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DetailComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_router__ = __webpack_require__("../../../router/@angular/router.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_context_service__ = __webpack_require__("../../../../../src/app/services/context.service.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_arbitrage_service__ = __webpack_require__("../../../../../src/app/services/arbitrage.service.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_order_service__ = __webpack_require__("../../../../../src/app/services/order.service.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_coinmarketcap_service__ = __webpack_require__("../../../../../src/app/services/coinmarketcap.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_exchange_service__ = __webpack_require__("../../../../../src/app/services/exchange.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_context_service__ = __webpack_require__("../../../../../src/app/services/context.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_arbitrage_service__ = __webpack_require__("../../../../../src/app/services/arbitrage.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_order_service__ = __webpack_require__("../../../../../src/app/services/order.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_coinmarketcap_service__ = __webpack_require__("../../../../../src/app/services/coinmarketcap.service.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -391,14 +401,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
 var DetailComponent = (function () {
-    function DetailComponent(contextService, route, router, arbitrageService, orderService, coincap) {
+    function DetailComponent(contextService, route, router, arbitrageService, orderService, coincap, exchangeService) {
         this.contextService = contextService;
         this.route = route;
         this.router = router;
         this.arbitrageService = arbitrageService;
         this.orderService = orderService;
         this.coincap = coincap;
+        this.exchangeService = exchangeService;
         this.orders = [];
     }
     DetailComponent.prototype.ngOnInit = function () {
@@ -415,7 +427,18 @@ var DetailComponent = (function () {
         var pairId = Number(this.route.snapshot.paramMap.get('pairId'));
         this.arbitrageService.getArbitragePair(pairId).then(function (pair) {
             _this.pair = pair;
-            _this.isLoading = false;
+            _this.exchangeService.getBalances().then(function (balances) {
+                if (balances && balances[pair.baseExchange] && balances[pair.baseExchange][pair.marketCurrency]) {
+                    _this.baseBalance = balances[pair.baseExchange][pair.marketCurrency].available;
+                }
+                if (balances && balances[pair.counterExchange] && balances[pair.counterExchange][pair.marketCurrency]) {
+                    _this.counterBalance = balances[pair.counterExchange][pair.marketCurrency].available;
+                }
+                _this.isLoading = false;
+            });
+            _this.arbitrageService.getHeroStats().then(function (heroStats) {
+                _this.heroStat = heroStats.getValue(_this.pair.symbol);
+            });
         });
     };
     DetailComponent.prototype.save = function () {
@@ -433,107 +456,11 @@ DetailComponent = __decorate([
         template: __webpack_require__("../../../../../src/app/arbitrage/detail/detail.component.html"),
         styles: [__webpack_require__("../../../../../src/app/arbitrage/detail/detail.component.css")]
     }),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_2__services_context_service__["a" /* ContextService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_2__services_context_service__["a" /* ContextService */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_1__angular_router__["a" /* ActivatedRoute */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__angular_router__["a" /* ActivatedRoute */]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_1__angular_router__["b" /* Router */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__angular_router__["b" /* Router */]) === "function" && _c || Object, typeof (_d = typeof __WEBPACK_IMPORTED_MODULE_3__services_arbitrage_service__["a" /* ArbitrageService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_3__services_arbitrage_service__["a" /* ArbitrageService */]) === "function" && _d || Object, typeof (_e = typeof __WEBPACK_IMPORTED_MODULE_4__services_order_service__["a" /* OrderService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_4__services_order_service__["a" /* OrderService */]) === "function" && _e || Object, typeof (_f = typeof __WEBPACK_IMPORTED_MODULE_5__services_coinmarketcap_service__["a" /* CoinMarketCapService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_5__services_coinmarketcap_service__["a" /* CoinMarketCapService */]) === "function" && _f || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_3__services_context_service__["a" /* ContextService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_3__services_context_service__["a" /* ContextService */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_1__angular_router__["a" /* ActivatedRoute */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__angular_router__["a" /* ActivatedRoute */]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_1__angular_router__["b" /* Router */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__angular_router__["b" /* Router */]) === "function" && _c || Object, typeof (_d = typeof __WEBPACK_IMPORTED_MODULE_4__services_arbitrage_service__["a" /* ArbitrageService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_4__services_arbitrage_service__["a" /* ArbitrageService */]) === "function" && _d || Object, typeof (_e = typeof __WEBPACK_IMPORTED_MODULE_5__services_order_service__["a" /* OrderService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_5__services_order_service__["a" /* OrderService */]) === "function" && _e || Object, typeof (_f = typeof __WEBPACK_IMPORTED_MODULE_6__services_coinmarketcap_service__["a" /* CoinMarketCapService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_6__services_coinmarketcap_service__["a" /* CoinMarketCapService */]) === "function" && _f || Object, typeof (_g = typeof __WEBPACK_IMPORTED_MODULE_2__services_exchange_service__["a" /* ExchangeService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_2__services_exchange_service__["a" /* ExchangeService */]) === "function" && _g || Object])
 ], DetailComponent);
 
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 //# sourceMappingURL=detail.component.js.map
-
-/***/ }),
-
-/***/ "../../../../../src/app/dashboard/dashboard.component.css":
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-base.js")(false);
-// imports
-
-
-// module
-exports.push([module.i, ".currency-logo {\r\n\t/* position: absolute;\r\n    left: 10px; */\r\n\tfloat: left;\r\n\twidth: 16px;\r\n\theight: 16px;\r\n}\r\n\r\n.price {\r\n\tfont-weight: bold;\r\n}\r\n\r\n.price-up {\r\n\tcolor: green;\r\n}\r\n\r\n.price-down {\r\n\tcolor: red;\r\n}\r\n\r\n.interval-buttons {\r\n\theight: 100%;\r\n}\r\n\r\n.interval.active {\r\n\tfont-weight: bold;\r\n}\r\n", ""]);
-
-// exports
-
-
-/*** EXPORTS FROM exports-loader ***/
-module.exports = module.exports.toString();
-
-/***/ }),
-
-/***/ "../../../../../src/app/dashboard/dashboard.component.html":
-/***/ (function(module, exports) {
-
-module.exports = "<div class=\"row mt-4\">\r\n\t<div class=\"col\">\r\n\t\t<h1>Dashboard</h1>\r\n\t</div>\r\n\t<div class=\"col\">\r\n\t</div>\r\n</div>\r\n<hr />\r\n<div *ngIf=\"isLoading\" class=\"load\">\r\n\t<div class=\"loader mx-auto\"></div>\r\n</div>\r\n\r\n"
-
-/***/ }),
-
-/***/ "../../../../../src/app/dashboard/dashboard.component.ts":
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DashboardComponent; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_config_service__ = __webpack_require__("../../../../../src/app/services/config.service.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_coinmarketcap_service__ = __webpack_require__("../../../../../src/app/services/coinmarketcap.service.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_context_service__ = __webpack_require__("../../../../../src/app/services/context.service.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_arbitrage_service__ = __webpack_require__("../../../../../src/app/services/arbitrage.service.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__models_asset_group__ = __webpack_require__("../../../../../src/app/models/asset-group.ts");
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-
-
-var DashboardComponent = (function () {
-    function DashboardComponent(configService, coincap, contextService, arbitrageService) {
-        this.configService = configService;
-        this.coincap = coincap;
-        this.contextService = contextService;
-        this.arbitrageService = arbitrageService;
-        this.isLoading = false;
-    }
-    DashboardComponent.prototype.ngOnInit = function () {
-        var _this = this;
-        this.contextService.context$.subscribe(function (context) {
-            _this.context = context;
-            _this.refresh();
-        });
-    };
-    DashboardComponent.prototype.setInterval = function (interval) {
-        this.contextService.setInterval(interval);
-    };
-    DashboardComponent.prototype.refresh = function () {
-    };
-    DashboardComponent.prototype.createAssetGroups = function (assets, groups) {
-        var ags = [];
-        groups.forEach(function (group) {
-            var groupAssets = assets.filter(function (a) { return group.symbols.indexOf(a.symbol) != -1; });
-            var ag = new __WEBPACK_IMPORTED_MODULE_5__models_asset_group__["a" /* AssetGroup */](group.name, groupAssets, group.description);
-            ags.push(ag);
-        });
-        this.assetGroups = ags;
-    };
-    return DashboardComponent;
-}());
-DashboardComponent = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["o" /* Component */])({
-        selector: 'app-dashboard',
-        template: __webpack_require__("../../../../../src/app/dashboard/dashboard.component.html"),
-        styles: [__webpack_require__("../../../../../src/app/dashboard/dashboard.component.css")]
-    }),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__services_config_service__["a" /* ConfigService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services_config_service__["a" /* ConfigService */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_2__services_coinmarketcap_service__["a" /* CoinMarketCapService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_2__services_coinmarketcap_service__["a" /* CoinMarketCapService */]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_3__services_context_service__["a" /* ContextService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_3__services_context_service__["a" /* ContextService */]) === "function" && _c || Object, typeof (_d = typeof __WEBPACK_IMPORTED_MODULE_4__services_arbitrage_service__["a" /* ArbitrageService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_4__services_arbitrage_service__["a" /* ArbitrageService */]) === "function" && _d || Object])
-], DashboardComponent);
-
-var _a, _b, _c, _d;
-//# sourceMappingURL=dashboard.component.js.map
 
 /***/ }),
 
@@ -550,47 +477,6 @@ var AppContext = (function () {
 }());
 
 //# sourceMappingURL=app-context.js.map
-
-/***/ }),
-
-/***/ "../../../../../src/app/models/asset-group.ts":
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AssetGroup; });
-var AssetGroup = (function () {
-    function AssetGroup(name, assetGroup, description) {
-        if (description === void 0) { description = ''; }
-        this.name = name;
-        this.description = description;
-        this.assets = assetGroup;
-        this.reset();
-    }
-    AssetGroup.prototype.reset = function () {
-        var _this = this;
-        this.volume_24h_usd = 0;
-        this.market_cap_usd = 0;
-        this.market_cap_usd_1h = 0;
-        this.market_cap_usd_24h = 0;
-        this.market_cap_usd_7d = 0;
-        this.percent_change_1h = 0;
-        this.percent_change_24h = 0;
-        this.percent_change_7d = 0;
-        this.assets.forEach(function (a) {
-            _this.volume_24h_usd += a['24h_volume_usd'];
-            _this.market_cap_usd += a.market_cap_usd;
-            _this.market_cap_usd_1h += a.market_cap_usd_1h;
-            _this.market_cap_usd_24h += a.market_cap_usd_24h;
-            _this.market_cap_usd_7d += a.market_cap_usd_7d;
-        });
-        this.percent_change_1h = ((this.market_cap_usd - this.market_cap_usd_1h) / this.market_cap_usd_1h) * 100;
-        this.percent_change_24h = ((this.market_cap_usd - this.market_cap_usd_24h) / this.market_cap_usd_24h) * 100;
-        this.percent_change_7d = ((this.market_cap_usd - this.market_cap_usd_7d) / this.market_cap_usd_7d) * 100;
-    };
-    return AssetGroup;
-}());
-
-//# sourceMappingURL=asset-group.js.map
 
 /***/ }),
 
@@ -890,7 +776,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var ContextService = (function () {
     function ContextService() {
         //dashboard/market summary
-        this.intervals = ['1h', '24h', '7d'];
+        this.intervals = ['1h', '4h', '12h', '24h', '7d'];
         this.contextSource = new __WEBPACK_IMPORTED_MODULE_1_rxjs_Rx__["a" /* BehaviorSubject */](new __WEBPACK_IMPORTED_MODULE_2__models_app_context__["a" /* AppContext */]());
         this.context$ = this.contextSource.asObservable();
         this.context = new __WEBPACK_IMPORTED_MODULE_2__models_app_context__["a" /* AppContext */]();
@@ -929,8 +815,6 @@ ContextService = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__("../../../http/@angular/http.es5.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__context_service__ = __webpack_require__("../../../../../src/app/services/context.service.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_typescript_collections__ = __webpack_require__("../../../../typescript-collections/dist/lib/index.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_typescript_collections___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_typescript_collections__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -943,7 +827,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
 var ExchangeService = (function () {
     function ExchangeService(http, contextService) {
         var _this = this;
@@ -951,28 +834,8 @@ var ExchangeService = (function () {
         this.contextService = contextService;
         this.contextService.context$.subscribe(function (context) { return _this.context = context; });
     }
-    ExchangeService.prototype.getMarketSummaries = function (exchange) {
-        return this.http.get("/api/" + exchange + "/marketsummaries/").toPromise().then(function (response) {
-            var result = response.json();
-            var dic = new __WEBPACK_IMPORTED_MODULE_3_typescript_collections__["Dictionary"]();
-            result.forEach(function (market) { return dic.setValue(market.symbol, market); });
-            return dic;
-        });
-    };
-    ExchangeService.prototype.getMarketSummary = function (exchange, symbol) {
-        return this.http.get("/api/" + exchange + "/marketsummary?symbol=" + symbol).toPromise().then(function (response) {
-            var result = response.json();
-            return result;
-        });
-    };
-    ExchangeService.prototype.getOrderBook = function (exchange, symbol) {
-        return this.http.get("/api/" + exchange + "/orderbook?symbol=" + symbol).toPromise().then(function (response) {
-            var result = response.json();
-            return result;
-        });
-    };
-    ExchangeService.prototype.getSymbols = function (exchange) {
-        return this.http.get("/api/" + exchange + "/symbols").toPromise().then(function (response) {
+    ExchangeService.prototype.getBalances = function () {
+        return this.http.get("/api/exchange/GetBalances").toPromise().then(function (response) {
             var result = response.json();
             return result;
         });

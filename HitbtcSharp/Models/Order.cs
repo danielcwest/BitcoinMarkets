@@ -4,6 +4,7 @@ using System.Linq;
 using Core.Util;
 using Core.Contracts;
 using Newtonsoft.Json;
+using Core.Engine;
 
 namespace HitbtcSharp.Models
 {
@@ -20,7 +21,7 @@ namespace HitbtcSharp.Models
         public decimal Fees { get; set; }
         public bool IsOpen { get; set; }
         public bool IsFilled { get; set; }
-        public string Side { get; set; }
+        public OrderSide Side { get; set; }
         public string ClientOrderId { get; set; }
         public decimal QuantityFilled { get; set; }
         public bool IsClosed { get; set; }
@@ -39,7 +40,7 @@ namespace HitbtcSharp.Models
             this.CostProceeds = 0m;
             this.AvgRate = 0m;
             this.Fees = 0m;
-            this.Side = order.side;
+            this.Side = order.side == "buy" ? OrderSide.buy : OrderSide.sell; 
             this.ClientOrderId = order.clientOrderId;
             this.IsOpen = order.status == "new" || order.status == "partiallyFilled";
             this.IsFilled = order.status == "filled";
@@ -62,7 +63,7 @@ namespace HitbtcSharp.Models
         public decimal Fees { get; set; }
         public bool IsOpen { get; set; }
         public bool IsFilled { get; set; }
-        public string Side { get; set; }
+        public OrderSide Side { get; set; }
         public string ClientOrderId { get; set; }
         public decimal QuantityFilled { get; set; }
         public bool IsClosed { get; set; }
@@ -78,7 +79,7 @@ namespace HitbtcSharp.Models
             this.CostProceeds = 0m;
             this.AvgRate = 0m;
             this.Fees = 0m;
-            this.Side = order.side;
+            this.Side = order.side == "buy" ? OrderSide.buy : OrderSide.sell; 
             this.ClientOrderId = order.clientOrderId;
             this.IsOpen = order.status == "new" || order.status == "partiallyFilled";
             this.IsFilled = order.status == "filled";
@@ -96,7 +97,7 @@ namespace HitbtcSharp.Models
             this.CostProceeds = 0m;
             this.AvgRate = 0m;
             this.Fees = 0m;
-            this.Side = order.side;
+            this.Side = order.side == "buy" ? OrderSide.buy : OrderSide.sell;
             this.ClientOrderId = order.clientOrderId;
             this.IsOpen = order.status == "new" || order.status == "partiallyFilled";
             this.IsFilled = order.status == "filled";
@@ -132,7 +133,7 @@ namespace HitbtcSharp.Models
             this.IsOpen = order.status == "new" || order.status == "partiallyFilled";
             this.IsFilled = order.status == "filled";
             this.IsClosed = order.status == "filled" || order.status == "canceled" || order.status == "expired";
-            this.Side = order.side;
+            this.Side = order.side == "buy" ? OrderSide.buy : OrderSide.sell;
         }
 
         public Order(IEnumerable<Trade> trades)
@@ -142,7 +143,7 @@ namespace HitbtcSharp.Models
                 this.Uuid = trades.FirstOrDefault().orderId;
                 this.Exchange = "Hitbtc";
                 this.Symbol = trades.FirstOrDefault().symbol;
-                this.Side = this.Symbol = trades.FirstOrDefault().side;
+                this.Side = trades.FirstOrDefault().side == "buy" ? OrderSide.buy : OrderSide.sell;
                 this.QuantityFilled = trades.Sum(t => t.quantity);
                 this.Quantity = trades.Sum(t => t.quantity);
                 this.AvgRate = trades.Average(t => t.price);
@@ -150,7 +151,7 @@ namespace HitbtcSharp.Models
 
                 //this.Cost = trades.Sum(t => (t.quantity * t.price) + t.fee);
 
-                if (this.Side == "buy")
+                if (this.Side == OrderSide.buy)
                 {
                     this.CostProceeds = trades.Sum(t => (t.quantity * t.price) + t.fee);
                 }

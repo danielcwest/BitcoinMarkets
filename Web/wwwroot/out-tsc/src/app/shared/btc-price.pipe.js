@@ -7,7 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
-var BtcPricePipe = (function () {
+var BtcPricePipe = /** @class */ (function () {
     function BtcPricePipe() {
     }
     BtcPricePipe.prototype.transform = function (value, args) {
@@ -16,12 +16,12 @@ var BtcPricePipe = (function () {
         }
         return Number(value).toFixed(8);
     };
+    BtcPricePipe = __decorate([
+        core_1.Pipe({
+            name: 'btcPrice'
+        })
+    ], BtcPricePipe);
     return BtcPricePipe;
 }());
-BtcPricePipe = __decorate([
-    core_1.Pipe({
-        name: 'btcPrice'
-    })
-], BtcPricePipe);
 exports.BtcPricePipe = BtcPricePipe;
 //# sourceMappingURL=btc-price.pipe.js.map

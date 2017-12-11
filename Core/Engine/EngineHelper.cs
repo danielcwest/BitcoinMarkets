@@ -7,11 +7,13 @@ using Core.Config;
 using Core.Contracts;
 using Core.DbService;
 using Core.Models;
+using NLog;
 
 namespace Core.Engine
 {
     public class EngineHelper
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         #region Basic Arbitrage
 
@@ -237,7 +239,71 @@ namespace Core.Engine
 
         #region Reporting Helpers
 
-        
+        public static void AuditCompletedOrdersForPair(IDbService dbService, IExchange baseExchange, IExchange counterExchange, ArbitragePair pair)
+        {
+            foreach (var order in dbService.GetMakerOrdersByStatus("filled", pair.Id).Where(o => o.BaseExchange == baseExchange.Name && o.CounterExchange == counterExchange.Name))
+            {
+                try
+                {
+
+                    var baseOrder = baseExchange.CheckOrder(order.BaseOrderUuid, pair.Symbol).Result;
+                    var counterOrder = counterExchange.CheckOrder(order.CounterOrderUuid, pair.Symbol).Result;
+
+                    if (baseOrder != null && counterOrder != null)
+                    {
+                        decimal commission = 0m;
+                        if (baseOrder.Side == OrderSide.buy)
+                        {
+                            commission = counterOrder.CostProceeds - baseOrder.CostProceeds;
+                        }
+                        else
+                        {
+                            commission = baseOrder.CostProceeds - counterOrder.CostProceeds;
+                        }
+
+                        dbService.UpdateOrder(order.Id, baseRate: baseOrder.AvgRate, counterRate: counterOrder.AvgRate, baseCost: baseOrder.CostProceeds, counterCost: counterOrder.CostProceeds, commission: commission, status: "complete", baseQuantityFilled: baseOrder.QuantityFilled, counterQuantityFilled: counterOrder.QuantityFilled);
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+        }
+
+        public static void TakeProfit(IDbService dbService, IExchange baseExchange, IExchange counterExchange, decimal margin)
+        {
+            try
+            {
+
+                var baseBalances = baseExchange.GetBalances().Result.ToDictionary(b => b.Currency);
+                var counterBalances = counterExchange.GetBalances().Result.ToDictionary(b => b.Currency);
+
+                var pairs = dbService.GetArbitragePairs("market", baseExchange.Name, counterExchange.Name).Select(p => new ArbitragePair(p));
+
+                var completedCurrencies = new Dictionary<string, bool>();
+
+                foreach (var pair in pairs)
+                {
+                    if (!completedCurrencies.ContainsKey(pair.MarketCurrency))
+                    {
+
+                        decimal baseQuantity = Helper.RoundQuantity(pair, baseBalances[pair.MarketCurrency].Available * margin);
+                         var baseResult = baseExchange.MarketSell(pair.Symbol, baseQuantity).Result;
+
+                        decimal counterQuantity = Helper.RoundQuantity(pair, counterBalances[pair.MarketCurrency].Available * margin);
+                        var counterResult = counterExchange.MarketSell(pair.Symbol, counterQuantity).Result;
+                        completedCurrencies.TryAdd(pair.MarketCurrency, true);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                logger.Error(e);
+            }
+
+        }
 
         #endregion  
 

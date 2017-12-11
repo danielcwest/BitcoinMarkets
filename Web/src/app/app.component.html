@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-	<a class="navbar-brand" href="http://localhost:50001">Bitcoin Markets</a>
+	<a class="navbar-brand" href="/">Bitcoin Markets</a>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
 	    aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -13,6 +13,8 @@
 	<div class="text-right">
 		<div class="btn-group interval-buttons" role="group" aria-label="Basic example">
 			<button type="button" class="btn btn-link interval" (click)="setInterval('1h')" [class.active]="context.interval == '1h'">1h</button>
+			<button type="button" class="btn btn-link interval" (click)="setInterval('4h')" [class.active]="context.interval == '4h'">4h</button>
+			<button type="button" class="btn btn-link interval" (click)="setInterval('12h')" [class.active]="context.interval == '12h'">12h</button>
 			<button type="button" class="btn btn-link interval" (click)="setInterval('24h')" [class.active]="context.interval == '24h'">24h</button>
 			<button type="button" class="btn btn-link interval" (click)="setInterval('7d')" [class.active]="context.interval == '7d'">7d</button>
 		</div>

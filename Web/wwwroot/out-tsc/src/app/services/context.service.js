@@ -12,10 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var Rx_1 = require("rxjs/Rx");
 var app_context_1 = require("../models/app-context");
-var ContextService = (function () {
+var ContextService = /** @class */ (function () {
     function ContextService() {
         //dashboard/market summary
-        this.intervals = ['1h', '24h', '7d'];
+        this.intervals = ['1h', '4h', '12h', '24h', '7d'];
         this.contextSource = new Rx_1.BehaviorSubject(new app_context_1.AppContext());
         this.context$ = this.contextSource.asObservable();
         this.context = new app_context_1.AppContext();
@@ -35,11 +35,11 @@ var ContextService = (function () {
     ContextService.prototype.notify = function () {
         this.contextSource.next(this.context);
     };
+    ContextService = __decorate([
+        core_1.Injectable(),
+        __metadata("design:paramtypes", [])
+    ], ContextService);
     return ContextService;
 }());
-ContextService = __decorate([
-    core_1.Injectable(),
-    __metadata("design:paramtypes", [])
-], ContextService);
 exports.ContextService = ContextService;
 //# sourceMappingURL=context.service.js.map

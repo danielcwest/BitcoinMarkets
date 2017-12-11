@@ -14,33 +14,31 @@ var app_component_1 = require("./app.component");
 var services_module_1 = require("./services/services.module");
 var app_routing_module_1 = require("./app-routing.module");
 var shared_module_1 = require("./shared/shared.module");
-var dashboard_component_1 = require("./dashboard/dashboard.component");
 var arbitrage_component_1 = require("./arbitrage/arbitrage.component");
 var detail_component_1 = require("./arbitrage/detail/detail.component");
-var AppModule = (function () {
+var AppModule = /** @class */ (function () {
     function AppModule() {
     }
+    AppModule = __decorate([
+        core_1.NgModule({
+            declarations: [
+                app_component_1.AppComponent,
+                arbitrage_component_1.ArbitrageComponent,
+                detail_component_1.DetailComponent
+            ],
+            imports: [
+                platform_browser_1.BrowserModule,
+                http_1.HttpModule,
+                services_module_1.ServicesModule,
+                app_routing_module_1.AppRoutingModule,
+                shared_module_1.SharedModule,
+                forms_1.FormsModule
+            ],
+            providers: [],
+            bootstrap: [app_component_1.AppComponent]
+        })
+    ], AppModule);
     return AppModule;
 }());
-AppModule = __decorate([
-    core_1.NgModule({
-        declarations: [
-            app_component_1.AppComponent,
-            dashboard_component_1.DashboardComponent,
-            arbitrage_component_1.ArbitrageComponent,
-            detail_component_1.DetailComponent
-        ],
-        imports: [
-            platform_browser_1.BrowserModule,
-            http_1.HttpModule,
-            services_module_1.ServicesModule,
-            app_routing_module_1.AppRoutingModule,
-            shared_module_1.SharedModule,
-            forms_1.FormsModule
-        ],
-        providers: [],
-        bootstrap: [app_component_1.AppComponent]
-    })
-], AppModule);
 exports.AppModule = AppModule;
 //# sourceMappingURL=app.module.js.map

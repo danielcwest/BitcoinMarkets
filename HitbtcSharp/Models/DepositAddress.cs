@@ -9,5 +9,6 @@ namespace Core.Models
     {
         public string Currency { get; set; }
         public string Address { get; set; }
+        public string Tag { get; set; }
     }
 }
