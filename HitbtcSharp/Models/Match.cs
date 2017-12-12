@@ -9,7 +9,7 @@ namespace HitbtcSharp.Models
     public class Match : IMatch
     {
         public string Uuid { get; set; }
-        public OrderSide Side { get; set; }
+        public string Side { get; set; }
         public string Symbol { get; set; }
         public decimal QuantityFilled { get; set; }
         public string ClientOrderId { get; set; }
@@ -17,7 +17,7 @@ namespace HitbtcSharp.Models
         public Match(HitbtcOrderV2 order)
         {
             Uuid = order.Uuid;
-            Side = order.side == "buy" ? OrderSide.buy : OrderSide.sell; 
+            Side = order.side; 
             Symbol = order.symbol;
             QuantityFilled = order.tradeQuantity;
             ClientOrderId = order.clientOrderId;

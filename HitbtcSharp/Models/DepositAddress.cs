@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Core.Contracts;
 
-namespace Core.Models
+namespace HitbtcSharp.Models
 {
     public class DepositAddress : IDepositAddress
     {

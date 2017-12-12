@@ -281,7 +281,7 @@ namespace HitbtcSharp
 
         public async Task<IEnumerable<ICurrencyBalance>> GetBalances()
         {
-            //await MoveBalancesToTrading();
+            await MoveBalancesToTrading();
             return await _hitbtc.GetTradingBalances();
         }
 
@@ -353,6 +353,11 @@ namespace HitbtcSharp
             var order = await _hitbtc.PlaceOrder(data);
 
             return order;
+        }
+
+        public async Task CancelWithdrawal(string id)
+        {
+            var response = await _hitbtc.DeleteWithdrawal(id);
         }
 
         public ISocketExchange GetSocket()

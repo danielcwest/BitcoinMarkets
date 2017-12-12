@@ -49,13 +49,13 @@ namespace Engine
                 var exchanges = arbitrageConfig.Exchanges.Where(c => c.Enabled).Select(c => ExchangeFactory.GetInstance(c)).ToDictionary(e => e.Name);
 
                 var binance = (Binance)exchanges["Binance"];
-                var hitbtcV2 = new HitbtcSocketV2(configs["Hitbtc"]);
+                var hitbtcV2 = new HitbtcSocket(configs["Hitbtc"]);
 
-                var balanceManager = new BalanceManager(dbService);
-                var engineV2 = new ArbitrageEngineV2(hitbtcV2, binance, dbService);
+                var balanceManager = new BalanceManager(dbService, hitbtcV2.Rest, binance);
+                var engineV2 = new ArbitrageEngineV2(hitbtcV2.Rest, binance, dbService);
 
-                balanceManager.Start(hitbtcV2.Rest, binance);
-                engineV2.StartEngine(hitbtcV2, binance);              
+                balanceManager.StartManager();
+                engineV2.StartEngine(hitbtcV2);              
 
             }
             catch (Exception e)

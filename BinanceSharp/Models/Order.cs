@@ -1,4 +1,5 @@
 ﻿using Core.Contracts;
+using Core.Domain;
 using Core.Engine;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ namespace BinanceSharp.Models
         public decimal Fees { get; set; }
         public bool IsFilled { get; set; }
         public bool IsClosed { get; set; }
-        public OrderSide Side { get; set; }
+        public string Side { get; set; }
 
         public Order(BinanceOrder order)
         {
@@ -48,7 +49,7 @@ namespace BinanceSharp.Models
             this.CostProceeds = order.executedQty * order.price - ((order.executedQty * order.price) * 0.001m);
             this.AvgRate = order.price;
             this.Fees = 0m;
-            this.Side = order.side.ToLowerInvariant() == "buy" ? OrderSide.buy : OrderSide.sell;
+            this.Side = order.side.ToLowerInvariant();
             this.IsFilled = order.status == "FILLED";
             this.IsClosed = order.status == "FILLED" || order.status == "CANCELED" || order.status == "REJECTED" || order.status == "EXPIRED";
         }
@@ -66,7 +67,7 @@ namespace BinanceSharp.Models
             this.CostProceeds = order.executedQty * order.price;
             this.AvgRate = order.price;
             this.Fees = 0m;
-            this.Side = order.side.ToLowerInvariant() == "buy" ? OrderSide.buy : OrderSide.sell;
+            this.Side = order.side.ToLowerInvariant();
 
             if (trades.Any())
             {
@@ -86,7 +87,7 @@ namespace BinanceSharp.Models
 
                 decimal rawCost = this.QuantityFilled * this.AvgRate;
 
-                if (this.Side == OrderSide.buy)
+                if (this.Side == OrderSide.Buy)
                 {
                     this.CostProceeds = rawCost + Fees;
                 }

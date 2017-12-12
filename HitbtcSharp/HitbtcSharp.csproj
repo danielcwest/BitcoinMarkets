@@ -9,5 +9,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\websocket-manager-master\src\WebSocketManager.Client\WebSocketManager.Client.csproj" />
+    <ProjectReference Include="..\websocket-manager-master\src\WebSocketManager.Common\WebSocketManager.Common.csproj" />
   </ItemGroup>
 </Project>

@@ -12,6 +12,7 @@ using Core.Models;
 using System.Linq;
 using RestEase;
 using Newtonsoft.Json;
+using Core.Domain;
 
 namespace Core.Engine
 {
@@ -298,7 +299,7 @@ namespace Core.Engine
                     if (baseOrder != null && counterOrder != null)
                     {
                         decimal commission = 0m;
-                        if (baseOrder.Side == OrderSide.buy)
+                        if (baseOrder.Side == OrderSide.Buy)
                         {
                             commission = counterOrder.CostProceeds - baseOrder.CostProceeds;
                         }
@@ -389,13 +390,13 @@ namespace Core.Engine
             {
                 decimal quantity = Helper.RoundQuantity(pair, trade.QuantityFilled);
 
-                if (trade.Side == OrderSide.sell)
+                if (trade.Side == OrderSide.Sell)
                 {
                     var result = await counterExchange.MarketBuy(trade.Symbol, quantity);
                     logger.Trace(string.Format("COUNTER BUY {0} {1} {2} {3}", pair.Symbol, quantity, trade.Uuid, result.Uuid));
                     dbService.InsertMakerOrder(pair.Id, "basesell", trade.Uuid, result.Uuid);
                 }
-                else if (trade.Side == OrderSide.buy)
+                else if (trade.Side == OrderSide.Buy)
                 {
                     var result = await counterExchange.MarketSell(trade.Symbol, quantity);
                     logger.Trace(string.Format("COUNTER SELL {0} {1} {2} {3}", pair.Symbol, quantity, trade.Uuid, result.Uuid));

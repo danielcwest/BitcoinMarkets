@@ -194,7 +194,7 @@ namespace BinanceSharp
                     var match = new Match()
                     {
                         QuantityFilled = userEvent.QuantityOfLastFilledTrade,
-                        Side = userEvent.Side.ToLowerInvariant() == "buy" ? OrderSide.buy : OrderSide.sell,
+                        Side = userEvent.Side.ToLowerInvariant(),
                         Symbol = userEvent.Symbol,
                         Uuid = userEvent.TradeId.ToString()
                     };
@@ -247,16 +247,12 @@ namespace BinanceSharp
 
         public void Reset()
         {
-            if (socket != null)
+            if(socket != null)
             {
                 socket.Close();
                 socket = null;
             }
-
-            cache = null;
         }
-
-
 
         #endregion
     }

@@ -21,4 +21,11 @@ namespace BinanceSharp.Models
             Held = res.locked;
         }
     }
+
+    public class BalanceResponse
+    {
+        public string asset { get; set; }
+        public decimal free { get; set; }
+        public decimal locked { get; set; }
+    }
 }

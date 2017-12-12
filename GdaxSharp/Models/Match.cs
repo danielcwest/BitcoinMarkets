@@ -9,7 +9,7 @@ namespace GdaxSharp.Models
     public class Match : IMatch
     {
         public string Uuid { get; set; }
-        public OrderSide Side { get; set; }
+        public string Side { get; set; }
         public string Symbol { get; set; }
         public decimal QuantityFilled { get; set; }
         public string ClientOrderId { get; set; }
@@ -18,7 +18,7 @@ namespace GdaxSharp.Models
         public Match(SocketTrade trade)
         {
             Uuid = trade.taker_order_id;
-            Side = trade.side == "buy" ? OrderSide.sell : OrderSide.buy;
+            Side = trade.side;
             Symbol = trade.product_id.Replace("-", "");
             QuantityFilled = trade.size;
         }

@@ -8,6 +8,7 @@ using Core.Contracts;
 using Core.DbService;
 using Core.Models;
 using NLog;
+using Core.Domain;
 
 namespace Core.Engine
 {
@@ -252,7 +253,7 @@ namespace Core.Engine
                     if (baseOrder != null && counterOrder != null)
                     {
                         decimal commission = 0m;
-                        if (baseOrder.Side == OrderSide.buy)
+                        if (baseOrder.Side == OrderSide.Buy)
                         {
                             commission = counterOrder.CostProceeds - baseOrder.CostProceeds;
                         }
@@ -289,8 +290,8 @@ namespace Core.Engine
                     if (!completedCurrencies.ContainsKey(pair.MarketCurrency))
                     {
 
-                        decimal baseQuantity = Helper.RoundQuantity(pair, baseBalances[pair.MarketCurrency].Available * margin);
-                         var baseResult = baseExchange.MarketSell(pair.Symbol, baseQuantity).Result;
+                     //   decimal baseQuantity = Helper.RoundQuantity(pair, baseBalances[pair.MarketCurrency].Available * margin);
+                     //    var baseResult = baseExchange.MarketSell(pair.Symbol, baseQuantity).Result;
 
                         decimal counterQuantity = Helper.RoundQuantity(pair, counterBalances[pair.MarketCurrency].Available * margin);
                         var counterResult = counterExchange.MarketSell(pair.Symbol, counterQuantity).Result;

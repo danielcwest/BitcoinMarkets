@@ -57,6 +57,9 @@ namespace HitbtcSharp
         [Post("/api/2/account/crypto/withdraw")]
         Task<CryptoTransaction> Withdraw([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> data);
 
+        [Delete("/api/2/account/crypto/withdraw/{id}")]
+        Task<CryptoTransaction> DeleteWithdrawal([Path] string id);
+
         [Get("/api/2/account/transactions/{id}")]
         Task<Transaction> GetWithdrawal([Path] string id);
 

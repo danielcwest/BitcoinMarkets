@@ -39,7 +39,7 @@ namespace GdaxSharp.Models
         public decimal Fees { get; set; }
         public bool IsFilled { get; set; }
         public bool IsClosed { get; set; }
-        public OrderSide Side { get; set; }
+        public string Side { get; set; }
         public string ExchangeStatus { get; set; }
 
         public Order(GdaxOrder o)
@@ -47,7 +47,7 @@ namespace GdaxSharp.Models
             Uuid = o.id.ToString();
             Exchange = "Gdax";
             Symbol = o.product_id;
-            Side = o.side == "buy" ? OrderSide.buy : OrderSide.sell;
+            Side = o.side;
             Quantity = o.size == 0 ? o.filled_size : o.size;
             QuantityFilled = o.filled_size;
             IsFilled = o.settled;
@@ -68,7 +68,7 @@ namespace GdaxSharp.Models
             this.CostProceeds = 0m;
             this.AvgRate = 0m;
             this.Fees = 0m;
-            this.Side = order.side == "buy" ? OrderSide.buy : OrderSide.sell;
+            this.Side = order.side;
             this.IsFilled = false;
             this.IsClosed =true;
         }

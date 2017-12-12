@@ -17,7 +17,6 @@ using NLog;
 using OkexSharp;
 using RestEase;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Authentication;
@@ -62,30 +61,32 @@ namespace Debugger
                 var gdax = (Gdax)exchanges["Gdax"];
 
 
-                var hitMarkets = hitbtc.Symbols().Result.ToDictionary(s => s.LocalSymbol);
-                var biMarkets = binance.Symbols().Result.ToDictionary(s => s.LocalSymbol);
+                var hitbtcv2 = new HitbtcSocket(configs["Hitbtc"]);
 
-                //EngineHelper.TakeProfit(dbService, hitbtc, binance, 0.05m);
+                var enginev2 = new ArbitrageEngineV2(hitbtcv2.Rest, binance, dbService);
+                var bManager = new BalanceManager(dbService, hitbtcv2.Rest, binance);
 
-                     var hitbtcV2 = new HitbtcSocketV2(configs["Hitbtc"]);
+                //hitbtcv2.InitWebSocket();
+                //hitbtcv2.Login().Wait();
 
-                    var engineV2 = new ArbitrageEngineV2(hitbtcV2, binance, dbService);
+                //hitbtcv2.ImmediateOrCancel("sell", "ETHBTC", 1m, 0.1m).Wait();
 
-                //        var balanceManager = new BalanceManager(dbService);
-                //       balanceManager.Start(hitbtc, binance);
+                bManager.StartManager();
 
-                //     var addr = hitbtc.GetDepositAddress("XRP").Result;
-                //     var res = binance.Withdraw(addr.Currency, 100m, addr.Address, addr.Tag).Result;
-                  engineV2.StartEngine(hitbtcV2, binance);
+                 // enginev2.StartEngine(hitbtcv2);
 
+                // EngineHelper.TakeProfit(dbService, hitbtc, binance, 0.08m);
+                //enginev2.StartEngine(hitbtcv2);
+                //       var addr = hitbtc.GetDepositAddress("ETH").Result;
+                //     var res = binance.Withdraw(addr.Currency, 3m, addr.Address).Result;
 
+                //  var addr = binance.GetDepositAddress("ETC").Result;
+                //  var res = hitbtc.Withdraw(addr.Currency, 22.12471398m, addr.Address).Result;
 
-                //   var res = hitbtc.Withdraw("QTUM", 70.0m, "QfqN1UUFwCQiM8ENn1193J6TVFSyyVR3eu").Result;
-                //  var res2 = binance.Withdraw("QTUM", 70.0m, "QfqN1UUFwCQiM8ENn1193J6TVFSyyVR3eu").Result;
-
+                //var res = hitbtc.Withdraw("DOGE", 1000000m, "DDi3FWrU7RhSJ4NbYKS9gAM73ZHP8TCQTv").Result;
                 //AuditOrder("XMRBTC", "8903177267", "1614791", hitbtc, binance);
 
-                //Console.ReadKey();
+                Console.ReadKey();
 
                 //var result = gdax.MarketSell("BTCUSD", 0.63405632m).Result;
 
@@ -112,7 +113,7 @@ namespace Debugger
             if (baseOrder != null && counterOrder != null)
             {
                 decimal commission = 0m;
-                if (baseOrder.Side == OrderSide.buy)
+                if (baseOrder.Side == "buy")
                 {
                     commission = counterOrder.CostProceeds - baseOrder.CostProceeds;
                 }

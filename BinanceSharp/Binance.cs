@@ -235,7 +235,8 @@ namespace BinanceSharp
                 {"signature", sign}
             };
 
-           return await _binance.DepositAddress(_config.ApiKey, data);
+           var resp = await _binance.DepositAddress(_config.ApiKey, data);
+            return new DepositAddress(resp);
         }
 
         public async Task<IAcceptedAction> LimitBuy(string symbol, decimal quantity, decimal rate)

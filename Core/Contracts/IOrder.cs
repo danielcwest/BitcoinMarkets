@@ -15,6 +15,6 @@ namespace Core.Contracts
         decimal Fees { get; set; }
         bool IsFilled { get; set; }
         bool IsClosed { get; set; }
-        OrderSide Side { get; set; }
+        string Side { get; set; }
     }
 }
