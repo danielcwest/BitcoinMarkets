@@ -49,7 +49,9 @@ namespace Core.Engine
             // Set the tasks.
             var task = (ActionBlock<IBaseSocketExchange>)CreateNeverEndingTask((e, ct) => DoWork(e, ct), wtoken.Token);
 
-            task.Post(baseExchange);           
+            task.Post(baseExchange);
+
+            task.Completion.Wait();
         }
 
         public async Task DoWork(IBaseSocketExchange baseExchange, CancellationToken token)
@@ -258,7 +260,7 @@ namespace Core.Engine
                 }
             };
 
-            counterSocket.SubscribeOrderbook(pair.Symbol);
+            counterSocket.SubscribeOrderbook(pair.CounterSymbol);
             await Task.FromResult(true);
         }
 
@@ -278,8 +280,10 @@ namespace Core.Engine
 
             try
             {
-                decimal raw = pair.BidMultiplier * pair.TradeThreshold / price;
-                buyQuantity = Helper.RoundQuantity(pair, pair.BidMultiplier * pair.TradeThreshold / price);
+             //   decimal raw = pair.BidMultiplier * pair.TradeThreshold / price;
+              //  buyQuantity = Helper.RoundQuantity(pair, pair.BidMultiplier * pair.TradeThreshold / price);
+
+                buyQuantity = pair.Increment;
 
                 if (buyQuantity > 0)
                 {
@@ -302,8 +306,8 @@ namespace Core.Engine
             }
             catch (Exception e)
             {
-
                 logger.Error(e);
+                Thread.Sleep(1000 * 10);
             }
 
         }
@@ -313,8 +317,9 @@ namespace Core.Engine
             decimal sellQuantity = 0;
             try
             {
-                decimal raw = pair.AskMultiplier * pair.TradeThreshold / price;
-                sellQuantity = Helper.RoundQuantity(pair, pair.AskMultiplier * pair.TradeThreshold / price);
+                //  decimal raw = pair.AskMultiplier * pair.TradeThreshold / price;
+                //  sellQuantity = Helper.RoundQuantity(pair, pair.AskMultiplier * pair.TradeThreshold / price);
+                sellQuantity = pair.Increment;
 
                 if (sellQuantity > 0)
                 {
@@ -338,6 +343,7 @@ namespace Core.Engine
             catch (Exception e)
             {
                 logger.Error(e);
+                Thread.Sleep(1000 * 10);
             }
         }
 
@@ -350,13 +356,13 @@ namespace Core.Engine
                 if (trade.Side == OrderSide.Sell)
                 {
                     var result = await counterExchange.MarketBuy(trade.Symbol, quantity);
-                    logger.Trace(string.Format("COUNTER BUY {0} {1} {2} {3}", pair.Symbol, quantity, trade.Uuid, result.Uuid));
+                    logger.Trace(string.Format("COUNTER BUY {0} {1} {2} {3}", pair.CounterSymbol, quantity, trade.Uuid, result.Uuid));
                     dbService.InsertMakerOrder(pair.Id, "basesell", trade.Uuid, result.Uuid);
                 }
                 else if (trade.Side == OrderSide.Buy)
                 {
                     var result = await counterExchange.MarketSell(trade.Symbol, quantity);
-                    logger.Trace(string.Format("COUNTER SELL {0} {1} {2} {3}", pair.Symbol, quantity, trade.Uuid, result.Uuid));
+                    logger.Trace(string.Format("COUNTER SELL {0} {1} {2} {3}", pair.CounterSymbol, quantity, trade.Uuid, result.Uuid));
                     dbService.InsertMakerOrder(pair.Id, "basebuy", trade.Uuid, result.Uuid);
                 }
             }

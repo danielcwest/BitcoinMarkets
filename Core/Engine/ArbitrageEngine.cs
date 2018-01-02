@@ -247,7 +247,7 @@ namespace Core.Engine
                 }
             };
 
-            counterSocket.SubscribeOrderbook(pair.Symbol);
+            counterSocket.SubscribeOrderbook(pair.CounterSymbol);
             await Task.FromResult(true);
         }
 

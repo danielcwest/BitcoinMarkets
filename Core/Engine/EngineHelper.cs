@@ -290,8 +290,8 @@ namespace Core.Engine
                     if (!completedCurrencies.ContainsKey(pair.MarketCurrency))
                     {
 
-                     //   decimal baseQuantity = Helper.RoundQuantity(pair, baseBalances[pair.MarketCurrency].Available * margin);
-                     //    var baseResult = baseExchange.MarketSell(pair.Symbol, baseQuantity).Result;
+                        decimal baseQuantity = Helper.RoundQuantity(pair, baseBalances[pair.MarketCurrency].Available * margin);
+                        var baseResult = baseExchange.MarketSell(pair.Symbol, baseQuantity).Result;
 
                         decimal counterQuantity = Helper.RoundQuantity(pair, counterBalances[pair.MarketCurrency].Available * margin);
                         var counterResult = counterExchange.MarketSell(pair.Symbol, counterQuantity).Result;

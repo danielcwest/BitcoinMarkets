@@ -74,11 +74,16 @@ namespace HitbtcSharp.RPC
             {
                 message = JsonConvert.DeserializeObject<RpcResponse>(data);
             }
+            else if(msg.error != null)
+            {
+                logger.Error(msg);
+                throw new Exception(msg.error);
+
+            }
             else
             {
                 logger.Error(msg);
-                throw new Exception("Request???");
-
+                throw new Exception("RPC read msg error");
             }
 
             return message;

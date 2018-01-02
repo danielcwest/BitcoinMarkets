@@ -3,6 +3,7 @@ using Core.DbService;
 using Core.Domain;
 using Core.Models;
 using NLog;
+using RestEase;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -52,14 +53,14 @@ namespace Core.Engine
             var pairs = dbService.GetArbitragePairs("", baseExchange.Name, counterExchange.Name).Select(p => new ArbitragePair(p));
 
             task.Post(pairs);
+
+            task.Completion.Wait();
         }
 
         public async Task DoWork(IEnumerable<ArbitragePair> pairs, CancellationToken token)
         {
             try
             {
-                Console.WriteLine("Balancing Pairs");
-
                 baseBalances.Clear();
                 counterBalances.Clear();
                 completedPairs.Clear();
@@ -151,15 +152,17 @@ namespace Core.Engine
         {
             var orders = dbService.GetMakerOrdersByStatus("filled", pair.Id).Where(o => o.BaseExchange == baseExchange.Name && o.CounterExchange == counterExchange.Name);
 
-            if(orders.Any())
+            if (orders.Any())
                 logger.Trace("Audit {0} orders for {1}", orders.Count(), pair.Symbol);
+            else
+                logger.Trace("No orders for {0}", pair.Symbol);
 
             foreach (var order in orders)
             {
                 try
                 {
-                    var baseOrder = baseExchange.CheckOrder(order.BaseOrderUuid, pair.Symbol).Result;
-                    var counterOrder = counterExchange.CheckOrder(order.CounterOrderUuid, pair.Symbol).Result;
+                    var baseOrder = baseExchange.CheckOrder(order.BaseOrderUuid, pair.BaseSymbol).Result;
+                    var counterOrder = counterExchange.CheckOrder(order.CounterOrderUuid, pair.CounterSymbol).Result;
 
                     if (baseOrder != null && counterOrder != null)
                     {
@@ -175,6 +178,26 @@ namespace Core.Engine
 
                         dbService.UpdateOrder(order.Id, baseRate: baseOrder.AvgRate, counterRate: counterOrder.AvgRate, baseCost: baseOrder.CostProceeds, counterCost: counterOrder.CostProceeds, commission: commission, status: "complete", baseQuantityFilled: baseOrder.QuantityFilled, counterQuantityFilled: counterOrder.QuantityFilled);
                     }
+                }
+                catch (AggregateException ae)
+                {
+                    ae.Handle((x) =>
+                    {
+                        if (x is ApiException) // This we know how to handle.
+                        {
+                            string content = ((ApiException)x).Content;
+
+                            if(content.Contains("Order does not exist")) // Dont know why we are seeing this but update status
+                            {
+                                dbService.UpdateOrder(order.Id, status: "notexists");
+                            }
+                            else
+                            {
+                                logger.Error(content);
+                            }
+                        }
+                        return true; 
+                    });
                 }
                 catch (Exception e)
                 {
@@ -209,7 +232,7 @@ namespace Core.Engine
                     ConfigureAwait(false);
 
                 // Wait.
-                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).
+                await Task.Delay(TimeSpan.FromSeconds(300), cancellationToken).
                 // Same as above.
                  ConfigureAwait(false);
 

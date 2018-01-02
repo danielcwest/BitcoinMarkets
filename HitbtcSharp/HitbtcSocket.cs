@@ -156,7 +156,10 @@ namespace HitbtcSharp
                 var completed = await Task.WhenAny(completion.Task, timeout);
 
                 if (completed == timeout)
-                    logger.Error("{0} Request timed out", method);
+                {
+                    //logger.Error("{0} Request timed out", method);
+                   // throw new Exception("Timeout");
+                }
 
                 if (method == "login")
                     Console.WriteLine("Hitbtc Authenticated");
