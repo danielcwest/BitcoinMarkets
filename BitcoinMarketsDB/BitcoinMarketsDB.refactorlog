@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="a83a980c-d081-4eb6-8ad1-e459bca93f13" ChangeDateTime="10/15/2017 18:12:54">
+    <Property Name="ElementName" Value="[dbo].[TradeLog].[CreatedAtUtc]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[TradeLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[CreatedUtc]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f3154707-1055-475e-9784-14d376b280f2" ChangeDateTime="10/15/2017 18:48:42">
+    <Property Name="ElementName" Value="[dbo].[Withdrawal].[Quantity]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Withdrawal]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[AmountRequested]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e1c9907f-cc93-461c-869d-581508f02993" ChangeDateTime="10/15/2017 18:49:01">
+    <Property Name="ElementName" Value="[dbo].[Withdrawal].[TxFee]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Withdrawal]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[AmountActual]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0f21da92-ec2b-41d8-b1fd-54361cdd01f4" ChangeDateTime="10/24/2017 00:55:44">
+    <Property Name="ElementName" Value="[dbo].[ArbitragePair].[LastLogUtc]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[ArbitragePair]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[LastOpportunityUtc]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="451fb458-a11c-4a42-8805-52ace1035cee" ChangeDateTime="10/29/2017 23:38:31">
+    <Property Name="ElementName" Value="[dbo].[BaseCurrency].[WithdrawalThreshold]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[BaseCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[MarketThreshold]" />
+  </Operation>
+</Operations>
